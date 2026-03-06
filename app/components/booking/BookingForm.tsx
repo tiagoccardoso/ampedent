@@ -102,7 +102,7 @@ function BookingForm() {
       }
     }
     fetchAvailableTimes()
-  }, [selectedDate?.valueOf])
+  }, [selectedDate])
 
   function handleAppointment(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -248,7 +248,7 @@ function BookingForm() {
                     id='date'
                     disabled={isLoading}
                     selected={selectedDate}
-                    onChange={date => setSelectedDate(date)}
+                    onChange={(date: Date | null) => setSelectedDate(date)}
                     dateFormat='dd MMMM yyyy'
                     filterDate={filterDates}
                   />
