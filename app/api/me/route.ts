@@ -1,6 +1,6 @@
 import authOptions from '@/lib/authOptions'
-import dbConnect from '@/lib/dbConnect'
-import User from '@/models/User'
+import { supabaseRequest } from '@/lib/supabaseAdmin'
+import { AdminUserRow } from '@/lib/types'
 import { getServerSession } from 'next-auth'
 
 export async function GET(req: Request) {
@@ -8,10 +8,22 @@ export async function GET(req: Request) {
     const session = await getServerSession(authOptions)
 
     if (session) {
-      await dbConnect()
-      const user = await User.findOne({ name: session?.user?.name }).select(
-        '-password',
+      const { data: users } = await supabaseRequest<AdminUserRow[]>(
+        'admin_users',
+        {
+          searchParams: {
+            select: 'name,role',
+            name: `eq.${session?.user?.name}`,
+            limit: 1,
+          },
+        },
       )
+
+      const user = users[0]
+
+      if (!user) {
+        throw new Error('Unauthorized')
+      }
 
       return Response.json({
         message: 'user fetched',

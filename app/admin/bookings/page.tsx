@@ -1,6 +1,6 @@
 'use client'
 
-import { BookingType } from '@/models/Booking'
+import { BookingType } from '@/lib/types'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useDebounce } from '@uidotdev/usehooks'

@@ -1,65 +1,77 @@
-import dbConnect from '@/lib/dbConnect'
 import { isSuperAdmin } from '@/lib/isSuperAdmin'
-import Booking, { BookingType } from '@/models/Booking'
+import { mapBooking } from '@/lib/supabaseMappers'
+import { supabaseRequest } from '@/lib/supabaseAdmin'
+import { BookingRow } from '@/lib/types'
+
+function normalizeBookingDate(date: string | Date) {
+  return new Date(date).toISOString().split('T')[0]
+}
+
+function buildSearchFilter(search: string) {
+  const term = search.trim()
+
+  if (!term) {
+    return undefined
+  }
+
+  return `(first_name.ilike.*${term}*,last_name.ilike.*${term}*,phone.ilike.*${term}*,email.ilike.*${term}*)`
+}
 
 export async function GET(req: Request) {
   try {
-    await dbConnect()
     const role = await isSuperAdmin()
     if (role === 'superadmin' || role === 'admin') {
       const url = new URL(req.url)
       const _id = url.searchParams.get('_id')
 
       if (_id) {
-        const booking = await Booking.findById(_id)
-        return Response.json({ message: 'Booking fetched', booking: booking })
+        const { data } = await supabaseRequest<BookingRow[]>('bookings', {
+          searchParams: {
+            select: '*',
+            id: `eq.${_id}`,
+            limit: 1,
+          },
+        })
+
+        return Response.json({
+          message: 'Booking fetched',
+          booking: data[0] ? mapBooking(data[0]) : null,
+        })
       }
 
-      const status = url.searchParams.get('status')
-      const search = url.searchParams.get('search')
+      const status = url.searchParams.get('status') ?? 'all'
+      const search = url.searchParams.get('search') ?? ''
       const page = Number(url.searchParams.get('page')) || 1
       const pageSize = 9
+      const offset = pageSize * (page - 1)
+      const searchFilter = buildSearchFilter(search)
 
-      let filter: any = {}
-
-      if (status === 'all') {
-        filter = {
-          $or: [
-            { firstName: { $regex: `.*${search}.*`, $options: 'i' } },
-            { lastName: { $regex: `.*${search}.*`, $options: 'i' } },
-            { phone: { $regex: `.*${search}.*`, $options: 'i' } },
-            { email: { $regex: `.*${search}.*`, $options: 'i' } },
-          ],
-        }
-      } else {
-        filter = {
-          status,
-          $or: [
-            { firstName: { $regex: `.*${search}.*`, $options: 'i' } },
-            { lastName: { $regex: `.*${search}.*`, $options: 'i' } },
-            { phone: { $regex: `.*${search}.*`, $options: 'i' } },
-            { email: { $regex: `.*${search}.*`, $options: 'i' } },
-          ],
-        }
+      const searchParams: Record<string, string | number | undefined> = {
+        select: '*',
+        limit: pageSize,
+        offset,
+        order: 'status.desc,date.asc,time.asc',
       }
 
-      const totalBookings = await Booking.countDocuments(filter)
-      const totalPages = Math.ceil(totalBookings / pageSize)
-
-      let bookings: BookingType[] = []
-
-      if (totalPages >= page) {
-        bookings = await Booking.find(filter)
-          .limit(pageSize)
-          .skip(pageSize * (page - 1))
-          .sort({ status: -1, date: 1, time: 1 })
-          .exec()
+      if (status !== 'all') {
+        searchParams.status = `eq.${status}`
       }
+
+      if (searchFilter) {
+        searchParams.or = searchFilter
+      }
+
+      const { data, count } = await supabaseRequest<BookingRow[]>('bookings', {
+        searchParams,
+        headers: {
+          Prefer: 'count=exact',
+        },
+      })
 
       return Response.json({
         message: 'Bookings fetched',
-        bookings,
-        totalPages: totalPages,
+        bookings: data.map(mapBooking),
+        totalPages: Math.ceil((count ?? 0) / pageSize),
       })
     } else {
       throw new Error('Unauthorized')
@@ -73,17 +85,30 @@ export async function POST(req: Request) {
   try {
     const body = await req.json()
     const { firstName, lastName, email, phone, message, date, time } = body
-    await dbConnect()
-    const booking = await Booking.create({
-      firstName,
-      lastName,
-      email,
-      phone,
-      message,
-      date,
-      time,
+
+    const { data } = await supabaseRequest<BookingRow[]>('bookings', {
+      method: 'POST',
+      body: {
+        first_name: firstName,
+        last_name: lastName,
+        email,
+        phone,
+        message: message || null,
+        date: normalizeBookingDate(date),
+        time,
+      },
+      searchParams: {
+        select: '*',
+      },
+      headers: {
+        Prefer: 'return=representation',
+      },
     })
-    return Response.json({ message: 'Booking created', booking: booking })
+
+    return Response.json({
+      message: 'Booking created',
+      booking: data[0] ? mapBooking(data[0]) : null,
+    })
   } catch (error: any) {
     throw new Error(error.message)
   }
@@ -91,18 +116,28 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   try {
-    await dbConnect()
     const url = new URL(req.url)
     const _id = url.searchParams.get('_id')
     const role = await isSuperAdmin()
+
     if (role === 'superadmin' || role === 'admin') {
       if (_id) {
-        const booking = await Booking.findByIdAndUpdate(
-          _id,
-          { status: 'completed' },
-          { new: true },
-        )
-        return Response.json({ message: 'Booking updated', booking: booking })
+        const { data } = await supabaseRequest<BookingRow[]>('bookings', {
+          method: 'PATCH',
+          body: { status: 'completed' },
+          searchParams: {
+            id: `eq.${_id}`,
+            select: '*',
+          },
+          headers: {
+            Prefer: 'return=representation',
+          },
+        })
+
+        return Response.json({
+          message: 'Booking updated',
+          booking: data[0] ? mapBooking(data[0]) : null,
+        })
       }
     } else {
       throw new Error('Unauthorized')

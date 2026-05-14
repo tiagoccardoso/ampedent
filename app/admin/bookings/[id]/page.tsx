@@ -5,7 +5,7 @@ import {
   formatTime,
   incrementTimeByOneHour,
 } from '@/lib/dateAndTimeUtils'
-import { BookingType } from '@/models/Booking'
+import { BookingType } from '@/lib/types'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'

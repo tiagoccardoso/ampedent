@@ -3,13 +3,13 @@
 ![Landing page](https://res.cloudinary.com/dkofkuquf/image/upload/v1707530071/nuxtshop/lqnlwdzylzf5u2zgu2bo.png)
 
 Ampedent is a full-featured dental office website built with **Next.js**,
-**Tailwind CSS**, **MongoDB**, and **Mongoose**. It boasts an intuitive
+**Tailwind CSS**, and **Supabase Postgres**. It boasts an intuitive
 appointment booking system, and a secure admin panel.
 
 ## Features
 
 - **Appointment Booking:** Users can easily book an appointment using our
-  intuitive booking system. All bookings are stored in MongoDB for easy
+  intuitive booking system. All bookings are stored in Supabase Postgres for easy
   management.
 - **Admin Panel:** Manage appointments and other site content through a secure
   admin panel.Navigate to /admin to login with your admin credentials.
@@ -23,10 +23,8 @@ appointment booking system, and a secure admin panel.
   applications.
 - **Tailwind CSS**:A utility-first CSS framework for crafting tailored designs
   with rapid efficiency.
-- **MongoDB**: A source-available cross-platform document-oriented database
-  program.
-- **Mongoose**: An Object Data Modeling (ODM) library that simplifies
-  interactions with MongoDB in Node.js applications.
+- **Supabase Postgres**: A hosted PostgreSQL database used to store bookings and
+  admin users.
 - **NextAuth**: A complete open source authentication solution for Next.js
   applications.
 
@@ -58,22 +56,23 @@ appointment booking system, and a secure admin panel.
 4. **Configure environment variables.**
 
 - Create a `.env` file in the root of the project.
-- Add the necessary environment variables for MongoDB and NextAuth.
+- Add the necessary environment variables for Supabase and NextAuth.
 
   ```env
-  # MongoDB
-  MONGODB_URI=your_mongodb_uri
+  # Supabase
+  SUPABASE_URL=your_supabase_project_url
+  SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 
   # NextAuth
-  NEXTAUTH_URL=http://localhost:3000 for development
-  NEXTAUTH_SECRET=your nextauth secret
-
+  NEXTAUTH_URL=http://localhost:3000
+  NEXTAUTH_SECRET=your_nextauth_secret
 
   NODE_ENV='development'
   ```
 
-5. **Create a superuser (modify the name and password to your liking) with the
-   provided script.**
+5. **Run the SQL in `supabase/migrations/001_init_ampedent.sql` in your Supabase
+   project, then create a superuser (modify the name and password to your liking)
+   with the provided script.**
 
    ```bash
    node createuser.js
@@ -88,6 +87,20 @@ appointment booking system, and a secure admin panel.
    ```
 
 7. **Open your browser and visit http://localhost:3000 to view the website.**
+
+
+## Migrating existing MongoDB data to Supabase
+
+If you already have MongoDB data, keep `MONGODB_URI` available only while running
+the migration and execute:
+
+```bash
+npm run migrate:mongo-to-supabase
+```
+
+The migration copies Mongo `_id` values into `mongo_id` columns, keeps existing
+bcrypt password hashes, and normalizes booking status values to `pending`,
+`completed`, or `canceled`.
 
 ## Live Version
 
