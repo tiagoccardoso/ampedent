@@ -22,16 +22,16 @@ export async function GET(req: Request) {
       const user = users[0]
 
       if (!user) {
-        throw new Error('Unauthorized')
+        throw new Error('Não autorizado')
       }
 
       return Response.json({
-        message: 'user fetched',
+        message: 'Usuário encontrado',
         user: user.name,
         role: user.role,
       })
     } else {
-      throw new Error('Unauthorized')
+      throw new Error('Não autorizado')
     }
   } catch (error) {
     throw error

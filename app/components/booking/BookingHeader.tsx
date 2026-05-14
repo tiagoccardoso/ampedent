@@ -2,13 +2,10 @@ function BookingHeader() {
   return (
     <div className='my-8'>
       <h1 className='text-center mb-8 text-3xl font-bold md:text-5xl'>
-        Book an appointment
+        Agende uma consulta
       </h1>
       <p className='mx-auto mb-8 mt-4  text-slate-600 md:mb-16'>
-        AmpeDent can help you maintain or create the smile you want with
-        preventive, cosmetic, and restorative dentistry. Our practice uses
-        state-of-the-art technology to give you a comfortable experience.
-        Contact us today to learn more.
+        A AmpeDent pode ajudar você a manter ou criar o sorriso que deseja com odontologia preventiva, estética e restauradora. Nossa clínica utiliza tecnologia de ponta para oferecer uma experiência confortável. Entre em contato hoje para saber mais.
       </p>
     </div>
   )

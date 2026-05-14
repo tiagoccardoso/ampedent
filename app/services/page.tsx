@@ -8,7 +8,7 @@ import { Metadata } from 'next'
 import HeroHeaders from '../components/layout/HeroHeaders'
 
 export const metadata: Metadata = {
-  title: 'Services',
+  title: 'Serviços',
 }
 
 function Services() {

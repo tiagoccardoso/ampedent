@@ -36,7 +36,7 @@ function EditUserModal({
   return (
     <>
       <button className='btn' onClick={() => setShowUser(prev => !prev)}>
-        Edit
+        Editar
       </button>
       {showUser ? (
         <div className='fixed inset-0 z-40' onClick={() => setShowUser(false)}>
@@ -50,7 +50,7 @@ function EditUserModal({
                     className='mx-auto mb-4 max-w-md w-full pb-4'
                     onSubmit={handleEdit}>
                     <h1 className='text-center text-3xl my-8'>
-                      Edit {user.name}
+                      Editar {user.name}
                     </h1>
                     <div className='relative'>
                       <input
@@ -59,7 +59,7 @@ function EditUserModal({
                         type='text'
                         className='my-4 '
                         name='name'
-                        placeholder='name'
+                        placeholder='nome'
                         required
                       />
                     </div>
@@ -69,7 +69,7 @@ function EditUserModal({
                         onChange={e => setPassword(e.target.value)}
                         type='password'
                         className='my-4 '
-                        placeholder='password'
+                        placeholder='senha'
                       />
                     </div>
                     {error && (
@@ -78,7 +78,7 @@ function EditUserModal({
                     <button
                       type='submit'
                       className=' rounded px-6 py-3 text-center font-semibold text-white bg-blue-600  hover:bg-blue-800'>
-                      Confirm
+                      Confirmar
                     </button>
                   </form>
                 </div>
@@ -88,7 +88,7 @@ function EditUserModal({
                       className='bg-red-500 hover:bg-red-600 text-white rounded  background-transparent font-bold uppercase px-6 py-3  md:text-sm text-xs  mr-1 mb-1  '
                       type='button'
                       onClick={() => setShowUser(prev => !prev)}>
-                      Close
+                      Fechar
                     </button>
                   </div>
                 </div>

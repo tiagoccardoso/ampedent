@@ -54,7 +54,7 @@ function UserList() {
   }
 
   useEffect(() => {
-    document.title = 'Users | Admin | AmpeDent'
+    document.title = 'Usuários | Admin | AmpeDent'
   }, [])
   return (
     <>
@@ -68,13 +68,13 @@ function UserList() {
                 ID
               </th>
               <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground '>
-                Username
+                Nome de usuário
               </th>
               <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground '>
-                Role
+                Função
               </th>
               <th className='h-12 px-4 align-middle font-medium text-muted-foreground  w-20 text-right'>
-                Actions
+                Ações
               </th>
             </tr>
           </thead>
@@ -88,11 +88,13 @@ function UserList() {
                     {user._id.toString()}
                   </td>
                   <td className='p-4 align-middle '>{user.name}</td>
-                  <td className='p-4 align-middle '>{user.role}</td>
+                  <td className='p-4 align-middle '>
+                    {user.role === 'superadmin' ? 'superadministrador' : 'administrador'}
+                  </td>
                   <td className='p-4 align-middle  flex justify-end gap-2'>
                     <EditUserModal user={user} onUserUpdate={triggerRefresh} />
                     <DeleteButton
-                      label='Delete'
+                      label='Excluir'
                       onDelete={() => handleDeleteClick(user._id.toString())}
                     />
                   </td>

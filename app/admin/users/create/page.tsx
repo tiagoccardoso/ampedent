@@ -14,7 +14,7 @@ function CreateUser() {
   const router = useRouter()
 
   useEffect(() => {
-    document.title = 'Create user | Admin | AmpeDent'
+    document.title = 'Criar usuário | Admin | AmpeDent'
   }, [])
 
   async function handleLogin(e: FormEvent<HTMLFormElement>) {
@@ -47,7 +47,7 @@ function CreateUser() {
           className='mx-auto mb-4 max-w-md w-full pb-4'
           onSubmit={handleLogin}>
           <h1 className='text-center text-3xl my-8'>
-            Create a new AmpeDent user
+            Criar um novo usuário AmpeDent
           </h1>
           <div className='relative'>
             <input
@@ -57,7 +57,7 @@ function CreateUser() {
               type='text'
               className='my-4 '
               name='name'
-              placeholder='username'
+              placeholder='nome de usuário'
               required
             />
           </div>
@@ -68,7 +68,7 @@ function CreateUser() {
               onChange={e => setPassword(e.target.value)}
               type='password'
               className='my-4 '
-              placeholder='password'
+              placeholder='senha'
               required
             />
           </div>
@@ -77,7 +77,7 @@ function CreateUser() {
             disabled={isLoading}
             type='submit'
             className=' rounded px-6 py-3 text-center font-semibold text-white bg-blue-600  hover:bg-blue-800'>
-            Create user
+            Criar usuário
           </button>
         </form>
       </div>

@@ -48,33 +48,33 @@ function Pagination({
           disabled={page === 1}
           onClick={() => setPage(prevPage => Math.min(prevPage - 1, pages))}
           className='relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed'>
-          Previous
+          Anterior
         </button>
         <button
           disabled={page === pages}
           onClick={() => setPage(prevPage => Math.min(prevPage + 1, pages))}
           className='relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed'>
-          Next
+          Próxima
         </button>
       </div>
       <div className='hidden sm:flex sm:flex-1 sm:items-center sm:justify-between'>
         <div>
           <p className='text-sm text-gray-700'>
-            Showing{' '}
+            Exibindo{' '}
             <span className='font-medium'>
-              page {page} out of {pages} total pages
+              página {page} de {pages} páginas no total
             </span>
           </p>
         </div>
         <div>
           <nav
             className='isolate inline-flex -space-x-px rounded-md shadow-sm'
-            aria-label='Pagination'>
+            aria-label='Paginação'>
             <button
               disabled={page === 1}
               onClick={() => setPage(prevPage => Math.min(prevPage - 1, pages))}
               className='relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:cursor-not-allowed disabled:bg-gray-300'>
-              <span className='sr-only'>Previous</span>
+              <span className='sr-only'>Anterior</span>
               <AlignLeft aria-hidden='true' />
             </button>
 
@@ -96,7 +96,7 @@ function Pagination({
               disabled={page === pages}
               onClick={() => setPage(prevPage => Math.min(prevPage + 1, pages))}
               className='relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:cursor-not-allowed disabled:bg-gray-300'>
-              <span className='sr-only'>Next</span>
+              <span className='sr-only'>Próxima</span>
               <AlignRight aria-hidden='true' />
             </button>
           </nav>

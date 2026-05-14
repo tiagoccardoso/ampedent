@@ -7,7 +7,7 @@ import { Metadata } from 'next'
 import HeroHeaders from '../components/layout/HeroHeaders'
 
 export const metadata: Metadata = {
-  title: 'About',
+  title: 'Sobre',
 }
 
 function About() {

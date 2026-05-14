@@ -1,62 +1,60 @@
 # Ampedent
 
-![Landing page](https://res.cloudinary.com/dkofkuquf/image/upload/v1707530071/nuxtshop/lqnlwdzylzf5u2zgu2bo.png)
+![Página inicial](https://res.cloudinary.com/dkofkuquf/image/upload/v1707530071/nuxtshop/lqnlwdzylzf5u2zgu2bo.png)
 
-Ampedent is a full-featured dental office website built with **Next.js**,
-**Tailwind CSS**, and **Supabase Postgres**. It boasts an intuitive
-appointment booking system, and a secure admin panel.
+Ampedent é um site completo para consultório odontológico criado com **Next.js**,
+**Tailwind CSS** e **Supabase Postgres**. Ele conta com um sistema intuitivo de
+agendamento de consultas e um painel administrativo seguro.
 
-## Features
+## Recursos
 
-- **Appointment Booking:** Users can easily book an appointment using our
-  intuitive booking system. All bookings are stored in Supabase Postgres for easy
-  management.
-- **Admin Panel:** Manage appointments and other site content through a secure
-  admin panel.Navigate to /admin to login with your admin credentials.
-- **Authentication:** The site uses NextAuth for authentication. The admin panel
-  is accessible only to admins. A super admin can create other regular admin
-  users.
+- **Agendamento de consultas:** usuários podem agendar consultas facilmente pelo
+  sistema intuitivo de agendamento. Todos os agendamentos são armazenados no
+  Supabase Postgres para facilitar o gerenciamento.
+- **Painel administrativo:** gerencie consultas e outros conteúdos do site por
+  meio de um painel administrativo seguro. Acesse `/admin` para entrar com suas
+  credenciais administrativas.
+- **Autenticação:** o site usa NextAuth para autenticação. O painel
+  administrativo é acessível apenas para administradores. Um superadministrador
+  pode criar outros usuários administradores comuns.
 
-## Technologies Used
+## Tecnologias utilizadas
 
-- **Next.js**: A popular React framework for building dynamic and performant web
-  applications.
-- **Tailwind CSS**:A utility-first CSS framework for crafting tailored designs
-  with rapid efficiency.
-- **Supabase Postgres**: A hosted PostgreSQL database used to store bookings and
-  admin users.
-- **NextAuth**: A complete open source authentication solution for Next.js
-  applications.
+- **Next.js**: framework React popular para criar aplicações web dinâmicas e de
+  alta performance.
+- **Tailwind CSS**: framework CSS utility-first para criar designs personalizados
+  com rapidez.
+- **Supabase Postgres**: banco de dados PostgreSQL hospedado usado para armazenar
+  agendamentos e usuários administradores.
+- **NextAuth**: solução completa de autenticação open source para aplicações
+  Next.js.
 
-![Admin panel](https://res.cloudinary.com/dkofkuquf/image/upload/v1707585171/nuxtshop/go7j387zbdkslzrayolk.png)
+![Painel administrativo](https://res.cloudinary.com/dkofkuquf/image/upload/v1707585171/nuxtshop/go7j387zbdkslzrayolk.png)
 
-## Setup
+## Configuração
 
-1. **Clone the repository.**
+1. **Clone o repositório.**
 
    ```bash
    git clone https://github.com/atalek/ampedent.git
-
    ```
 
-2. **Navigate to the project directory.**
+2. **Acesse o diretório do projeto.**
 
    ```bash
    cd ampedent
-
    ```
 
-3. **Install dependencies.**
+3. **Instale as dependências.**
 
    ```bash
    npm install
-
    ```
 
-4. **Configure environment variables.**
+4. **Configure as variáveis de ambiente.**
 
-- Create a `.env` file in the root of the project.
-- Add the necessary environment variables for Supabase and NextAuth.
+- Crie um arquivo `.env` na raiz do projeto.
+- Adicione as variáveis de ambiente necessárias para Supabase e NextAuth.
 
   ```env
   # Supabase
@@ -70,44 +68,41 @@ appointment booking system, and a secure admin panel.
   NODE_ENV='development'
   ```
 
-5. **Run the SQL in `supabase/migrations/001_init_ampedent.sql` in your Supabase
-   project, then create a superuser (modify the name and password to your liking)
-   with the provided script.**
+5. **Execute o SQL em `supabase/migrations/001_init_ampedent.sql` no seu projeto
+   Supabase e, em seguida, crie um superusuário (ajuste nome e senha como
+   preferir) com o script fornecido.**
 
    ```bash
    node createuser.js
-
    ```
 
-6. **Run the development server.**
+6. **Inicie o servidor de desenvolvimento.**
 
    ```bash
    npm run dev
-
    ```
 
-7. **Open your browser and visit http://localhost:3000 to view the website.**
+7. **Abra o navegador e acesse http://localhost:3000 para visualizar o site.**
 
+## Migração de dados existentes do MongoDB para o Supabase
 
-## Migrating existing MongoDB data to Supabase
-
-If you already have MongoDB data, keep `MONGODB_URI` available only while running
-the migration and execute:
+Se você já tiver dados no MongoDB, mantenha `MONGODB_URI` disponível apenas
+durante a migração e execute:
 
 ```bash
 npm run migrate:mongo-to-supabase
 ```
 
-The migration copies Mongo `_id` values into `mongo_id` columns, keeps existing
-bcrypt password hashes, and normalizes booking status values to `pending`,
-`completed`, or `canceled`.
+A migração copia os valores `_id` do Mongo para as colunas `mongo_id`, preserva
+os hashes bcrypt de senha existentes e normaliza os status dos agendamentos para
+`pending`, `completed` ou `canceled`.
 
-## Live Version
+## Versão online
 
 [https://ampedent.atalek.com](https://ampedent.atalek.com)
 
-## Author
+## Autor
 
 Github [@atalek](https://github.com/atalek) <br> Linkedin:
 [@Aleksandar Atanasovski](https://www.linkedin.com/in/aleksandar-atanasovski-16b123263/)
-<br> Portfolio: [https://www.atalek.com/](https://www.atalek.com/)
+<br> Portfólio: [https://www.atalek.com/](https://www.atalek.com/)

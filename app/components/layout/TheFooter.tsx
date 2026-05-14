@@ -25,7 +25,7 @@ function TheFooter() {
         <div className='flex-row flex justify-between max-[767px]:flex-col max-[767px]:items-start'>
           <div className='w-full max-w-[560px] max-[991px]:mr-4 max-[991px]:flex-initial max-[767px]:'>
             <h2 className='font-bold text-3xl md:text-5xl'>
-              Personalized care, exceptional results
+              Cuidado personalizado, resultados excepcionais
             </h2>
           </div>
           <div className='max-[991px]:ml-4 max-[991px]:flex-none max-[767px]: max-[767px]:mt-8'>
@@ -44,7 +44,7 @@ function TheFooter() {
             <div className='mb-4 flex max-w-[272px] items-start justify-start'>
               <img
                 src='https://assets.website-files.com/6458c625291a94a195e6cf3a/6458c625291a944119e6cf76_EnvelopeSimple-2.svg'
-                alt='email icon'
+                alt='ícone de e-mail'
                 className='inline-block mr-3'
                 width={24}
                 height={24}
@@ -56,7 +56,7 @@ function TheFooter() {
             <div className='mb-4 flex max-w-[272px] items-start justify-start'>
               <img
                 src='https://www.svgrepo.com/show/79112/telephone.svg'
-                alt='telephone icon'
+                alt='ícone de telefone'
                 className='inline-block mr-3 '
                 width={24}
                 height={24}
@@ -70,26 +70,26 @@ function TheFooter() {
           <div className='font-semibold max-[991px]: max-[479px]:mb-4 max-[991px]:py-1 text-center sm:text-center'>
             <Link
               href='/about'
-              aria-label='About us page link'
+              aria-label='Link para a página sobre nós'
               className='inline-block font-normal text-slate-600 transition hover:text-blue-600 sm:pr-6 lg:pr-12 py-1.5 sm:py-2 pr-6'>
-              About Us
+              Sobre nós
             </Link>
             <Link
               href='/services'
-              aria-label='Services page link'
+              aria-label='Link para a página de serviços'
               className='inline-block font-normal text-slate-600 transition hover:text-blue-600 sm:pr-6 lg:pr-12 py-1.5 sm:py-2 pr-6'>
-              Services
+              Serviços
             </Link>
             <Link
               href='booking'
-              aria-label='Create a booking page link'
+              aria-label='Link para criar agendamento'
               className='inline-block font-normal text-slate-600 transition hover:text-blue-600 sm:pr-6 lg:pr-12 py-1.5 sm:py-2 pr-6'>
               Booking
             </Link>
             {status === 'authenticated' && (
               <Link
                 href='/admin/bookings'
-                aria-label='Admin bookings dashboard page link'
+                aria-label='Link para o painel administrativo de agendamentos'
                 className='inline-block font-normal text-slate-600 transition hover:text-blue-600 sm:pr-6 lg:pr-12 py-1.5 sm:py-2 pr-6'>
                 Admin
               </Link>
@@ -100,7 +100,7 @@ function TheFooter() {
               href='https://github.com/atalek/ampedent'
               target='_blank'
               className='text-slate-600   flex flex-row items-center gap-1 '>
-              © {currentYear} AmpeDent - Made by atalek <Github />
+              © {currentYear} AmpeDent - Criado por atalek <Github />
             </Link>
           </div>
         </div>

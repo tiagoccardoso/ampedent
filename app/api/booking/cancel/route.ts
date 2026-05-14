@@ -24,12 +24,12 @@ export async function PUT(req: Request) {
         })
 
         return Response.json({
-          message: 'Booking updated',
+          message: 'Agendamento atualizado',
           booking: data[0] ? mapBooking(data[0]) : null,
         })
       }
     } else {
-      throw new Error('Unauthorized')
+      throw new Error('Não autorizado')
     }
   } catch (error) {
     throw new Error('Could not update bookings')

@@ -146,18 +146,17 @@ function BookingForm() {
           <SuccessBox ref={successBoxRef}>
             <div className='my-8'>
               <h1 className='text-center mb-8 text-3xl font-bold md:text-5xl'>
-                Appointment created
+                Consulta agendada
               </h1>
               <p className='mx-auto text-lg mb-8 mt-4  text-slate-600 md:mb-16'>
-                Thank you! Your appointment has been successfully booked. <br />
-                We look forward to seeing you on{' '}
-                {formatDate(selectedDate!.toString())} at{' '}
+                Obrigado! Sua consulta foi agendada com sucesso. <br />
+                Esperamos ver você em {formatDate(selectedDate!.toString())} às{' '}
                 {formatTime(selectedTime)} -{' '}
                 {incrementTimeByOneHour(selectedTime)}. <br />
-                If you have any questions or need to make changes, please
-                contact us at <br />
-                <span className='font-bold'>ampedent@example.com</span> or call
-                us at <span className='font-bold'>+1234567890</span>
+                Se tiver dúvidas ou precisar fazer alterações, entre em contato
+                pelo <br />
+                <span className='font-bold'>ampedent@example.com</span> ou
+                ligue para <span className='font-bold'>+1234567890</span>
                 <br />
               </p>
             </div>
@@ -172,7 +171,7 @@ function BookingForm() {
               <div className='grid md:grid-cols-2 gap-4 items-center'>
                 <div>
                   <label htmlFor='name'>
-                    First name
+                    Nome
                     {!isValidName(firstName) && (
                       <span className='text-red-600 ml-1'>*</span>
                     )}
@@ -186,8 +185,8 @@ function BookingForm() {
                   />
                 </div>
                 <div>
-                  <label htmlFor='name'>
-                    Last name
+                  <label htmlFor='lastName'>
+                    Sobrenome
                     {!isValidName(lastName) && (
                       <span className='text-red-600 ml-1'>*</span>
                     )}
@@ -195,7 +194,7 @@ function BookingForm() {
                   <input
                     disabled={isLoading}
                     type='text'
-                    id='name'
+                    id='lastName'
                     value={lastName}
                     onChange={e => setLastName(e.target.value)}
                   />
@@ -218,13 +217,9 @@ function BookingForm() {
               </div>
               <div className=' flex flex-col my-4'>
                 <label htmlFor='phone'>
-                  Phone
+                  Telefone
                   {!isValidPhone(phone) && (
-                    <span
-                      className='text-red-600 ml-1
-					'>
-                      *
-                    </span>
+                    <span className='text-red-600 ml-1'>*</span>
                   )}
                 </label>
                 <input
@@ -239,7 +234,7 @@ function BookingForm() {
               <div className='grid md:grid-cols-2 gap-4 items-center'>
                 <div className='flex flex-col'>
                   <label htmlFor='date' className='mb-[2px]'>
-                    Date
+                    Data
                     {!selectedDate && (
                       <span className='text-red-600 ml-1'>*</span>
                     )}
@@ -255,7 +250,7 @@ function BookingForm() {
                 </div>
                 <div className='flex flex-col'>
                   <label htmlFor='time' className='mb-[2px]'>
-                    Time
+                    Horário
                     {!selectedTime && (
                       <span className='text-red-600 ml-1'>*</span>
                     )}
@@ -273,7 +268,7 @@ function BookingForm() {
                         </option>
                       ))
                     ) : (
-                      <option disabled>No time available for this date</option>
+                      <option disabled>Nenhum horário disponível para esta data</option>
                     )}
                   </select>
                 </div>
@@ -281,7 +276,7 @@ function BookingForm() {
 
               <div className=' flex flex-col my-4'></div>
               <div className=' flex flex-col my-4'>
-                <label htmlFor='message'>Message</label>
+                <label htmlFor='message'>Mensagem</label>
                 <textarea
                   disabled={isLoading}
                   value={message}
@@ -290,13 +285,13 @@ function BookingForm() {
                   id='message'
                   cols={30}
                   rows={10}
-                  placeholder='Enter any specific requests or additional information here...'></textarea>
+                  placeholder='Informe solicitações específicas ou informações adicionais aqui...'></textarea>
               </div>
               <button
                 type='submit'
                 className=' rounded px-6 py-3 text-center font-semibold text-white bg-blue-600  hover:bg-blue-800'
                 disabled={isDisabled || isLoading}>
-                {isLoading ? 'Submitting' : 'Submit'}
+                {isLoading ? 'Enviando' : 'Enviar'}
               </button>
             </form>
           </>

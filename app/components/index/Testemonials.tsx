@@ -9,7 +9,7 @@ function Testemonials() {
     <section className=''>
       <div className='mx-auto w-full max-w-7xl px-5 py-16 md:px-10 md:py-24 lg:py-32'>
         <h2 className='mb-8 text-center text-3xl font-bold md:mb-14 md:text-5xl'>
-          What our clients are saying
+          O que nossos clientes estão dizendo
         </h2>
         <ul className='mb-6 grid gap-5 sm:grid-cols-2 md:grid-cols-3 md:mb-16 text-balance'>
           <li className='grid gap-8 border border-solid border-[#dfdfdf] bg-white p-8 md:p-10'>
@@ -51,8 +51,7 @@ function Testemonials() {
               />
             </div>
             <p className='text-[#647084]'>
-              Dr. Lee transformed my smile! I'm no longer afraid to show my
-              teeth. Best dentist ever!
+              O Dr. Lee transformou meu sorriso! Não tenho mais medo de mostrar meus dentes. Melhor dentista que já conheci!
             </p>
             <div className='flex'>
               <Image
@@ -107,8 +106,7 @@ function Testemonials() {
               />
             </div>
             <p className='text-[#647084]'>
-              Dr. Green made my child's first dental visit a breeze. Highly
-              recommend for pediatric care!
+              A Dra. Green tornou a primeira visita odontológica do meu filho muito tranquila. Recomendo muito para atendimento infantil!
             </p>
             <div className='flex'>
               <Image
@@ -163,7 +161,7 @@ function Testemonials() {
               />
             </div>
             <p className='text-[#647084]'>
-              Emergency root canal was painless. Dr. White is a lifesaver!
+              O tratamento de canal de emergência foi indolor. O Dr. White salvou meu dia!
             </p>
             <div className='flex'>
               <Image

@@ -18,7 +18,7 @@ export async function GET(req: Request) {
         },
       )
       return Response.json({
-        message: 'User fetched',
+        message: 'Usuário encontrado',
         users: users.map(mapUser),
       })
     } else {
@@ -55,10 +55,10 @@ export async function PUT(req: Request) {
       })
 
       if (!data[0]) {
-        throw new Error('User not found')
+        throw new Error('Usuário não encontrado')
       }
 
-      return Response.json({ message: 'User updated' })
+      return Response.json({ message: 'Usuário atualizado' })
     } else {
       throw new Error('Unathorized')
     }
@@ -87,7 +87,7 @@ export async function DELETE(req: Request) {
 
       const user = users[0]
       if (!user) {
-        throw new Error('User not found')
+        throw new Error('Usuário não encontrado')
       }
 
       if (user.role === 'superadmin') {
@@ -101,7 +101,7 @@ export async function DELETE(req: Request) {
         },
       })
 
-      return Response.json({ message: 'User deleted' })
+      return Response.json({ message: 'Usuário excluído' })
     } else {
       throw new Error('Unathorized')
     }
