@@ -10,7 +10,7 @@ function Yep() {
     <section className='bg-[#276981] w-full h-vh '>
       <div className='flex flex-col mx-auto items-center my-48 max-w-xl px-4'>
         <h3 className='text-white text-5xl font-bold text-center'>
-          Feel amazing <br /> about your oral health
+          Sinta-se incrível <br /> com a sua saúde bucal
         </h3>
         <div className=' relative mt-16 flex flex-row  gap-4 max-w-md w-full p-2'>
           <div className='absolute -left-[60%] hidden md:block'>
@@ -18,43 +18,43 @@ function Yep() {
           </div>
           <Checkmark />
           <div className='flex flex-col'>
-            <h4 className='text-white text-2xl font-bold'>QUALITY</h4>
+            <h4 className='text-white text-2xl font-bold'>QUALIDADE</h4>
             <p className='text-md  text-white'>
-              Experts clinicians, guided by science
+              Especialistas guiados pela ciência
             </p>
           </div>
         </div>
         <div className='mt-8 flex flex-row  gap-4 max-w-md w-full p-2'>
           <Comfort />
           <div className='flex flex-col'>
-            <h4 className='text-white text-2xl font-bold'>COMFORT</h4>
+            <h4 className='text-white text-2xl font-bold'>CONFORTO</h4>
             <p className='text-md text-white'>
-              Relaxing care in a calm environment
+              Atendimento relaxante em um ambiente tranquilo
             </p>
           </div>
         </div>
         <div className='mt-8 flex flex-row  gap-4 max-w-md w-full p-2'>
           <Science />
           <div className='flex flex-col'>
-            <h4 className='text-white text-2xl font-bold'>TECHNOLOGY</h4>
+            <h4 className='text-white text-2xl font-bold'>TECNOLOGIA</h4>
             <p className='text-md text-white'>
-              The latest tools for a modern experience
+              As ferramentas mais recentes para uma experiência moderna
             </p>
           </div>
         </div>
         <div className='mt-8 flex flex-row  gap-4 max-w-md w-full p-2'>
           <Confidence />
           <div className='flex flex-col'>
-            <h4 className='text-white text-2xl font-bold'>CONFIDENCE</h4>
-            <p className='text-md text-white'>Shine brighter than ever</p>
+            <h4 className='text-white text-2xl font-bold'>CONFIANÇA</h4>
+            <p className='text-md text-white'>Sorria com mais brilho do que nunca</p>
           </div>
         </div>
         <Link
           href='/about#mission'
-          aria-label='Learn about our mission and values'
+          aria-label='Saiba mais sobre nossa missão e valores'
           className='mx-auto mt-16 inline-block rounded-md bg-blue-800 hover:bg-blue-600 px-8 py-4 text-center font-semibold text-white'>
-          <span aria-hidden='true'>Learn More</span>
-          <span className='sr-only'>About Our Mission</span>
+          <span aria-hidden='true'>Saiba mais</span>
+          <span className='sr-only'>Sobre nossa missão</span>
         </Link>
       </div>
     </section>

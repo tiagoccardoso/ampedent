@@ -22,11 +22,11 @@ function getSupabaseConfig() {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
   if (!url) {
-    throw new Error('Missing SUPABASE_URL environment variable')
+    throw new Error('Variável de ambiente SUPABASE_URL ausente')
   }
 
   if (!serviceRoleKey) {
-    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY environment variable')
+    throw new Error('Variável de ambiente SUPABASE_SERVICE_ROLE_KEY ausente')
   }
 
   return {
@@ -66,7 +66,7 @@ export async function supabaseRequest<T>(
     const message =
       typeof data?.message === 'string'
         ? data.message
-        : `Supabase request failed with status ${response.status}`
+        : `Requisição ao Supabase falhou com status ${response.status}`
 
     throw new SupabaseRequestError(message, response.status, data)
   }

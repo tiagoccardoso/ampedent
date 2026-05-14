@@ -53,7 +53,7 @@ function Bookings() {
   }, [filter, debouncedSearchTerm, page])
 
   useEffect(() => {
-    document.title = 'Bookings | Admin | AmpeDent'
+    document.title = 'Agendamentos | Admin | AmpeDent'
   }, [])
 
   if (status === 'unauthenticated') {
@@ -68,7 +68,7 @@ function Bookings() {
           value={search}
           onChange={e => setSearch(e.target.value)}
           className='max-w-md items-center'
-          placeholder='Search for name or email'
+          placeholder='Buscar por nome ou e-mail'
           type='search'
         />
       </div>
@@ -78,16 +78,16 @@ function Bookings() {
           <thead>
             <tr className='border-b transition-colors hover:bg-muted/50 '>
               <th className='h-12 px-4 text-left  align-middle font-medium text-muted-foreground w-[100px] whitespace-nowrap'>
-                Booking ID
+                ID do agendamento
               </th>
               <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground'>
-                Name
+                Nome
               </th>
               <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground'>
                 Email
               </th>
               <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground'>
-                Phone
+                Telefone
               </th>
               <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground'>
                 <div className='flex flex-row items-center gap-4'>
@@ -97,15 +97,15 @@ function Bookings() {
                     id='status'
                     onChange={e => setFilter(e.target.value)}
                     className='bg-white max-w-[150px]'>
-                    <option value='all'>all</option>
-                    <option value='pending'>pending</option>
-                    <option value='completed'>completed</option>
-                    <option value='canceled'>canceled</option>
+                    <option value='all'>todos</option>
+                    <option value='pending'>pendente</option>
+                    <option value='completed'>concluído</option>
+                    <option value='canceled'>cancelado</option>
                   </select>
                 </div>
               </th>
               <th className='h-12 px-4 align-middle font-medium text-muted-foreground text-right'>
-                Scheduled
+                Agendado
               </th>
               <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground'></th>
             </tr>
@@ -132,7 +132,11 @@ function Bookings() {
                         ? 'text-red-600'
                         : ''
                     }`}>
-                    {booking.status}
+                    {booking.status === 'completed'
+                      ? 'concluído'
+                      : booking.status === 'canceled'
+                      ? 'cancelado'
+                      : 'pendente'}
                   </td>
                   <td className='p-4 align-middle md:text-right text-center'>
                     {formatTime(booking.time.toString())} -{' '}
@@ -144,7 +148,7 @@ function Bookings() {
                       <Link
                         href={`/admin/bookings/${booking._id.toString()}`}
                         className='btn '>
-                        Show details
+                        Ver detalhes
                       </Link>
                     </button>
                   </td>

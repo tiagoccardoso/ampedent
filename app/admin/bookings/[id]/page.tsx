@@ -80,14 +80,14 @@ function IndividualBooking({ params }: { params: { id: string } }) {
       <Link
         href='/admin/bookings'
         className='p-3 border rounded hover:border-black'>
-        Go back
+        Voltar
       </Link>
       {booking && (
         <section className='max-w-3xl w-full mx-auto flex items-center justify-center p-4'>
           <div className='w-full'>
             <div className='mb-1'>
               <h1 className=' text-center mb-8 text-wrap text-2xl font-bold md:text-5xl'>
-                Booking : {booking._id.toString()}
+                Agendamento: {booking._id.toString()}
               </h1>
               {isLoading && <Spinner />}
               {error && <p className='text-red-600 text-center '>{error}</p>}
@@ -95,7 +95,7 @@ function IndividualBooking({ params }: { params: { id: string } }) {
             <form className='mx-auto flex flex-col'>
               <div className='grid md:grid-cols-2 gap-4 items-center'>
                 <div>
-                  <label htmlFor='firstName'>First name</label>
+                  <label htmlFor='firstName'>Nome</label>
                   <input
                     disabled={true}
                     type='text'
@@ -104,7 +104,7 @@ function IndividualBooking({ params }: { params: { id: string } }) {
                   />
                 </div>
                 <div>
-                  <label htmlFor='lastName'>Last name</label>
+                  <label htmlFor='lastName'>Sobrenome</label>
                   <input
                     disabled={true}
                     type='text'
@@ -123,7 +123,7 @@ function IndividualBooking({ params }: { params: { id: string } }) {
                 />
               </div>
               <div className='flex flex-col my-4'>
-                <label htmlFor='phone'>Phone</label>
+                <label htmlFor='phone'>Telefone</label>
                 <input
                   disabled={true}
                   type='text'
@@ -134,7 +134,7 @@ function IndividualBooking({ params }: { params: { id: string } }) {
               <div className='grid md:grid-cols-2 gap-4 items-center'>
                 <div className='flex flex-col'>
                   <label htmlFor='date' className='mb-[2px]'>
-                    Date
+                    Data
                   </label>
                   <input
                     disabled={true}
@@ -145,7 +145,7 @@ function IndividualBooking({ params }: { params: { id: string } }) {
                 </div>
                 <div className='flex flex-col'>
                   <label htmlFor='time' className='mb-[2px]'>
-                    Time
+                    Horário
                   </label>
                   <input
                     disabled={true}
@@ -163,7 +163,7 @@ function IndividualBooking({ params }: { params: { id: string } }) {
               </div>
               <div className='flex flex-col my-4'></div>
               <div className='flex flex-col my-4'>
-                <label htmlFor='message'>Message</label>
+                <label htmlFor='message'>Mensagem</label>
                 <textarea
                   disabled={true}
                   value={booking.message}
@@ -177,20 +177,20 @@ function IndividualBooking({ params }: { params: { id: string } }) {
                   <button
                     type='button'
                     className='rounded w-full md:max-w-[100px] px-6 py-3 text-center font-semibold text-white bg-blue-600 hover:bg-blue-800'>
-                    Notify
+                    Notificar
                   </button>
                   <div className='flex w-full md:flex-row flex-col items-center gap-4'>
                     <button
                       onClick={cancelBooking}
                       type='button'
                       className='rounded w-full md:max-w-[200px] whitespace-nowrap px-6 py-3 text-center font-semibold text-white bg-red-500 hover:bg-red-800'>
-                      Cancel appointment
+                      Cancelar consulta
                     </button>
                     <button
                       onClick={completeBooking}
                       type='button'
                       className='rounded w-full md:max-w-[200px] px-6 py-3 text-center font-semibold text-white bg-green-600 hover:bg-green-800'>
-                      Mark as completed
+                      Marcar como concluído
                     </button>
                   </div>
                 </div>

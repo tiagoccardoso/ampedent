@@ -31,7 +31,7 @@ export default function NavLinks() {
             ? 'bg-sky-100 text-blue-600'
             : ''
         }`}>
-        <Bookings /> Bookings
+        <Bookings /> Agendamentos
       </Link>
       {role === 'superadmin' && (
         <>
@@ -41,7 +41,7 @@ export default function NavLinks() {
               pathname === '/admin/users' ? 'bg-sky-100 text-blue-600' : ''
             }`}>
             <Users />
-            Users
+            Usuários
           </Link>
           <Link
             href='/admin/users/create'
@@ -50,8 +50,8 @@ export default function NavLinks() {
                 ? 'bg-sky-100 text-blue-600'
                 : ''
             }`}>
-            <CreateUser /> Create{' '}
-            <span className='md:block hidden'> new user</span>
+            <CreateUser /> Criar{' '}
+            <span className='md:block hidden'> novo usuário</span>
           </Link>
         </>
       )}

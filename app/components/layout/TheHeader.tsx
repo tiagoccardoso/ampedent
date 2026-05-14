@@ -51,42 +51,42 @@ function TheHeader() {
             priority
             height={96}
             width={75}
-            alt='ampeDent logo'
+            alt='logotipo da AmpeDent'
           />
           AmpeDent
         </Link>
         <nav className='hidden md:flex gap-6 items-center text-lg'>
           <Link
             href='/about'
-            aria-label='About us page link'
+            aria-label='Link para a página sobre nós'
             className={
               pathName === '/about'
                 ? 'text-blue-600 font-bold'
                 : '' + 'hover:text-blue-600'
             }>
-            About us
+            Sobre nós
           </Link>
           <Link
             href='/services'
-            aria-label='Services page link'
+            aria-label='Link para a página de serviços'
             className={
               pathName === '/services'
                 ? 'text-blue-600 font-bold'
                 : '' + 'hover:text-blue-600'
             }>
-            Services
+            Serviços
           </Link>
           <Link
             href='/booking'
-            aria-label='Create a booking page link'
+            aria-label='Link para criar agendamento'
             className='p-2 rounded-full bg-blue-600 text-white hover:bg-blue-800 '>
-            Book now
+            Agendar agora
           </Link>
           {status === 'authenticated' && (
             <>
               <Link
                 href='/admin/bookings'
-                aria-label='Admin bookings dashboard page link'
+                aria-label='Link para o painel administrativo de agendamentos'
                 className={
                   pathName.startsWith('/admin')
                     ? 'text-blue-600 font-bold'
@@ -97,14 +97,14 @@ function TheHeader() {
               <button
                 onClick={() => signOut()}
                 className='p-2 text-blue-600 border border-blue-600 rounded  hover:text-blue-800 hover:border-blue-800'>
-                Sign Out
+                Sair
               </button>
             </>
           )}
         </nav>
         <div className='flex md:hidden gap-8 items-center'>
           <button
-            aria-label='expand mobile menu button'
+            aria-label='botão para expandir o menu móvel'
             className={`hamburger ${isOpen ? 'open' : ''} focus:outline-none `}
             onClick={() => setIsOpen(prev => !prev)}>
             <span className='hamburger-top'></span>
@@ -119,34 +119,34 @@ function TheHeader() {
           className='md:hidden p-4 bg-sky-50  mt-2 flex flex-col gap-2 text-center'>
           <Link
             href={'/about'}
-            aria-label='About us page link'
+            aria-label='Link para a página sobre nós'
             className='border rounded p-2 border-blue-400 animate-link'>
-            About us
+            Sobre nós
           </Link>
           <Link
             href={'/services'}
-            aria-label='Services page link'
+            aria-label='Link para a página de serviços'
             className='border rounded p-2 border-blue-400 animate-link'>
-            Services
+            Serviços
           </Link>
           <Link
             href={'/booking'}
-            aria-label='Create a booking page link'
+            aria-label='Link para criar agendamento'
             className=' rounded p-2 bg-blue-600 text-white animate-link font-bold'>
-            Book now
+            Agendar agora
           </Link>
           {status === 'authenticated' && (
             <>
               <Link
                 href={'/admin/bookings'}
-                aria-label='Admin bookings dashboard page link'
+                aria-label='Link para o painel administrativo de agendamentos'
                 className='border rounded p-2 border-blue-400 animate-link'>
                 Admin
               </Link>
               <button
                 className=' rounded p-2 bg-blue-600 text-white animate-link font-bold'
                 onClick={() => signOut()}>
-                Sign Out
+                Sair
               </button>
             </>
           )}
@@ -154,7 +154,7 @@ function TheHeader() {
       )}
       <div className='fixed bottom-0 -right-6 p-10 z-[10]'>
         <button
-          aria-label='go to top button'
+          aria-label='botão para voltar ao topo'
           onClick={goTop}
           className={
             y < 40

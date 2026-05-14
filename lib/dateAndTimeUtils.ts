@@ -5,18 +5,18 @@ export function formatTime(time: string) {
 
 export function formatDate(dateString: string) {
   const months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
+    'janeiro',
+    'fevereiro',
+    'março',
+    'abril',
+    'maio',
+    'junho',
+    'julho',
+    'agosto',
+    'setembro',
+    'outubro',
+    'novembro',
+    'dezembro',
   ]
   const date = new Date(dateString)
   const day = date.getDate()

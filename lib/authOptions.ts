@@ -8,11 +8,11 @@ const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET ?? process.env.SECRET,
   providers: [
     CredentialsProvider({
-      name: 'Credentials',
+      name: 'Credenciais',
       id: 'credentials',
       credentials: {
-        name: { label: 'Name', type: 'text' },
-        password: { label: 'Password', type: 'password' },
+        name: { label: 'Nome', type: 'text' },
+        password: { label: 'Senha', type: 'password' },
       },
       async authorize(credentials) {
         const name = credentials?.name?.toLowerCase()

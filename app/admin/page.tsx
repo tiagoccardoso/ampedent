@@ -30,7 +30,7 @@ function Admin() {
   }
 
   useEffect(() => {
-    document.title = 'Admin Login | AmpeDent'
+    document.title = 'Entrar administrativo | AmpeDent'
   }, [])
 
   if (status === 'authenticated') {
@@ -43,7 +43,7 @@ function Admin() {
         <form
           className='mx-auto mb-4 max-w-md w-full pb-4'
           onSubmit={handleLogin}>
-          <h1 className='text-center text-3xl my-8'>Login to AmpeDent</h1>
+          <h1 className='text-center text-3xl my-8'>Entrar na AmpeDent</h1>
           <div className='relative'>
             <input
               disabled={isLoading}
@@ -54,7 +54,7 @@ function Admin() {
               className='my-4'
               id='username'
               name='username'
-              placeholder='username'
+              placeholder='nome de usuário'
               required
             />
           </div>
@@ -67,7 +67,7 @@ function Admin() {
               id='password'
               name='password'
               className='my-4 '
-              placeholder='password'
+              placeholder='senha'
               required
             />
           </div>
@@ -76,7 +76,7 @@ function Admin() {
             disabled={isLoading}
             type='submit'
             className=' rounded px-6 py-3 text-center font-semibold text-white bg-blue-600  hover:bg-blue-800'>
-            Login
+            Entrar
           </button>
         </form>
       </div>

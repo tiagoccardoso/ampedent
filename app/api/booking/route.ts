@@ -34,7 +34,7 @@ export async function GET(req: Request) {
         })
 
         return Response.json({
-          message: 'Booking fetched',
+          message: 'Agendamento encontrado',
           booking: data[0] ? mapBooking(data[0]) : null,
         })
       }
@@ -69,12 +69,12 @@ export async function GET(req: Request) {
       })
 
       return Response.json({
-        message: 'Bookings fetched',
+        message: 'Agendamentos encontrados',
         bookings: data.map(mapBooking),
         totalPages: Math.ceil((count ?? 0) / pageSize),
       })
     } else {
-      throw new Error('Unauthorized')
+      throw new Error('Não autorizado')
     }
   } catch (error) {
     throw new Error('Could not fetch bookings')
@@ -106,7 +106,7 @@ export async function POST(req: Request) {
     })
 
     return Response.json({
-      message: 'Booking created',
+      message: 'Agendamento criado',
       booking: data[0] ? mapBooking(data[0]) : null,
     })
   } catch (error: any) {
@@ -135,12 +135,12 @@ export async function PUT(req: Request) {
         })
 
         return Response.json({
-          message: 'Booking updated',
+          message: 'Agendamento atualizado',
           booking: data[0] ? mapBooking(data[0]) : null,
         })
       }
     } else {
-      throw new Error('Unauthorized')
+      throw new Error('Não autorizado')
     }
   } catch (error) {
     throw new Error('Could not update bookings')

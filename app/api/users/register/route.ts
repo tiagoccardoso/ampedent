@@ -28,7 +28,7 @@ export async function POST(req: Request) {
       const user = data[0]
 
       return Response.json({
-        message: 'New user created',
+        message: 'Novo usuário criado',
         name: user?.name,
         role: user?.role,
       })

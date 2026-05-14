@@ -15,19 +15,19 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: {
-    default: 'AmpeDent | Your Dental Care Partner',
+    default: 'AmpeDent | Sua parceira em cuidados odontológicos',
     template: `%s | AmpeDent`,
   },
   description:
-    "AmpeDent provides comprehensive dental care services. We're committed to giving you a healthy smile.",
+    "A AmpeDent oferece serviços odontológicos completos. Temos o compromisso de proporcionar um sorriso saudável a você.",
   metadataBase: new URL('https://ampedent.vercel.app/'),
 
   openGraph: {
     type: 'website',
     url: 'https://ampedent.vercel.app/',
-    title: 'AmpeDent | Your Dental Care Partner',
+    title: 'AmpeDent | Sua parceira em cuidados odontológicos',
     description:
-      "AmpeDent provides comprehensive dental care services. We're committed to giving you a healthy smile.",
+      "A AmpeDent oferece serviços odontológicos completos. Temos o compromisso de proporcionar um sorriso saudável a você.",
     images: [
       {
         url: 'https://res.cloudinary.com/dkofkuquf/image/upload/v1707573685/nuxtshop/rlviwuatbxvwxex336eh.webp',
@@ -38,9 +38,9 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     site: 'https://ampedent.vercel.app/',
-    title: 'AmpeDent | Your Dental Care Partner',
+    title: 'AmpeDent | Sua parceira em cuidados odontológicos',
     description:
-      "AmpeDent provides comprehensive dental care services. We're committed to giving you a healthy smile.",
+      "A AmpeDent oferece serviços odontológicos completos. Temos o compromisso de proporcionar um sorriso saudável a você.",
     images: [
       'https://res.cloudinary.com/dkofkuquf/image/upload/v1707573685/nuxtshop/rlviwuatbxvwxex336eh.webp',
     ],
@@ -53,7 +53,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang='en'>
+    <html lang='pt-BR'>
       <AppProvider>
         <body className={inter.className}>
           <div className='flex flex-col min-h-screen'>

@@ -13,7 +13,7 @@ export async function GET(req: Request) {
     if (date !== null) {
       selectedDate = new Date(date)
     } else {
-      throw new Error('Invalid date')
+      throw new Error('Data inválida')
     }
 
     const dayOfWeek = selectedDate.getDay()
@@ -49,10 +49,10 @@ export async function GET(req: Request) {
     })
 
     return Response.json({
-      message: 'Available times fetched',
+      message: 'Horários disponíveis encontrados',
       availableTimes: availableTimes,
     })
   } catch (error) {
-    throw new Error('Could not fetch available times: ' + error)
+    throw new Error('Não foi possível buscar horários disponíveis: ' + error)
   }
 }

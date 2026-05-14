@@ -8,20 +8,17 @@ function ServicesAbout() {
         <div className='grid gap-10 lg:grid-cols-2 lg:gap-12'>
           <div className='flex flex-col gap-5 rounded-2xl  p-4'>
             <h2 className='text-3xl font-bold md:text-5xl'>
-              Love your general dental care
+              Apaixone-se pelo seu cuidado odontológico geral
             </h2>
             <p className='text-sm text-slate-600 sm:text-base text-balance'>
-              We're thrilled to be your new home for exceptional dentistry.
-              Visit us for a cleaning, general dental exam, and a bit of
-              pampering. Plus, everything else you need to look and feel your
-              best.
+              Estamos felizes em ser sua nova casa para uma odontologia excepcional. Visite-nos para uma limpeza, avaliação odontológica geral e um cuidado especial. Além disso, oferecemos tudo o que você precisa para se sentir e ficar bem.
             </p>
           </div>
           <Image
             height={1000}
             width={1000}
             src={services2}
-            alt='image of patient smiling'
+            alt='imagem de paciente sorrindo'
             className='object-contain rounded'
           />
         </div>
