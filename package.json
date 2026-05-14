@@ -12,10 +12,8 @@
   "dependencies": {
     "@uidotdev/usehooks": "^2.4.1",
     "@vercel/analytics": "^1.6.1",
-    "bcryptjs": "^3.0.3",
     "mongodb": "^7.1.0",
     "next": "16.1.6",
-    "next-auth": "^4.24.13",
     "next-nprogress-bar": "^2.4.7",
     "react": "^19.2.4",
     "react-calendar": "^6.0.0",
@@ -25,7 +23,6 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.1",
-    "@types/bcryptjs": "^3.0.0",
     "@types/node": "^25.3.5",
     "@types/react": "^19.2.14",
     "@types/react-datepicker": "^7.0.0",

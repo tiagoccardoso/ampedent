@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useDebounce } from '@uidotdev/usehooks'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useAuth } from '@/app/components/AppProvider'
 
 import {
   formatDate,
@@ -25,7 +25,7 @@ function Bookings() {
   const [pages, setPages] = useState<number>()
   const debouncedSearchTerm = useDebounce(search, 400)
   const router = useRouter()
-  const { status } = useSession()
+  const { status } = useAuth()
 
   useEffect(() => {
     setPage(1)

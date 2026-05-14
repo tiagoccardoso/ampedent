@@ -1,5 +1,3 @@
-const bcrypt = require('bcryptjs')
-
 async function supabaseRequest(resource, options = {}) {
   const supabaseUrl = process.env.SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -7,7 +5,9 @@ async function supabaseRequest(resource, options = {}) {
   if (!supabaseUrl) throw new Error('Missing SUPABASE_URL')
   if (!serviceRoleKey) throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY')
 
-  const endpoint = new URL(`${supabaseUrl.replace(/\/$/, '')}/rest/v1/${resource}`)
+  const endpoint = new URL(
+    `${supabaseUrl.replace(/\/$/, '')}/rest/v1/${resource}`,
+  )
   Object.entries(options.searchParams ?? {}).forEach(([key, value]) => {
     if (value !== undefined) endpoint.searchParams.set(key, String(value))
   })
@@ -33,17 +33,59 @@ async function supabaseRequest(resource, options = {}) {
   return data
 }
 
+async function supabaseAuthRequest(path, options = {}) {
+  const supabaseUrl = process.env.SUPABASE_URL
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl) throw new Error('Missing SUPABASE_URL')
+  if (!serviceRoleKey) throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY')
+
+  const response = await fetch(
+    `${supabaseUrl.replace(/\/$/, '')}/auth/v1/${path}`,
+    {
+      method: options.method ?? 'GET',
+      headers: {
+        apikey: serviceRoleKey,
+        Authorization: `Bearer ${serviceRoleKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+    },
+  )
+
+  const text = await response.text()
+  const data = text ? JSON.parse(text) : null
+
+  if (!response.ok) {
+    throw new Error(data?.message ?? data?.msg ?? `Supabase Auth failed: ${response.status}`)
+  }
+
+  return data
+}
+
 async function createSuperUser() {
-  // modify name and password to your liking
+  // modify name, email and password to your liking
   const name = 'admin'
+  const email = 'admin@example.com'
   const password = '123456'
   const role = 'superadmin'
+
+  const authUser = await supabaseAuthRequest('admin/users', {
+    method: 'POST',
+    body: {
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { name },
+    },
+  })
 
   await supabaseRequest('admin_users', {
     method: 'POST',
     body: {
+      auth_user_id: authUser.id,
+      email,
       name,
-      password: await bcrypt.hash(password, 10),
       role,
     },
     headers: {
@@ -51,7 +93,7 @@ async function createSuperUser() {
     },
   })
 
-  console.log('user created')
+  console.log('superadmin user created')
 }
 
 createSuperUser().catch(error => {
