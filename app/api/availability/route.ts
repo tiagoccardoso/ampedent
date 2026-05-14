@@ -1,6 +1,6 @@
 import { allTimes } from '@/data/times'
-import dbConnect from '@/lib/dbConnect'
-import Booking from '@/models/Booking'
+import { supabaseRequest } from '@/lib/supabaseAdmin'
+import { BookingRow } from '@/lib/types'
 import { unstable_noStore as noStore } from 'next/cache'
 
 export async function GET(req: Request) {
@@ -21,12 +21,13 @@ export async function GET(req: Request) {
       throw new Error('No available times on Saturday or Sunday')
     }
 
-    await dbConnect()
-
-    const bookings = await Booking.find({
-      date: {
-        $gte: new Date(selectedDate.setHours(0, 0, 0, 0)),
-        $lt: new Date(selectedDate.setHours(23, 59, 59, 999)),
+    const selectedDay = selectedDate.toISOString().split('T')[0]
+    const { data: bookings } = await supabaseRequest<
+      Pick<BookingRow, 'time' | 'status'>[]
+    >('bookings', {
+      searchParams: {
+        select: 'time,status',
+        date: `eq.${selectedDay}`,
       },
     })
 
@@ -40,9 +41,7 @@ export async function GET(req: Request) {
     const currentCETTime = new Date(utcTime + cetOffset * 60 * 1000)
 
     const availableTimes = allTimes.filter(time => {
-      const availableTime = new Date(
-        `${selectedDate?.toISOString().split('T')[0]}T${time}`,
-      )
+      const availableTime = new Date(`${selectedDay}T${time}`)
       return (
         availableTime.getTime() > currentCETTime.getTime() &&
         !bookedAndNotCanceledTimes.includes(time)

@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react'
 import Spinner from '@/app/components/Spinner'
 import DeleteButton from '@/app/components/admin/DeleteButton'
 import EditUserModal from '@/app/components/admin/EditUserModal'
-import { UserType } from '@/models/User'
+import { UserType } from '@/lib/types'
 
 function UserList() {
   const [users, setUsers] = useState<UserType[]>([])

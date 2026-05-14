@@ -1,18 +1,23 @@
-import User from '@/models/User'
+import { AdminUserRow } from '@/lib/types'
 import { getServerSession } from 'next-auth'
-import dbConnect from './dbConnect'
 import authOptions from './authOptions'
+import { supabaseRequest } from './supabaseAdmin'
 
 export async function isSuperAdmin() {
   const session = await getServerSession(authOptions)
   const name = session?.user?.name
+
   if (!name) {
     return false
   }
-  await dbConnect()
-  const user = await User.findOne({ name })
-  if (!user) {
-    return false
-  }
-  return user.role
+
+  const { data: users } = await supabaseRequest<AdminUserRow[]>('admin_users', {
+    searchParams: {
+      select: 'role',
+      name: `eq.${name}`,
+      limit: 1,
+    },
+  })
+
+  return users[0]?.role ?? false
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { UserType } from '@/models/User'
+import { UserType } from '@/lib/types'
 import { FormEvent, useState } from 'react'
 
 function EditUserModal({

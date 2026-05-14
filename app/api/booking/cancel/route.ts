@@ -1,22 +1,32 @@
-import dbConnect from '@/lib/dbConnect'
 import { isSuperAdmin } from '@/lib/isSuperAdmin'
-import Booking from '@/models/Booking'
+import { mapBooking } from '@/lib/supabaseMappers'
+import { supabaseRequest } from '@/lib/supabaseAdmin'
+import { BookingRow } from '@/lib/types'
 
 export async function PUT(req: Request) {
   try {
-    await dbConnect()
     const url = new URL(req.url)
     const _id = url.searchParams.get('_id')
 
     const role = await isSuperAdmin()
     if (role === 'superadmin' || role === 'admin') {
       if (_id) {
-        const booking = await Booking.findByIdAndUpdate(
-          _id,
-          { status: 'canceled' },
-          { new: true },
-        )
-        return Response.json({ message: 'Booking updated', booking: booking })
+        const { data } = await supabaseRequest<BookingRow[]>('bookings', {
+          method: 'PATCH',
+          body: { status: 'canceled' },
+          searchParams: {
+            id: `eq.${_id}`,
+            select: '*',
+          },
+          headers: {
+            Prefer: 'return=representation',
+          },
+        })
+
+        return Response.json({
+          message: 'Booking updated',
+          booking: data[0] ? mapBooking(data[0]) : null,
+        })
       }
     } else {
       throw new Error('Unauthorized')

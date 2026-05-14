@@ -1,14 +1,26 @@
-import dbConnect from '@/lib/dbConnect'
 import { isSuperAdmin } from '@/lib/isSuperAdmin'
-import User, { UserType } from '@/models/User'
+import { mapUser } from '@/lib/supabaseMappers'
+import { supabaseRequest } from '@/lib/supabaseAdmin'
+import { AdminUserRow } from '@/lib/types'
+import bcrypt from 'bcryptjs'
 
 export async function GET(req: Request) {
   try {
     const role = await isSuperAdmin()
     if (role === 'superadmin' || role === 'admin') {
-      await dbConnect()
-      const users = await User.find().select('-password')
-      return Response.json({ message: 'User fetched', users: users })
+      const { data: users } = await supabaseRequest<AdminUserRow[]>(
+        'admin_users',
+        {
+          searchParams: {
+            select: 'id,name,role',
+            order: 'created_at.asc',
+          },
+        },
+      )
+      return Response.json({
+        message: 'User fetched',
+        users: users.map(mapUser),
+      })
     } else {
       throw new Error('Unathorized')
     }
@@ -23,17 +35,29 @@ export async function PUT(req: Request) {
     if (role === 'superadmin') {
       const body = await req.json()
       const { _id, name, password } = body
-      await dbConnect()
-      const user = await User.findById({ _id })
 
-      if (!user) {
+      const updates: Record<string, string> = {}
+      if (name) updates.name = name.toLowerCase()
+      if (password && password !== '') {
+        updates.password = await bcrypt.hash(password, 10)
+      }
+
+      const { data } = await supabaseRequest<AdminUserRow[]>('admin_users', {
+        method: 'PATCH',
+        body: updates,
+        searchParams: {
+          id: `eq.${_id}`,
+          select: 'id,name,role',
+        },
+        headers: {
+          Prefer: 'return=representation',
+        },
+      })
+
+      if (!data[0]) {
         throw new Error('User not found')
       }
 
-      if (name) user.name = name
-      if (password && password !== '') user.password = password
-
-      await user.save()
       return Response.json({ message: 'User updated' })
     } else {
       throw new Error('Unathorized')
@@ -50,11 +74,33 @@ export async function DELETE(req: Request) {
     const role = await isSuperAdmin()
 
     if (role === 'superadmin') {
-      const user = await User.findById(_id)
+      const { data: users } = await supabaseRequest<AdminUserRow[]>(
+        'admin_users',
+        {
+          searchParams: {
+            select: 'id,role',
+            id: `eq.${_id}`,
+            limit: 1,
+          },
+        },
+      )
+
+      const user = users[0]
+      if (!user) {
+        throw new Error('User not found')
+      }
+
       if (user.role === 'superadmin') {
         throw new Error('Cannot delete superadmin')
       }
-      await user.deleteOne()
+
+      await supabaseRequest<null>('admin_users', {
+        method: 'DELETE',
+        searchParams: {
+          id: `eq.${_id}`,
+        },
+      })
+
       return Response.json({ message: 'User deleted' })
     } else {
       throw new Error('Unathorized')
