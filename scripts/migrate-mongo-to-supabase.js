@@ -86,7 +86,7 @@ async function main() {
       body: users.map(user => ({
         mongo_id: user._id.toString(),
         name: user.name,
-        password: user.password,
+        email: user.email ?? null,
         role: user.role ?? 'admin',
         created_at: user.createdAt ?? new Date().toISOString(),
         updated_at: user.updatedAt ?? new Date().toISOString(),
@@ -101,7 +101,8 @@ async function main() {
   }
 
   await mongo.close()
-  console.log(`Migrated ${bookings.length} bookings and ${users.length} users`)
+  console.log(`Migrated ${bookings.length} bookings and ${users.length} user profiles`)
+  console.log('Create matching Supabase Auth users and set admin_users.auth_user_id before using admin login.')
 }
 
 main().catch(error => {

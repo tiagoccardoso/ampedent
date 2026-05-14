@@ -12,13 +12,14 @@ function EditUserModal({
 }) {
   const [showUser, setShowUser] = useState(false)
   const [name, setName] = useState(user.name || '')
+  const [email, setEmail] = useState(user.email || '')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
 
   async function handleEdit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     try {
-      const body = { _id: user._id, name, password }
+      const body = { _id: user._id, name, email, password }
       const res = await fetch('/api/users/', {
         method: 'PUT',
         body: JSON.stringify(body),
@@ -60,6 +61,17 @@ function EditUserModal({
                         className='my-4 '
                         name='name'
                         placeholder='nome'
+                        required
+                      />
+                    </div>
+                    <div className='relative'>
+                      <input
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        type='email'
+                        className='my-4 '
+                        name='email'
+                        placeholder='email'
                         required
                       />
                     </div>

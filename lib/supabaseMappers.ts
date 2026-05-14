@@ -16,8 +16,9 @@ export function mapBooking(row: BookingRow): BookingType {
 
 export function mapUser(row: AdminUserRow): UserType {
   return {
-    _id: row.id,
+    _id: row.auth_user_id ?? row.id,
     name: row.name,
+    email: row.email ?? undefined,
     role: row.role,
   }
 }

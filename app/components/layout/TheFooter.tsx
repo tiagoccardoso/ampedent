@@ -2,11 +2,11 @@
 
 import Link from 'next/link'
 import Github from '../Icons/Github'
-import { useSession } from 'next-auth/react'
+import { useAuth } from '@/app/components/AppProvider'
 
 function TheFooter() {
   const currentYear = new Date().getFullYear()
-  const { status } = useSession()
+  const { status } = useAuth()
 
   return (
     <footer className='block relative'>

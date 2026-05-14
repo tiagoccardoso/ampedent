@@ -2,9 +2,9 @@ import { isSuperAdmin } from '@/lib/isSuperAdmin'
 import { mapUser } from '@/lib/supabaseMappers'
 import { supabaseRequest } from '@/lib/supabaseAdmin'
 import { AdminUserRow } from '@/lib/types'
-import bcrypt from 'bcryptjs'
+import { deleteAuthUser, updateAuthUser } from '@/lib/supabaseAuth'
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     const role = await isSuperAdmin()
     if (role === 'superadmin' || role === 'admin') {
@@ -12,7 +12,7 @@ export async function GET(req: Request) {
         'admin_users',
         {
           searchParams: {
-            select: 'id,name,role',
+            select: 'id,auth_user_id,email,name,role',
             order: 'created_at.asc',
           },
         },
@@ -22,10 +22,10 @@ export async function GET(req: Request) {
         users: users.map(mapUser),
       })
     } else {
-      throw new Error('Unathorized')
+      return Response.json({ message: 'Não autorizado' }, { status: 401 })
     }
   } catch (error: any) {
-    throw new Error(error.message)
+    return Response.json({ message: error.message }, { status: 500 })
   }
 }
 
@@ -34,20 +34,31 @@ export async function PUT(req: Request) {
     const role = await isSuperAdmin()
     if (role === 'superadmin') {
       const body = await req.json()
-      const { _id, name, password } = body
+      const { _id, name, email, password } = body
+
+      if (!_id) {
+        return Response.json({ message: 'Usuário inválido' }, { status: 400 })
+      }
+
+      const normalizedName = name?.toLowerCase()
+      const normalizedEmail = email?.toLowerCase()
+
+      await updateAuthUser(_id, {
+        email: normalizedEmail,
+        password,
+        name: normalizedName,
+      })
 
       const updates: Record<string, string> = {}
-      if (name) updates.name = name.toLowerCase()
-      if (password && password !== '') {
-        updates.password = await bcrypt.hash(password, 10)
-      }
+      if (normalizedName) updates.name = normalizedName
+      if (normalizedEmail) updates.email = normalizedEmail
 
       const { data } = await supabaseRequest<AdminUserRow[]>('admin_users', {
         method: 'PATCH',
         body: updates,
         searchParams: {
-          id: `eq.${_id}`,
-          select: 'id,name,role',
+          auth_user_id: `eq.${_id}`,
+          select: 'id,auth_user_id,email,name,role',
         },
         headers: {
           Prefer: 'return=representation',
@@ -60,10 +71,10 @@ export async function PUT(req: Request) {
 
       return Response.json({ message: 'Usuário atualizado' })
     } else {
-      throw new Error('Unathorized')
+      return Response.json({ message: 'Não autorizado' }, { status: 401 })
     }
   } catch (error: any) {
-    throw new Error(error.message)
+    return Response.json({ message: error.message }, { status: 500 })
   }
 }
 
@@ -78,8 +89,8 @@ export async function DELETE(req: Request) {
         'admin_users',
         {
           searchParams: {
-            select: 'id,role',
-            id: `eq.${_id}`,
+            select: 'id,auth_user_id,role',
+            auth_user_id: `eq.${_id}`,
             limit: 1,
           },
         },
@@ -94,18 +105,20 @@ export async function DELETE(req: Request) {
         throw new Error('Cannot delete superadmin')
       }
 
+      await deleteAuthUser(_id as string)
+
       await supabaseRequest<null>('admin_users', {
         method: 'DELETE',
         searchParams: {
-          id: `eq.${_id}`,
+          auth_user_id: `eq.${_id}`,
         },
       })
 
       return Response.json({ message: 'Usuário excluído' })
     } else {
-      throw new Error('Unathorized')
+      return Response.json({ message: 'Não autorizado' }, { status: 401 })
     }
-  } catch (error) {
-    throw error
+  } catch (error: any) {
+    return Response.json({ message: error.message }, { status: 500 })
   }
 }

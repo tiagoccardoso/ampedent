@@ -1,6 +1,6 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
+import { useAuth } from '@/app/components/AppProvider'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -15,7 +15,7 @@ function UserList() {
   const [error, setError] = useState('')
   const [refreshKey, setRefreshKey] = useState(0)
   const triggerRefresh = () => setRefreshKey(refreshKey + 1)
-  const { status } = useSession()
+  const { status } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
@@ -71,6 +71,9 @@ function UserList() {
                 Nome de usuário
               </th>
               <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground '>
+                Email
+              </th>
+              <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground '>
                 Função
               </th>
               <th className='h-12 px-4 align-middle font-medium text-muted-foreground  w-20 text-right'>
@@ -88,6 +91,7 @@ function UserList() {
                     {user._id.toString()}
                   </td>
                   <td className='p-4 align-middle '>{user.name}</td>
+                  <td className='p-4 align-middle '>{user.email}</td>
                   <td className='p-4 align-middle '>
                     {user.role === 'superadmin' ? 'superadministrador' : 'administrador'}
                   </td>

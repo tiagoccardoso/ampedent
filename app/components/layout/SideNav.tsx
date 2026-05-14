@@ -3,12 +3,10 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import NavLinks from './NavLinks'
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useAuth } from '@/app/components/AppProvider'
 
 function SideNav() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
+  const { session, status } = useAuth()
 
   return (
     <>
@@ -33,7 +31,7 @@ function SideNav() {
                 <Link
                   href='/admin/bookings'
                   className='flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3'>
-                  {session?.user?.name}
+                  {session?.user}
                 </Link>
               </form>
             </div>

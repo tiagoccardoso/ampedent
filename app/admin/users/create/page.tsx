@@ -1,16 +1,17 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useAuth } from '@/app/components/AppProvider'
 
 import { FormEvent, useEffect, useState } from 'react'
 
 function CreateUser() {
   const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const { status } = useSession()
+  const { status } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
@@ -20,9 +21,9 @@ function CreateUser() {
   async function handleLogin(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     try {
-      if (!name || !password) return
+      if (!name || !email || !password) return
       setIsLoading(true)
-      const body = { name, password }
+      const body = { name, email, password }
       const res = await fetch('/api/users/register', {
         method: 'POST',
         body: JSON.stringify(body),
@@ -58,6 +59,18 @@ function CreateUser() {
               className='my-4 '
               name='name'
               placeholder='nome de usuário'
+              required
+            />
+          </div>
+          <div className='relative'>
+            <input
+              disabled={isLoading}
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              type='email'
+              className='my-4 '
+              name='email'
+              placeholder='email'
               required
             />
           </div>

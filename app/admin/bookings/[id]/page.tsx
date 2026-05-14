@@ -9,7 +9,7 @@ import { BookingType } from '@/lib/types'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useAuth } from '@/app/components/AppProvider'
 import Spinner from '@/app/components/Spinner'
 
 function IndividualBooking({ params }: { params: { id: string } }) {
@@ -17,7 +17,7 @@ function IndividualBooking({ params }: { params: { id: string } }) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
-  const { status } = useSession()
+  const { status } = useAuth()
 
   useEffect(() => {
     async function fetchBooking() {

@@ -16,6 +16,7 @@ export type BookingType = {
 export type UserType = {
   _id: string
   name: string
+  email?: string
   role: AdminRole
 }
 
@@ -36,9 +37,10 @@ export type BookingRow = {
 
 export type AdminUserRow = {
   id: string
+  auth_user_id?: string | null
   mongo_id?: string | null
+  email?: string | null
   name: string
-  password?: string
   role: AdminRole
   created_at?: string
   updated_at?: string

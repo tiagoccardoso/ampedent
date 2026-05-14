@@ -6,7 +6,7 @@ import logo from '@/public/ampedent.webp'
 import { useEffect, useState } from 'react'
 import UpArrow from '../Icons/UpArrow'
 import { usePathname } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+import { useAuth } from '@/app/components/AppProvider'
 
 function TheHeader() {
   const [isOpen, setIsOpen] = useState(false)
@@ -20,7 +20,7 @@ function TheHeader() {
       behavior: 'smooth',
     })
   }
-  const { status } = useSession()
+  const { status, logout } = useAuth()
 
   useEffect(() => {
     const updateScroll = () => {
@@ -95,7 +95,7 @@ function TheHeader() {
                 Admin
               </Link>
               <button
-                onClick={() => signOut()}
+                onClick={logout}
                 className='p-2 text-blue-600 border border-blue-600 rounded  hover:text-blue-800 hover:border-blue-800'>
                 Sair
               </button>
@@ -145,7 +145,7 @@ function TheHeader() {
               </Link>
               <button
                 className=' rounded p-2 bg-blue-600 text-white animate-link font-bold'
-                onClick={() => signOut()}>
+                onClick={logout}>
                 Sair
               </button>
             </>

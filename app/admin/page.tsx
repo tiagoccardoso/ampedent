@@ -1,31 +1,54 @@
 'use client'
 
-import { signIn, useSession } from 'next-auth/react'
+import { useAuth } from '@/app/components/AppProvider'
 import { useRouter } from 'next/navigation'
 import { FormEvent, useEffect, useState } from 'react'
 
 function Admin() {
   const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [isRegistering, setIsRegistering] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const { status } = useSession()
+  const [success, setSuccess] = useState('')
+  const { status, refreshSession } = useAuth()
   const router = useRouter()
 
-  async function handleLogin(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     try {
-      if (!name || !password) return
+      if (!email || !password || (isRegistering && !name)) return
       setIsLoading(true)
-      await signIn('credentials', {
-        name,
-        password,
-        callbackUrl: '/admin/bookings',
-      })
-      setIsLoading(false)
+      setError('')
+      setSuccess('')
+
+      const res = await fetch(
+        isRegistering ? '/api/auth/register' : '/api/auth/login',
+        {
+          method: 'POST',
+          body: JSON.stringify({ name, email, password }),
+          headers: { 'Content-Type': 'application/json' },
+        },
+      )
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.message ?? 'Não foi possível autenticar')
+      }
+
+      if (isRegistering && data.authenticated === false) {
+        setSuccess(data.message)
+        return
+      }
+
+      await refreshSession()
+      router.push('/admin/bookings')
     } catch (err: any) {
-      setIsLoading(false)
       setError(err.message)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -42,19 +65,37 @@ function Admin() {
       <div className=' py-16 md:py-24 lg:py-32'>
         <form
           className='mx-auto mb-4 max-w-md w-full pb-4'
-          onSubmit={handleLogin}>
-          <h1 className='text-center text-3xl my-8'>Entrar na AmpeDent</h1>
+          onSubmit={handleSubmit}>
+          <h1 className='text-center text-3xl my-8'>
+            {isRegistering ? 'Criar conta AmpeDent' : 'Entrar na AmpeDent'}
+          </h1>
+          {isRegistering && (
+            <div className='relative'>
+              <input
+                disabled={isLoading}
+                autoFocus
+                value={name}
+                onChange={e => setName(e.target.value)}
+                type='text'
+                className='my-4'
+                id='name'
+                name='name'
+                placeholder='nome de usuário'
+                required
+              />
+            </div>
+          )}
           <div className='relative'>
             <input
               disabled={isLoading}
-              autoFocus
-              value={name}
-              onChange={e => setName(e.target.value)}
-              type='text'
+              autoFocus={!isRegistering}
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              type='email'
               className='my-4'
-              id='username'
-              name='username'
-              placeholder='nome de usuário'
+              id='email'
+              name='email'
+              placeholder='email'
               required
             />
           </div>
@@ -72,11 +113,27 @@ function Admin() {
             />
           </div>
           {error && <p className='text-red-600 text-center my-4'>{error}</p>}
+          {success && (
+            <p className='text-green-600 text-center my-4'>{success}</p>
+          )}
           <button
             disabled={isLoading}
             type='submit'
             className=' rounded px-6 py-3 text-center font-semibold text-white bg-blue-600  hover:bg-blue-800'>
-            Entrar
+            {isRegistering ? 'Cadastrar' : 'Entrar'}
+          </button>
+          <button
+            disabled={isLoading}
+            type='button'
+            className='block mx-auto mt-6 text-blue-600 hover:text-blue-800'
+            onClick={() => {
+              setIsRegistering(prev => !prev)
+              setError('')
+              setSuccess('')
+            }}>
+            {isRegistering
+              ? 'Já tenho uma conta administrativa'
+              : 'Cadastrar novo usuário'}
           </button>
         </form>
       </div>

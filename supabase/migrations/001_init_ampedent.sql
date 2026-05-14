@@ -18,9 +18,10 @@ create table public.bookings (
 
 create table public.admin_users (
   id uuid primary key default gen_random_uuid(),
+  auth_user_id uuid unique references auth.users(id) on delete cascade,
   mongo_id text unique,
+  email text unique,
   name text not null unique,
-  password text not null,
   role public.admin_role not null default 'admin',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
