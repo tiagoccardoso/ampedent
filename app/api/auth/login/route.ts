@@ -1,6 +1,11 @@
 import { authenticate, setSession } from '@/lib/auth'
 import { SupabaseRequestError } from '@/lib/supabaseAdmin'
 
+function getMissingAuthEnvMessage(error: unknown) {
+  if (!(error instanceof Error)) return null
+  return error.message.includes('Variável de ambiente') ? error.message : null
+}
+
 export async function POST(req: Request) {
   try {
     const { email, password } = await req.json()
@@ -17,9 +22,11 @@ export async function POST(req: Request) {
       )
     }
 
-    if (error instanceof Error && error.message.includes('Variável de ambiente')) {
+    const missingAuthEnvMessage = getMissingAuthEnvMessage(error)
+    if (missingAuthEnvMessage) {
+      console.error('[auth/login] configuração de autenticação ausente:', missingAuthEnvMessage)
       return Response.json(
-        { message: 'Configuração de autenticação incompleta no servidor.' },
+        { message: 'Não foi possível entrar no momento. Tente novamente em instantes.' },
         { status: 500 },
       )
     }

@@ -19,15 +19,16 @@ export class SupabaseRequestError extends Error {
 
 function getSupabaseConfig() {
   const url = process.env.NEON_AUTH_BASE_URL ?? process.env.SUPABASE_URL
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const serviceRoleKey =
+    process.env.NEON_AUTH_SERVICE_ROLE_KEY ??
+    process.env.SUPABASE_SERVICE_ROLE_KEY ??
+    process.env.NEON_AUTH_ANON_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!url) {
     throw new Error('Variável de ambiente NEON_AUTH_BASE_URL/SUPABASE_URL ausente')
   }
 
-  if (!serviceRoleKey) {
-    throw new Error('Variável de ambiente SUPABASE_SERVICE_ROLE_KEY ausente')
-  }
 
   return {
     url: url.replace(/\/$/, ''),
@@ -51,8 +52,7 @@ export async function supabaseRequest<T>(
   const response = await fetch(endpoint, {
     method: options.method ?? 'GET',
     headers: {
-      apikey: serviceRoleKey,
-      Authorization: `Bearer ${serviceRoleKey}`,
+      ...(serviceRoleKey ? { apikey: serviceRoleKey, Authorization: `Bearer ${serviceRoleKey}` } : {}),
       'Content-Type': 'application/json',
       ...options.headers,
     },
