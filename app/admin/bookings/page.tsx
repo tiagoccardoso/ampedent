@@ -53,7 +53,7 @@ function Bookings() {
   }, [filter, debouncedSearchTerm, page])
 
   useEffect(() => {
-    document.title = 'Agendamentos | Admin | AmpeDent'
+    document.title = 'Agendamentos | Admin | DentalSys'
   }, [])
 
   if (status === 'unauthenticated') {

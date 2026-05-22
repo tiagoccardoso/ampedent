@@ -53,7 +53,7 @@ function Admin() {
   }
 
   useEffect(() => {
-    document.title = 'Entrar administrativo | AmpeDent'
+    document.title = 'Entrar administrativo | DentalSys'
   }, [])
 
   if (status === 'authenticated') {
@@ -61,13 +61,13 @@ function Admin() {
   }
 
   return (
-    <section>
-      <div className=' py-16 md:py-24 lg:py-32'>
+    <section className='min-h-[calc(100vh-220px)] flex items-center justify-center px-4 py-10'>
+      <div className='w-full'>
         <form
           className='mx-auto mb-4 max-w-md w-full pb-4'
           onSubmit={handleSubmit}>
           <h1 className='text-center text-3xl my-8'>
-            {isRegistering ? 'Criar conta AmpeDent' : 'Entrar na AmpeDent'}
+            {isRegistering ? 'Criar conta DentalSys' : 'Entrar na DentalSys'}
           </h1>
           {isRegistering && (
             <div className='relative'>
@@ -120,7 +120,13 @@ function Admin() {
             disabled={isLoading}
             type='submit'
             className=' rounded px-6 py-3 text-center font-semibold text-white bg-blue-600  hover:bg-blue-800'>
-            {isRegistering ? 'Cadastrar' : 'Entrar'}
+            {isLoading
+              ? isRegistering
+                ? 'Cadastrando...'
+                : 'Entrando...'
+              : isRegistering
+                ? 'Cadastrar'
+                : 'Entrar'}
           </button>
           <button
             disabled={isLoading}

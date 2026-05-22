@@ -54,7 +54,7 @@ function UserList() {
   }
 
   useEffect(() => {
-    document.title = 'Usuários | Admin | AmpeDent'
+    document.title = 'Usuários | Admin | DentalSys'
   }, [])
   return (
     <>

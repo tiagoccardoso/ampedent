@@ -11,16 +11,21 @@ function Hero() {
           Reconecte-se com o seu sorriso
         </h1>
         <h2 className='mx-auto max-w-lg  text-slate-800 text-md sm:text-xl mb-4'>
-          AmpeDent - Uma nova abordagem para o conforto odontológico
+          DentalSys - Uma nova abordagem para o conforto odontológico
         </h2>
         <h2 className='mx-auto mb-5 max-w-lg  text-slate-800 text-md sm:text-xl '>
           Torne seu sorriso perfeito ainda melhor
         </h2>
-        <div className='flex items-stretch justify-center mt-8 '>
+        <div className='flex flex-col sm:flex-row gap-3 items-stretch justify-center mt-8 '>
           <Link
             href='/booking'
             className='mx-auto inline-block rounded-md bg-blue-800 hover:bg-blue-600 px-8 py-4 text-center font-semibold text-white'>
             AGENDAR ONLINE
+          </Link>
+          <Link
+            href='/admin'
+            className='mx-auto inline-block rounded-md border border-blue-700 text-blue-700 hover:bg-blue-50 px-8 py-4 text-center font-semibold'>
+            ENTRAR
           </Link>
         </div>
       </div>
