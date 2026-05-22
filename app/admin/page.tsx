@@ -58,12 +58,14 @@ function Admin() {
     document.title = 'Entrar administrativo | DentalSys'
   }, [])
 
-  if (status === 'authenticated') {
-    router.push('/admin/bookings')
-  }
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.push('/admin/bookings')
+    }
+  }, [router, status])
 
   return (
-    <section className='flex min-h-[calc(100vh-220px)] items-center justify-center px-4 py-8 sm:py-10'>
+    <section className='mx-auto flex min-h-[100dvh] w-full max-w-7xl items-center justify-center overflow-x-hidden px-4 py-8 sm:px-6 sm:py-10 lg:px-8'>
       <div className='w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-sm sm:p-8'>
         <form className='flex w-full flex-col gap-4' onSubmit={handleSubmit} aria-busy={isLoading}>
           <h1 className='text-center text-2xl font-semibold text-slate-900 sm:text-3xl'>
