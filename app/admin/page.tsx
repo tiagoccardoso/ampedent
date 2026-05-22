@@ -17,6 +17,8 @@ function Admin() {
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    if (isLoading) return
+
     try {
       if (!email || !password || (isRegistering && !name)) return
       setIsLoading(true)
@@ -61,45 +63,55 @@ function Admin() {
   }
 
   return (
-    <section className='min-h-[calc(100vh-220px)] flex items-center justify-center px-4 py-10'>
-      <div className='w-full'>
-        <form
-          className='mx-auto mb-4 max-w-md w-full pb-4'
-          onSubmit={handleSubmit}>
-          <h1 className='text-center text-3xl my-8'>
+    <section className='flex min-h-[calc(100vh-220px)] items-center justify-center px-4 py-8 sm:py-10'>
+      <div className='w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-sm sm:p-8'>
+        <form className='flex w-full flex-col gap-4' onSubmit={handleSubmit} aria-busy={isLoading}>
+          <h1 className='text-center text-2xl font-semibold text-slate-900 sm:text-3xl'>
             {isRegistering ? 'Criar conta DentalSys' : 'Entrar na DentalSys'}
           </h1>
+
           {isRegistering && (
-            <div className='relative'>
+            <div className='flex flex-col gap-2'>
+              <label htmlFor='name' className='text-sm font-medium text-slate-700'>
+                Nome
+              </label>
               <input
                 disabled={isLoading}
                 autoFocus
                 value={name}
                 onChange={e => setName(e.target.value)}
                 type='text'
-                className='my-4'
                 id='name'
                 name='name'
-                placeholder='nome de usuário'
+                placeholder='Nome de usuário'
+                className='min-h-11 w-full rounded-md border border-slate-300 px-3 py-2 text-base outline-none transition focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-100'
                 required
               />
             </div>
           )}
-          <div className='relative'>
+
+          <div className='flex flex-col gap-2'>
+            <label htmlFor='email' className='text-sm font-medium text-slate-700'>
+              E-mail
+            </label>
             <input
               disabled={isLoading}
               autoFocus={!isRegistering}
               value={email}
               onChange={e => setEmail(e.target.value)}
               type='email'
-              className='my-4'
               id='email'
               name='email'
-              placeholder='email'
+              placeholder='voce@empresa.com'
+              className='min-h-11 w-full rounded-md border border-slate-300 px-3 py-2 text-base outline-none transition focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-100'
               required
             />
           </div>
-          <div className='relative mb-4 pb-2'>
+
+          <div className='flex flex-col gap-2'>
+            <label htmlFor='password' className='text-sm font-medium text-slate-700'>
+              Senha
+            </label>
             <input
               disabled={isLoading}
               value={password}
@@ -107,19 +119,27 @@ function Admin() {
               type='password'
               id='password'
               name='password'
-              className='my-4 '
-              placeholder='senha'
+              placeholder='Digite sua senha'
+              className='min-h-11 w-full rounded-md border border-slate-300 px-3 py-2 text-base outline-none transition focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-100'
               required
             />
           </div>
-          {error && <p className='text-red-600 text-center my-4'>{error}</p>}
-          {success && (
-            <p className='text-green-600 text-center my-4'>{success}</p>
+
+          {error && (
+            <p className='rounded-md border border-red-200 bg-red-50 px-3 py-2 text-center text-sm text-red-700'>
+              {error}
+            </p>
           )}
+          {success && (
+            <p className='rounded-md border border-green-200 bg-green-50 px-3 py-2 text-center text-sm text-green-700'>
+              {success}
+            </p>
+          )}
+
           <button
             disabled={isLoading}
             type='submit'
-            className=' rounded px-6 py-3 text-center font-semibold text-white bg-blue-600  hover:bg-blue-800'>
+            className='mt-2 min-h-11 w-full rounded-md bg-blue-600 px-6 py-3 text-center font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-blue-400'>
             {isLoading
               ? isRegistering
                 ? 'Cadastrando...'
@@ -128,10 +148,11 @@ function Admin() {
                 ? 'Cadastrar'
                 : 'Entrar'}
           </button>
+
           <button
             disabled={isLoading}
             type='button'
-            className='block mx-auto mt-6 text-blue-600 hover:text-blue-800'
+            className='mx-auto mt-2 text-sm font-medium text-blue-700 underline-offset-2 transition hover:text-blue-800 hover:underline disabled:cursor-not-allowed disabled:text-slate-500'
             onClick={() => {
               setIsRegistering(prev => !prev)
               setError('')

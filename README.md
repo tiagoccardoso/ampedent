@@ -58,11 +58,17 @@ agendamento de consultas e um painel administrativo seguro.
 - Adicione as variáveis de ambiente necessárias para acesso ao Postgres via API e autenticação local por sessão.
 
   ```env
-  # Supabase
-  SUPABASE_URL=your_supabase_project_url
-  NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-  SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+  # Auth/API server-side (Neon Auth naming accepted)
+  NEON_AUTH_BASE_URL=your_project_rest_base_url
+  SUPABASE_URL=your_project_rest_base_url
+  SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+  # Session cookie signing secret (server-only)
+  NEON_AUTH_COOKIE_SECRET=uma_chave_aleatoria_longa_para_assinar_sessao
   AUTH_SECRET=uma_chave_aleatoria_longa_para_assinar_sessao
+
+  # Public URL consumed by client-side reads
+  NEXT_PUBLIC_SUPABASE_URL=your_project_rest_base_url
 
   NODE_ENV='development'
   ```
