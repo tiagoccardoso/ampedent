@@ -1,5 +1,5 @@
 import { requireStaff } from '@/lib/authHelpers'
-import { supabaseRequest } from '@/lib/supabaseAdmin'
+import { getDb } from '@/lib/db'
 import { PlanoTratamento } from '@/lib/types'
 
 export async function GET(req: Request) {
@@ -11,25 +11,45 @@ export async function GET(req: Request) {
     const page = Number(url.searchParams.get('page')) || 1
     const pageSize = 20
     const offset = pageSize * (page - 1)
+    const sql = getDb()
 
-    const searchParams: Record<string, string | number | undefined> = {
-      select: '*,pacientes(nome_completo)',
-      limit: pageSize,
-      offset,
-      order: 'created_at.desc',
+    const conditions: string[] = []
+    const params: unknown[] = []
+
+    if (pacienteId) {
+      params.push(pacienteId)
+      conditions.push(`pt.paciente_id = $${params.length}`)
+    }
+    if (status) {
+      params.push(status)
+      conditions.push(`pt.status = $${params.length}`)
     }
 
-    if (pacienteId) searchParams.paciente_id = `eq.${pacienteId}`
-    if (status) searchParams.status = `eq.${status}`
+    const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
+    const countParams = [...params]
 
-    const { data, count } = await supabaseRequest<PlanoTratamento[]>('planos_tratamento', {
-      searchParams,
-      headers: { Prefer: 'count=exact' },
-    })
+    params.push(pageSize, offset)
+    const dataQ = `
+      SELECT pt.*,
+        json_build_object('nome_completo', p.nome_completo) AS pacientes
+      FROM planos_tratamento pt
+      LEFT JOIN pacientes p ON p.id = pt.paciente_id
+      ${where}
+      ORDER BY pt.created_at DESC
+      LIMIT $${params.length - 1} OFFSET $${params.length}
+    `
+    const countQ = `SELECT COUNT(*)::int AS count FROM planos_tratamento pt ${where}`
+
+    const [countRows, dataRows] = await Promise.all([
+      sql.query(countQ, countParams as string[]),
+      sql.query(dataQ, params as string[]),
+    ])
+
+    const count = (countRows[0] as { count: number }).count
 
     return Response.json({
-      planos: data,
-      totalPages: Math.ceil((count ?? 0) / pageSize),
+      planos: dataRows as PlanoTratamento[],
+      totalPages: Math.ceil(count / pageSize),
     })
   } catch (error: any) {
     return Response.json({ message: error.message }, { status: 401 })
@@ -40,13 +60,18 @@ export async function POST(req: Request) {
   try {
     await requireStaff()
     const body = await req.json()
-    const { data } = await supabaseRequest<PlanoTratamento[]>('planos_tratamento', {
-      method: 'POST',
-      body,
-      searchParams: { select: '*' },
-      headers: { Prefer: 'return=representation' },
-    })
-    return Response.json({ plano: data[0] }, { status: 201 })
+    const sql = getDb()
+
+    const fields = Object.keys(body)
+    const values = Object.values(body)
+    const placeholders = values.map((_, i) => `$${i + 1}`)
+
+    const rows = await sql.query(
+      `INSERT INTO planos_tratamento (${fields.join(', ')}) VALUES (${placeholders.join(', ')}) RETURNING *`,
+      values as string[],
+    )
+
+    return Response.json({ plano: rows[0] as PlanoTratamento }, { status: 201 })
   } catch (error: any) {
     return Response.json({ message: error.message }, { status: 400 })
   }

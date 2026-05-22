@@ -1,6 +1,6 @@
-import { getCurrentAdminProfile } from './supabaseAuth'
+import { getCurrentUser } from './auth'
 
 export async function isSuperAdmin() {
-  const admin = await getCurrentAdminProfile()
-  return admin?.role ?? false
+  const user = await getCurrentUser()
+  return user?.role ?? false
 }

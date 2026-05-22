@@ -1,19 +1,14 @@
-import { setAuthCookies, signInWithPassword } from '@/lib/supabaseAuth'
+import { signInWithPassword } from '@/lib/auth'
 
 export async function POST(req: Request) {
   try {
     const { email, password } = await req.json()
 
     if (!email || !password) {
-      return Response.json(
-        { message: 'Email e senha são obrigatórios' },
-        { status: 400 },
-      )
+      return Response.json({ message: 'Email e senha são obrigatórios' }, { status: 400 })
     }
 
-    const session = await signInWithPassword(email.toLowerCase(), password)
-    await setAuthCookies(session)
-
+    await signInWithPassword(email, password)
     return Response.json({ message: 'Login realizado com sucesso' })
   } catch (error: any) {
     return Response.json(

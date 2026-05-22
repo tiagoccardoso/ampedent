@@ -1,6 +1,4 @@
-import { setAuthCookies, signUpWithPassword } from '@/lib/supabaseAuth'
-import { supabaseRequest } from '@/lib/supabaseAdmin'
-import { AdminUserRow } from '@/lib/types'
+import { createUser, signInWithPassword } from '@/lib/auth'
 
 export async function POST(req: Request) {
   try {
@@ -13,44 +11,18 @@ export async function POST(req: Request) {
       )
     }
 
-    const normalizedEmail = email.toLowerCase()
-    const normalizedName = name.toLowerCase()
-    const session = await signUpWithPassword(
-      normalizedEmail,
+    await createUser({
+      email: email.toLowerCase(),
       password,
-      normalizedName,
-    )
-
-    const authUser = 'user' in session ? session.user : session
-
-    await supabaseRequest<AdminUserRow[]>('admin_users', {
-      method: 'POST',
-      body: {
-        auth_user_id: authUser.id,
-        email: normalizedEmail,
-        name: normalizedName,
-        role: 'paciente',
-      },
-      searchParams: {
-        select: 'id,auth_user_id,email,name,role',
-      },
-      headers: {
-        Prefer: 'return=representation',
-      },
+      name: name.toLowerCase(),
+      role: 'paciente',
     })
 
-    const authenticated =
-      'access_token' in session && session.access_token && session.refresh_token
-
-    if (authenticated) {
-      await setAuthCookies(session)
-    }
+    await signInWithPassword(email.toLowerCase(), password)
 
     return Response.json({
-      authenticated,
-      message: authenticated
-        ? 'Cadastro realizado com sucesso'
-        : 'Cadastro realizado. Confirme o email antes de entrar.',
+      authenticated: true,
+      message: 'Cadastro realizado com sucesso',
     })
   } catch (error: any) {
     return Response.json(

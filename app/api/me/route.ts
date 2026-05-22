@@ -1,16 +1,16 @@
-import { getCurrentAdminProfile } from '@/lib/supabaseAuth'
+import { getCurrentUser } from '@/lib/auth'
 
 export async function GET() {
-  const admin = await getCurrentAdminProfile()
+  const user = await getCurrentUser()
 
-  if (!admin) {
+  if (!user) {
     return Response.json({ message: 'Não autorizado' }, { status: 401 })
   }
 
   return Response.json({
     message: 'Usuário encontrado',
-    user: admin.profile.name,
-    email: admin.profile.email,
-    role: admin.profile.role,
+    user: user.name,
+    email: user.email,
+    role: user.role,
   })
 }

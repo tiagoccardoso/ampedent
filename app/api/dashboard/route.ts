@@ -1,52 +1,37 @@
 import { requireStaff } from '@/lib/authHelpers'
-import { supabaseRequest } from '@/lib/supabaseAdmin'
-
-async function countTable(table: string, filter?: Record<string, string>) {
-  const searchParams: Record<string, string> = { select: 'id', ...filter }
-  const { count } = await supabaseRequest<unknown[]>(table, {
-    searchParams,
-    headers: { Prefer: 'count=exact' },
-  })
-  return count ?? 0
-}
+import { getDb } from '@/lib/db'
 
 export async function GET() {
   try {
     await requireStaff()
+    const sql = getDb()
 
     const now = new Date()
     const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
 
-    const [totalPacientes, agendamentosPendentes, pacientesMes] = await Promise.all([
-      countTable('pacientes', { ativo: 'eq.true' }),
-      countTable('bookings', { status: 'eq.pending' }),
-      countTable('pacientes', { created_at: `gte.${firstOfMonth}`, ativo: 'eq.true' }),
+    const [
+      totalPacientesRows,
+      pendingRows,
+      pacientesMesRows,
+      financeiroRows,
+      receitaMesRows,
+    ] = await Promise.all([
+      sql`SELECT COUNT(*)::int AS count FROM pacientes WHERE ativo = true`,
+      sql`SELECT COUNT(*)::int AS count FROM bookings WHERE status = 'pending'`,
+      sql`SELECT COUNT(*)::int AS count FROM pacientes WHERE ativo = true AND created_at >= ${firstOfMonth}`,
+      sql`SELECT valor_total, valor_pago FROM financeiro_registros WHERE status IN ('pendente', 'parcial', 'vencido')`,
+      sql`SELECT valor_pago FROM financeiro_registros WHERE status = 'pago' AND data_pagamento >= ${firstOfMonth}`,
     ])
 
-    const { data: financeiro } = await supabaseRequest<{ valor_total: number; valor_pago: number; status: string }[]>(
-      'financeiro_registros',
-      {
-        searchParams: {
-          select: 'valor_total,valor_pago,status',
-          status: 'in.(pendente,parcial,vencido)',
-        },
-      },
-    )
+    const totalPacientes = (totalPacientesRows[0] as { count: number }).count
+    const agendamentosPendentes = (pendingRows[0] as { count: number }).count
+    const pacientesMes = (pacientesMesRows[0] as { count: number }).count
 
-    const receitaPendente = financeiro.reduce((acc, r) => acc + (r.valor_total - r.valor_pago), 0)
+    const receitaPendente = (financeiroRows as { valor_total: number; valor_pago: number }[])
+      .reduce((acc, r) => acc + (r.valor_total - r.valor_pago), 0)
 
-    const { data: financeiroMes } = await supabaseRequest<{ valor_pago: number }[]>(
-      'financeiro_registros',
-      {
-        searchParams: {
-          select: 'valor_pago',
-          status: 'eq.pago',
-          data_pagamento: `gte.${firstOfMonth}`,
-        },
-      },
-    )
-
-    const receitaMes = financeiroMes.reduce((acc, r) => acc + r.valor_pago, 0)
+    const receitaMes = (receitaMesRows as { valor_pago: number }[])
+      .reduce((acc, r) => acc + r.valor_pago, 0)
 
     return Response.json({
       totalPacientes,

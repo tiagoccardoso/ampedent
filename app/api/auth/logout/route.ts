@@ -1,4 +1,4 @@
-import { clearAuthCookies } from '@/lib/supabaseAuth'
+import { clearAuthCookies } from '@/lib/auth'
 
 export async function POST() {
   await clearAuthCookies()

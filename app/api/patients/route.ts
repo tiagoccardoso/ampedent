@@ -1,5 +1,5 @@
 import { requireStaff } from '@/lib/authHelpers'
-import { supabaseRequest } from '@/lib/supabaseAdmin'
+import { getDb } from '@/lib/db'
 import { Paciente } from '@/lib/types'
 
 export async function GET(req: Request) {
@@ -11,31 +11,43 @@ export async function GET(req: Request) {
     const ativo = url.searchParams.get('ativo') ?? 'true'
     const pageSize = 20
     const offset = pageSize * (page - 1)
+    const sql = getDb()
 
-    const searchParams: Record<string, string | number | undefined> = {
-      select: '*',
-      limit: pageSize,
-      offset,
-      order: 'nome_completo.asc',
-    }
+    const conditions: string[] = []
+    const params: unknown[] = []
 
     if (ativo !== 'all') {
-      searchParams.ativo = `eq.${ativo}`
+      params.push(ativo === 'true')
+      conditions.push(`ativo = $${params.length}`)
     }
 
     if (search.trim()) {
-      searchParams.or = `(nome_completo.ilike.*${search.trim()}*,cpf.ilike.*${search.trim()}*,email.ilike.*${search.trim()}*,telefone.ilike.*${search.trim()}*,celular.ilike.*${search.trim()}*)`
+      const term = `%${search.trim()}%`
+      params.push(term, term, term, term, term)
+      const n = params.length
+      conditions.push(
+        `(nome_completo ILIKE $${n - 4} OR cpf ILIKE $${n - 3} OR email ILIKE $${n - 2} OR telefone ILIKE $${n - 1} OR celular ILIKE $${n})`,
+      )
     }
 
-    const { data, count } = await supabaseRequest<Paciente[]>('pacientes', {
-      searchParams,
-      headers: { Prefer: 'count=exact' },
-    })
+    const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
+    const countParams = [...params]
+
+    params.push(pageSize, offset)
+    const dataQ = `SELECT * FROM pacientes ${where} ORDER BY nome_completo ASC LIMIT $${params.length - 1} OFFSET $${params.length}`
+    const countQ = `SELECT COUNT(*)::int AS count FROM pacientes ${where}`
+
+    const [countRows, dataRows] = await Promise.all([
+      sql.query(countQ, countParams as string[]),
+      sql.query(dataQ, params as string[]),
+    ])
+
+    const count = (countRows[0] as { count: number }).count
 
     return Response.json({
-      pacientes: data,
-      totalPages: Math.ceil((count ?? 0) / pageSize),
-      total: count ?? 0,
+      pacientes: dataRows as Paciente[],
+      totalPages: Math.ceil(count / pageSize),
+      total: count,
     })
   } catch (error: any) {
     return Response.json({ message: error.message }, { status: 401 })
@@ -46,13 +58,18 @@ export async function POST(req: Request) {
   try {
     await requireStaff()
     const body = await req.json()
-    const { data } = await supabaseRequest<Paciente[]>('pacientes', {
-      method: 'POST',
-      body,
-      searchParams: { select: '*' },
-      headers: { Prefer: 'return=representation' },
-    })
-    return Response.json({ paciente: data[0] }, { status: 201 })
+    const sql = getDb()
+
+    const fields = Object.keys(body)
+    const values = Object.values(body)
+    const placeholders = values.map((_, i) => `$${i + 1}`)
+
+    const rows = await sql.query(
+      `INSERT INTO pacientes (${fields.join(', ')}) VALUES (${placeholders.join(', ')}) RETURNING *`,
+      values as string[],
+    )
+
+    return Response.json({ paciente: rows[0] as Paciente }, { status: 201 })
   } catch (error: any) {
     return Response.json({ message: error.message }, { status: 400 })
   }

@@ -1,5 +1,5 @@
 import { requireStaff } from '@/lib/authHelpers'
-import { supabaseRequest } from '@/lib/supabaseAdmin'
+import { getDb } from '@/lib/db'
 import { EvolucaoClinica } from '@/lib/types'
 
 export async function GET(req: Request) {
@@ -10,24 +10,44 @@ export async function GET(req: Request) {
     const page = Number(url.searchParams.get('page')) || 1
     const pageSize = 20
     const offset = pageSize * (page - 1)
+    const sql = getDb()
 
-    const searchParams: Record<string, string | number | undefined> = {
-      select: '*,admin_users(name)',
-      limit: pageSize,
-      offset,
-      order: 'data_atendimento.desc,created_at.desc',
+    const conditions: string[] = []
+    const params: unknown[] = []
+
+    if (pacienteId) {
+      params.push(pacienteId)
+      conditions.push(`ec.paciente_id = $${params.length}`)
     }
 
-    if (pacienteId) searchParams.paciente_id = `eq.${pacienteId}`
+    const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
+    const countParams = [...params]
 
-    const { data, count } = await supabaseRequest<EvolucaoClinica[]>('evolucoes_clinicas', {
-      searchParams,
-      headers: { Prefer: 'count=exact' },
-    })
+    params.push(pageSize, offset)
+    const dataQ = `
+      SELECT ec.*,
+        CASE WHEN ec.profissional_id IS NOT NULL
+          THEN json_build_object('name', u.name)
+          ELSE NULL
+        END AS admin_users
+      FROM evolucoes_clinicas ec
+      LEFT JOIN users u ON u.id = ec.profissional_id
+      ${where}
+      ORDER BY ec.data_atendimento DESC, ec.created_at DESC
+      LIMIT $${params.length - 1} OFFSET $${params.length}
+    `
+    const countQ = `SELECT COUNT(*)::int AS count FROM evolucoes_clinicas ec ${where}`
+
+    const [countRows, dataRows] = await Promise.all([
+      sql.query(countQ, countParams as string[]),
+      sql.query(dataQ, params as string[]),
+    ])
+
+    const count = (countRows[0] as { count: number }).count
 
     return Response.json({
-      evolucoes: data,
-      totalPages: Math.ceil((count ?? 0) / pageSize),
+      evolucoes: dataRows as EvolucaoClinica[],
+      totalPages: Math.ceil(count / pageSize),
     })
   } catch (error: any) {
     return Response.json({ message: error.message }, { status: 401 })
@@ -38,13 +58,18 @@ export async function POST(req: Request) {
   try {
     await requireStaff()
     const body = await req.json()
-    const { data } = await supabaseRequest<EvolucaoClinica[]>('evolucoes_clinicas', {
-      method: 'POST',
-      body,
-      searchParams: { select: '*' },
-      headers: { Prefer: 'return=representation' },
-    })
-    return Response.json({ evolucao: data[0] }, { status: 201 })
+    const sql = getDb()
+
+    const fields = Object.keys(body)
+    const values = Object.values(body)
+    const placeholders = values.map((_, i) => `$${i + 1}`)
+
+    const rows = await sql.query(
+      `INSERT INTO evolucoes_clinicas (${fields.join(', ')}) VALUES (${placeholders.join(', ')}) RETURNING *`,
+      values as string[],
+    )
+
+    return Response.json({ evolucao: rows[0] as EvolucaoClinica }, { status: 201 })
   } catch (error: any) {
     return Response.json({ message: error.message }, { status: 400 })
   }

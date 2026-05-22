@@ -1,5 +1,5 @@
 import { requireStaff } from '@/lib/authHelpers'
-import { supabaseRequest } from '@/lib/supabaseAdmin'
+import { getDb } from '@/lib/db'
 import { Paciente, Anamnese } from '@/lib/types'
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -8,11 +8,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     const { id } = await params
     const url = new URL(req.url)
     const include = url.searchParams.get('include') ?? ''
+    const sql = getDb()
 
-    const { data: pacientes } = await supabaseRequest<Paciente[]>('pacientes', {
-      searchParams: { select: '*', id: `eq.${id}`, limit: 1 },
-    })
-
+    const pacientes = await sql`SELECT * FROM pacientes WHERE id = ${id} LIMIT 1` as Paciente[]
     if (!pacientes[0]) {
       return Response.json({ message: 'Paciente não encontrado' }, { status: 404 })
     }
@@ -20,10 +18,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     const result: Record<string, unknown> = { paciente: pacientes[0] }
 
     if (include.includes('anamnese')) {
-      const { data } = await supabaseRequest<Anamnese[]>('anamneses', {
-        searchParams: { select: '*', paciente_id: `eq.${id}`, limit: 1 },
-      })
-      result.anamnese = data[0] ?? null
+      const rows = await sql`SELECT * FROM anamneses WHERE paciente_id = ${id} LIMIT 1` as Anamnese[]
+      result.anamnese = rows[0] ?? null
     }
 
     return Response.json(result)
@@ -37,50 +33,59 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     await requireStaff()
     const { id } = await params
     const body = await req.json()
-
     const { anamnese, ...pacienteData } = body
+    const sql = getDb()
 
-    const { data } = await supabaseRequest<Paciente[]>('pacientes', {
-      method: 'PATCH',
-      body: pacienteData,
-      searchParams: { id: `eq.${id}`, select: '*' },
-      headers: { Prefer: 'return=representation' },
-    })
+    const pacFields = Object.keys(pacienteData)
+    const pacValues = Object.values(pacienteData)
+
+    let paciente: Paciente | undefined
+    if (pacFields.length > 0) {
+      const setClause = pacFields.map((f, i) => `${f} = $${i + 1}`).join(', ')
+      pacValues.push(id)
+      const rows = await sql.query(
+        `UPDATE pacientes SET ${setClause}, updated_at = NOW() WHERE id = $${pacValues.length} RETURNING *`,
+        pacValues as string[],
+      )
+      paciente = rows[0] as Paciente
+    }
 
     if (anamnese !== undefined) {
-      const { data: existing } = await supabaseRequest<Anamnese[]>('anamneses', {
-        searchParams: { paciente_id: `eq.${id}`, limit: 1 },
-      })
+      const existing = await sql`SELECT id FROM anamneses WHERE paciente_id = ${id} LIMIT 1`
       if (existing[0]) {
-        await supabaseRequest('anamneses', {
-          method: 'PATCH',
-          body: anamnese,
-          searchParams: { paciente_id: `eq.${id}` },
-        })
+        const aFields = Object.keys(anamnese)
+        const aValues = Object.values(anamnese)
+        if (aFields.length > 0) {
+          const setClause = aFields.map((f, i) => `${f} = $${i + 1}`).join(', ')
+          aValues.push(id)
+          await sql.query(
+            `UPDATE anamneses SET ${setClause}, updated_at = NOW() WHERE paciente_id = $${aValues.length}`,
+            aValues as string[],
+          )
+        }
       } else {
-        await supabaseRequest('anamneses', {
-          method: 'POST',
-          body: { ...anamnese, paciente_id: id },
-          headers: { Prefer: 'return=minimal' },
-        })
+        const aFields = ['paciente_id', ...Object.keys(anamnese)]
+        const aValues = [id, ...Object.values(anamnese)]
+        const placeholders = aValues.map((_, i) => `$${i + 1}`)
+        await sql.query(
+          `INSERT INTO anamneses (${aFields.join(', ')}) VALUES (${placeholders.join(', ')})`,
+          aValues as string[],
+        )
       }
     }
 
-    return Response.json({ paciente: data[0] })
+    return Response.json({ paciente })
   } catch (error: any) {
     return Response.json({ message: error.message }, { status: 400 })
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await requireStaff()
     const { id } = await params
-    await supabaseRequest('pacientes', {
-      method: 'PATCH',
-      body: { ativo: false },
-      searchParams: { id: `eq.${id}` },
-    })
+    const sql = getDb()
+    await sql`UPDATE pacientes SET ativo = false, updated_at = NOW() WHERE id = ${id}`
     return Response.json({ message: 'Paciente desativado' })
   } catch (error: any) {
     return Response.json({ message: error.message }, { status: 400 })

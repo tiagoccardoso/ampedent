@@ -1,6 +1,6 @@
 import { isSuperAdmin } from '@/lib/isSuperAdmin'
 import { mapBooking } from '@/lib/supabaseMappers'
-import { supabaseRequest } from '@/lib/supabaseAdmin'
+import { getDb } from '@/lib/db'
 import { BookingRow } from '@/lib/types'
 
 export async function PUT(req: Request) {
@@ -9,27 +9,21 @@ export async function PUT(req: Request) {
     const _id = url.searchParams.get('_id')
 
     const role = await isSuperAdmin()
-    if (role === 'superadmin' || role === 'admin') {
-      if (_id) {
-        const { data } = await supabaseRequest<BookingRow[]>('bookings', {
-          method: 'PATCH',
-          body: { status: 'canceled' },
-          searchParams: {
-            id: `eq.${_id}`,
-            select: '*',
-          },
-          headers: {
-            Prefer: 'return=representation',
-          },
-        })
-
-        return Response.json({
-          message: 'Agendamento atualizado',
-          booking: data[0] ? mapBooking(data[0]) : null,
-        })
-      }
-    } else {
+    if (role !== 'superadmin' && role !== 'admin') {
       throw new Error('Não autorizado')
+    }
+
+    if (_id) {
+      const sql = getDb()
+      const rows = await sql`
+        UPDATE bookings SET status = 'canceled', updated_at = NOW()
+        WHERE id = ${_id} RETURNING *
+      ` as BookingRow[]
+
+      return Response.json({
+        message: 'Agendamento atualizado',
+        booking: rows[0] ? mapBooking(rows[0]) : null,
+      })
     }
   } catch (error) {
     throw new Error('Could not update bookings')

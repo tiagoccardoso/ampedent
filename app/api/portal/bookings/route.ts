@@ -1,28 +1,26 @@
-import { supabaseRequest } from '@/lib/supabaseAdmin'
-import { getCurrentAdminProfile } from '@/lib/supabaseAuth'
+import { getCurrentUser } from '@/lib/auth'
+import { getDb } from '@/lib/db'
 import { BookingRow } from '@/lib/types'
 
 export async function GET() {
   try {
-    const admin = await getCurrentAdminProfile()
-    if (!admin || admin.role !== 'paciente') {
+    const user = await getCurrentUser()
+    if (!user || user.role !== 'paciente') {
       return Response.json({ message: 'Não autorizado' }, { status: 401 })
     }
 
-    // Find bookings by email
-    if (!admin.profile.email) return Response.json({ bookings: [] })
+    if (!user.email) return Response.json({ bookings: [] })
 
-    const { data } = await supabaseRequest<BookingRow[]>('bookings', {
-      searchParams: {
-        select: '*',
-        email: `eq.${admin.profile.email}`,
-        order: 'date.desc,time.desc',
-        limit: 50,
-      },
-    })
+    const sql = getDb()
+    const rows = await sql`
+      SELECT * FROM bookings
+      WHERE email = ${user.email}
+      ORDER BY date DESC, time DESC
+      LIMIT 50
+    ` as BookingRow[]
 
     return Response.json({
-      bookings: data.map(b => ({
+      bookings: rows.map(b => ({
         id: b.id,
         date: b.date,
         time: b.time,

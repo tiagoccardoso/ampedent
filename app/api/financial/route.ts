@@ -1,5 +1,5 @@
 import { requireStaff } from '@/lib/authHelpers'
-import { supabaseRequest } from '@/lib/supabaseAdmin'
+import { getDb } from '@/lib/db'
 import { FinanceiroRegistro } from '@/lib/types'
 
 export async function GET(req: Request) {
@@ -12,27 +12,53 @@ export async function GET(req: Request) {
     const page = Number(url.searchParams.get('page')) || 1
     const pageSize = 20
     const offset = pageSize * (page - 1)
+    const sql = getDb()
 
-    const searchParams: Record<string, string | number | undefined> = {
-      select: '*,pacientes(nome_completo)',
-      limit: pageSize,
-      offset,
-      order: 'data_vencimento.asc,created_at.desc',
+    const conditions: string[] = []
+    const params: unknown[] = []
+
+    if (pacienteId) {
+      params.push(pacienteId)
+      conditions.push(`fr.paciente_id = $${params.length}`)
+    }
+    if (status) {
+      params.push(status)
+      conditions.push(`fr.status = $${params.length}`)
+    }
+    if (search.trim()) {
+      params.push(`%${search.trim()}%`)
+      conditions.push(`fr.descricao ILIKE $${params.length}`)
     }
 
-    if (pacienteId) searchParams.paciente_id = `eq.${pacienteId}`
-    if (status) searchParams.status = `eq.${status}`
-    if (search.trim()) searchParams.descricao = `ilike.*${search.trim()}*`
+    const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
+    const countParams = [...params]
 
-    const { data, count } = await supabaseRequest<FinanceiroRegistro[]>('financeiro_registros', {
-      searchParams,
-      headers: { Prefer: 'count=exact' },
-    })
+    params.push(pageSize, offset)
+    const dataQ = `
+      SELECT fr.*,
+        CASE WHEN fr.paciente_id IS NOT NULL
+          THEN json_build_object('nome_completo', p.nome_completo)
+          ELSE NULL
+        END AS pacientes
+      FROM financeiro_registros fr
+      LEFT JOIN pacientes p ON p.id = fr.paciente_id
+      ${where}
+      ORDER BY fr.data_vencimento ASC, fr.created_at DESC
+      LIMIT $${params.length - 1} OFFSET $${params.length}
+    `
+    const countQ = `SELECT COUNT(*)::int AS count FROM financeiro_registros fr ${where}`
+
+    const [countRows, dataRows] = await Promise.all([
+      sql.query(countQ, countParams as string[]),
+      sql.query(dataQ, params as string[]),
+    ])
+
+    const count = (countRows[0] as { count: number }).count
 
     return Response.json({
-      registros: data,
-      totalPages: Math.ceil((count ?? 0) / pageSize),
-      total: count ?? 0,
+      registros: dataRows as FinanceiroRegistro[],
+      totalPages: Math.ceil(count / pageSize),
+      total: count,
     })
   } catch (error: any) {
     return Response.json({ message: error.message }, { status: 401 })
@@ -43,13 +69,18 @@ export async function POST(req: Request) {
   try {
     await requireStaff()
     const body = await req.json()
-    const { data } = await supabaseRequest<FinanceiroRegistro[]>('financeiro_registros', {
-      method: 'POST',
-      body,
-      searchParams: { select: '*' },
-      headers: { Prefer: 'return=representation' },
-    })
-    return Response.json({ registro: data[0] }, { status: 201 })
+    const sql = getDb()
+
+    const fields = Object.keys(body)
+    const values = Object.values(body)
+    const placeholders = values.map((_, i) => `$${i + 1}`)
+
+    const rows = await sql.query(
+      `INSERT INTO financeiro_registros (${fields.join(', ')}) VALUES (${placeholders.join(', ')}) RETURNING *`,
+      values as string[],
+    )
+
+    return Response.json({ registro: rows[0] as FinanceiroRegistro }, { status: 201 })
   } catch (error: any) {
     return Response.json({ message: error.message }, { status: 400 })
   }

@@ -1,6 +1,5 @@
 import { allTimes } from '@/data/times'
-import { supabaseRequest } from '@/lib/supabaseAdmin'
-import { BookingRow } from '@/lib/types'
+import { getDb } from '@/lib/db'
 import { unstable_noStore as noStore } from 'next/cache'
 
 export async function GET(req: Request) {
@@ -9,31 +8,23 @@ export async function GET(req: Request) {
     const url = new URL(req.url)
     const date = url.searchParams.get('date')
 
-    let selectedDate: Date | null = null
-    if (date !== null) {
-      selectedDate = new Date(date)
-    } else {
-      throw new Error('Data inválida')
-    }
+    if (!date) throw new Error('Data inválida')
 
+    const selectedDate = new Date(date)
     const dayOfWeek = selectedDate.getDay()
     if (dayOfWeek === 0 || dayOfWeek === 6) {
       throw new Error('No available times on Saturday or Sunday')
     }
 
     const selectedDay = selectedDate.toISOString().split('T')[0]
-    const { data: bookings } = await supabaseRequest<
-      Pick<BookingRow, 'time' | 'status'>[]
-    >('bookings', {
-      searchParams: {
-        select: 'time,status',
-        date: `eq.${selectedDay}`,
-      },
-    })
+    const sql = getDb()
+    const rows = await sql`
+      SELECT time, status FROM bookings WHERE date = ${selectedDay}
+    ` as { time: string; status: string }[]
 
-    const bookedAndNotCanceledTimes = bookings
-      .filter(booking => booking.status !== 'canceled')
-      .map(booking => booking.time)
+    const bookedAndNotCanceledTimes = rows
+      .filter(b => b.status !== 'canceled')
+      .map(b => b.time)
 
     const utcTime = new Date().getTime()
     const dstOffset = new Date(utcTime).getTimezoneOffset() / 60
@@ -50,7 +41,7 @@ export async function GET(req: Request) {
 
     return Response.json({
       message: 'Horários disponíveis encontrados',
-      availableTimes: availableTimes,
+      availableTimes,
     })
   } catch (error) {
     throw new Error('Não foi possível buscar horários disponíveis: ' + error)
