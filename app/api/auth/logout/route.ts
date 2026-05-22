@@ -1,6 +1,6 @@
-import { clearAuthCookies } from '@/lib/supabaseAuth'
+import { clearSession } from '@/lib/auth'
 
 export async function POST() {
-  await clearAuthCookies()
+  await clearSession()
   return Response.json({ message: 'Logout realizado com sucesso' })
 }

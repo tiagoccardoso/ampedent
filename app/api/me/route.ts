@@ -1,4 +1,4 @@
-import { getCurrentAdminProfile } from '@/lib/supabaseAuth'
+import { getCurrentAdminProfile } from '@/lib/auth'
 
 export async function GET() {
   const admin = await getCurrentAdminProfile()
