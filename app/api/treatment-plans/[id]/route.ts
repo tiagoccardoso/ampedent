@@ -1,15 +1,10 @@
-import { isSuperAdmin } from '@/lib/isSuperAdmin'
+import { requireStaff } from '@/lib/authHelpers'
 import { supabaseRequest } from '@/lib/supabaseAdmin'
 import { PlanoTratamento, ItemPlanoTratamento } from '@/lib/types'
 
-async function requireAuth() {
-  const role = await isSuperAdmin()
-  if (role !== 'admin' && role !== 'superadmin') throw new Error('Não autorizado')
-}
-
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth()
+    await requireStaff()
     const { id } = await params
 
     const [{ data: planos }, { data: itens }] = await Promise.all([
@@ -34,7 +29,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth()
+    await requireStaff()
     const { id } = await params
     const body = await req.json()
     const { itens, ...planoData } = body
@@ -54,7 +49,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth()
+    await requireStaff()
     const { id } = await params
     await supabaseRequest('planos_tratamento', {
       method: 'PATCH',

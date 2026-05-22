@@ -11,7 +11,7 @@ function Hero() {
           Reconecte-se com o seu sorriso
         </h1>
         <h2 className='mx-auto max-w-lg  text-slate-800 text-md sm:text-xl mb-4'>
-          AmpeDent - Uma nova abordagem para o conforto odontológico
+          DentalSys - Uma nova abordagem para o conforto odontológico
         </h2>
         <h2 className='mx-auto mb-5 max-w-lg  text-slate-800 text-md sm:text-xl '>
           Torne seu sorriso perfeito ainda melhor

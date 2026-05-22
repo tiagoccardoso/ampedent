@@ -9,13 +9,14 @@ function CreateUser() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [role, setRole] = useState<'paciente' | 'doutor' | 'admin'>('paciente')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const { status } = useAuth()
+  const { status, session } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    document.title = 'Criar usuário | Admin | AmpeDent'
+    document.title = 'Criar usuário | Admin | DentalSys'
   }, [])
 
   async function handleLogin(e: FormEvent<HTMLFormElement>) {
@@ -23,7 +24,7 @@ function CreateUser() {
     try {
       if (!name || !email || !password) return
       setIsLoading(true)
-      const body = { name, email, password }
+      const body = { name, email, password, role }
       const res = await fetch('/api/users/register', {
         method: 'POST',
         body: JSON.stringify(body),
@@ -33,9 +34,9 @@ function CreateUser() {
         router.push('/admin/users')
       }
       setIsLoading(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       setIsLoading(false)
-      setError(err.message)
+      setError(err instanceof Error ? err.message : 'Erro desconhecido')
     }
   }
   if (status === 'unauthenticated') {
@@ -48,7 +49,7 @@ function CreateUser() {
           className='mx-auto mb-4 max-w-md w-full pb-4'
           onSubmit={handleLogin}>
           <h1 className='text-center text-3xl my-8'>
-            Criar um novo usuário AmpeDent
+            Criar um novo usuário DentalSys
           </h1>
           <div className='relative'>
             <input
@@ -84,6 +85,23 @@ function CreateUser() {
               placeholder='senha'
               required
             />
+          </div>
+          <div className='relative mb-4'>
+            <label className='block text-sm font-medium text-gray-700 mb-1'>Função</label>
+            <select
+              disabled={isLoading}
+              value={role}
+              onChange={e => setRole(e.target.value as 'paciente' | 'doutor' | 'admin')}
+              className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+              name='role'
+            >
+              <option value='paciente'>Paciente</option>
+              <option value='doutor'>Doutor</option>
+              <option value='admin'>Admin</option>
+              {session?.role === 'superadmin' && (
+                <option value='superadmin'>Super Admin</option>
+              )}
+            </select>
           </div>
           {error && <p className='text-red-600 text-center my-4'>{error}</p>}
           <button

@@ -100,7 +100,7 @@ function TheFooter() {
               href='https://github.com/atalek/ampedent'
               target='_blank'
               className='text-slate-600   flex flex-row items-center gap-1 '>
-              © {currentYear} AmpeDent - Criado por atalek <Github />
+              © {currentYear} DentalSys - Criado por atalek <Github />
             </Link>
           </div>
         </div>

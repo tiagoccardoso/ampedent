@@ -105,7 +105,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
         setOdontograma(odoData.registros ?? [])
         setFinanceiro(finData.registros ?? [])
         setPlanos(plaData.planos ?? [])
-        document.title = `${pacData.paciente.nome_completo} | AmpeDent`
+        document.title = `${pacData.paciente.nome_completo} | DentalSys`
       } catch (err: any) {
         setError(err.message)
       } finally {

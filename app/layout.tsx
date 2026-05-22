@@ -12,32 +12,32 @@ import Spinner from './components/Spinner'
 
 export const metadata: Metadata = {
   title: {
-    default: 'AmpeDent | Sua parceira em cuidados odontológicos',
-    template: `%s | AmpeDent`,
+    default: 'DentalSys | Sua parceira em cuidados odontológicos',
+    template: `%s | DentalSys`,
   },
   description:
-    "A AmpeDent oferece serviços odontológicos completos. Temos o compromisso de proporcionar um sorriso saudável a você.",
+    "A DentalSys oferece serviços odontológicos completos. Temos o compromisso de proporcionar um sorriso saudável a você.",
   metadataBase: new URL('https://ampedent.vercel.app/'),
 
   openGraph: {
     type: 'website',
     url: 'https://ampedent.vercel.app/',
-    title: 'AmpeDent | Sua parceira em cuidados odontológicos',
+    title: 'DentalSys | Sua parceira em cuidados odontológicos',
     description:
-      "A AmpeDent oferece serviços odontológicos completos. Temos o compromisso de proporcionar um sorriso saudável a você.",
+      "A DentalSys oferece serviços odontológicos completos. Temos o compromisso de proporcionar um sorriso saudável a você.",
     images: [
       {
         url: 'https://res.cloudinary.com/dkofkuquf/image/upload/v1707573685/nuxtshop/rlviwuatbxvwxex336eh.webp',
-        alt: 'AmpeDent Logo',
+        alt: 'DentalSys Logo',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
     site: 'https://ampedent.vercel.app/',
-    title: 'AmpeDent | Sua parceira em cuidados odontológicos',
+    title: 'DentalSys | Sua parceira em cuidados odontológicos',
     description:
-      "A AmpeDent oferece serviços odontológicos completos. Temos o compromisso de proporcionar um sorriso saudável a você.",
+      "A DentalSys oferece serviços odontológicos completos. Temos o compromisso de proporcionar um sorriso saudável a você.",
     images: [
       'https://res.cloudinary.com/dkofkuquf/image/upload/v1707573685/nuxtshop/rlviwuatbxvwxex336eh.webp',
     ],

@@ -1,3 +1,8 @@
+'use client'
+
+import { useAuth } from '@/app/components/AppProvider'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import SideNav from '../components/layout/SideNav'
 
 export default function DashboardLayout({
@@ -5,6 +10,15 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
+  const { status, session } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (status === 'authenticated' && session?.role === 'paciente') {
+      router.push('/portal')
+    }
+  }, [status, session, router])
+
   return (
     <div className='flex min-h-screen flex-col md:flex-row'>
       <div className='flex-none md:w-56 lg:w-64'>

@@ -46,6 +46,9 @@ export default function NavLinks() {
     return `${linkBase} ${active ? activeClass : inactiveClass}`
   }
 
+  // Patients should not be in admin nav at all
+  if (role === 'paciente') return null
+
   return (
     <>
       <Link href='/admin/dashboard' className={cls(pathname === '/admin/dashboard')}>
@@ -78,7 +81,7 @@ export default function NavLinks() {
         <span className='md:hidden text-[10px]'>Financ.</span>
       </Link>
 
-      {role === 'superadmin' && (
+      {(role === 'superadmin' || role === 'admin') && (
         <>
           <div className='hidden md:block border-t border-gray-200 my-1' />
           <Link

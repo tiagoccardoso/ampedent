@@ -20,7 +20,7 @@ function buildSearchFilter(search: string) {
 export async function GET(req: Request) {
   try {
     const role = await isSuperAdmin()
-    if (role === 'superadmin' || role === 'admin') {
+    if (role === 'superadmin' || role === 'admin' || role === 'doutor') {
       const url = new URL(req.url)
       const _id = url.searchParams.get('_id')
 
@@ -120,7 +120,7 @@ export async function PUT(req: Request) {
     const _id = url.searchParams.get('_id')
     const role = await isSuperAdmin()
 
-    if (role === 'superadmin' || role === 'admin') {
+    if (role === 'superadmin' || role === 'admin' || role === 'doutor') {
       if (_id) {
         const { data } = await supabaseRequest<BookingRow[]>('bookings', {
           method: 'PATCH',

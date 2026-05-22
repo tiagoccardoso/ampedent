@@ -51,9 +51,9 @@ function TheHeader() {
             priority
             height={96}
             width={75}
-            alt='logotipo da AmpeDent'
+            alt='logotipo da DentalSys'
           />
-          AmpeDent
+          DentalSys
         </Link>
         <nav className='hidden md:flex gap-6 items-center text-lg'>
           <Link

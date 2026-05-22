@@ -1,8 +1,8 @@
-# Ampedent
+# DentalSys
 
 ![Página inicial](https://res.cloudinary.com/dkofkuquf/image/upload/v1707530071/nuxtshop/lqnlwdzylzf5u2zgu2bo.png)
 
-Ampedent é um site completo para consultório odontológico criado com **Next.js**,
+DentalSys é um site completo para consultório odontológico criado com **Next.js**,
 **Tailwind CSS**, **Supabase Postgres** e **Supabase Auth**. Ele conta com um sistema intuitivo de
 agendamento de consultas e um painel administrativo seguro.
 

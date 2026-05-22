@@ -29,7 +29,7 @@ export async function POST(req: Request) {
         auth_user_id: authUser.id,
         email: normalizedEmail,
         name: normalizedName,
-        role: 'admin',
+        role: 'paciente',
       },
       searchParams: {
         select: 'id,auth_user_id,email,name,role',

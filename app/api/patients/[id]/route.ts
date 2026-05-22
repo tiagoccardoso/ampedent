@@ -1,15 +1,10 @@
-import { isSuperAdmin } from '@/lib/isSuperAdmin'
+import { requireStaff } from '@/lib/authHelpers'
 import { supabaseRequest } from '@/lib/supabaseAdmin'
 import { Paciente, Anamnese } from '@/lib/types'
 
-async function requireAuth() {
-  const role = await isSuperAdmin()
-  if (role !== 'admin' && role !== 'superadmin') throw new Error('Não autorizado')
-}
-
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth()
+    await requireStaff()
     const { id } = await params
     const url = new URL(req.url)
     const include = url.searchParams.get('include') ?? ''
@@ -39,7 +34,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth()
+    await requireStaff()
     const { id } = await params
     const body = await req.json()
 
@@ -79,7 +74,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth()
+    await requireStaff()
     const { id } = await params
     await supabaseRequest('pacientes', {
       method: 'PATCH',

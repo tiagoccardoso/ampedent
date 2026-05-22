@@ -17,6 +17,9 @@ export async function POST(req: Request) {
         )
       }
 
+      const VALID_ROLES = ['paciente', 'doutor', 'admin', 'superadmin']
+      const newRole = VALID_ROLES.includes(body.role) ? body.role : 'paciente'
+
       const normalizedEmail = email.toLowerCase()
       const normalizedName = name.toLowerCase()
       const authUser = await createAuthUser({
@@ -31,7 +34,7 @@ export async function POST(req: Request) {
           auth_user_id: authUser.id,
           email: normalizedEmail,
           name: normalizedName,
-          role: 'admin',
+          role: newRole,
         },
         searchParams: {
           select: 'id,auth_user_id,email,name,role',

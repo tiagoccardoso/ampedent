@@ -44,7 +44,7 @@ export default function PatientsPage() {
   }, [search, page])
 
   useEffect(() => {
-    document.title = 'Pacientes | AmpeDent'
+    document.title = 'Pacientes | DentalSys'
   }, [])
 
   useEffect(() => {

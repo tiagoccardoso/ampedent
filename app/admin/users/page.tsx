@@ -53,7 +53,7 @@ function UserList() {
   }
 
   useEffect(() => {
-    document.title = 'Usuários | Admin | AmpeDent'
+    document.title = 'Usuários | Admin | DentalSys'
   }, [])
 
   return (
@@ -117,9 +117,16 @@ function UserList() {
                       <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                         user.role === 'superadmin'
                           ? 'bg-purple-100 text-purple-700'
-                          : 'bg-blue-100 text-blue-700'
+                          : user.role === 'admin'
+                          ? 'bg-blue-100 text-blue-700'
+                          : user.role === 'doutor'
+                          ? 'bg-teal-100 text-teal-700'
+                          : 'bg-green-100 text-green-700'
                       }`}>
-                        {user.role === 'superadmin' ? 'Super Admin' : 'Admin'}
+                        {user.role === 'superadmin' ? 'Super Admin'
+                          : user.role === 'admin' ? 'Admin'
+                          : user.role === 'doutor' ? 'Doutor'
+                          : 'Paciente'}
                       </span>
                     </td>
                     <td className='px-4 py-3 align-middle'>

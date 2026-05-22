@@ -21,7 +21,7 @@ function SideNav() {
             height={28}
             src={'/ampedent.webp'}
           />
-          <span className='font-bold text-blue-600 text-lg'>AmpeDent</span>
+          <span className='font-bold text-blue-600 text-lg'>DentalSys</span>
         </Link>
         <span className='text-xs text-gray-500 truncate max-w-[140px]'>{session?.user}</span>
       </div>
@@ -47,7 +47,7 @@ function SideNav() {
             height={34}
             src={'/ampedent.webp'}
           />
-          <span className='font-bold text-blue-600 text-lg leading-tight'>AmpeDent</span>
+          <span className='font-bold text-blue-600 text-lg leading-tight'>DentalSys</span>
         </Link>
         <nav className='flex-1 overflow-y-auto px-2 py-3 space-y-1'>
           <NavLinks />

@@ -67,7 +67,7 @@ export default function FinancialPage() {
   const [formError, setFormError] = useState('')
 
   useEffect(() => {
-    document.title = 'Financeiro | AmpeDent'
+    document.title = 'Financeiro | DentalSys'
   }, [])
 
   const load = useCallback(async () => {

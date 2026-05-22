@@ -1,15 +1,10 @@
-import { isSuperAdmin } from '@/lib/isSuperAdmin'
+import { requireStaff } from '@/lib/authHelpers'
 import { supabaseRequest } from '@/lib/supabaseAdmin'
 import { EvolucaoClinica } from '@/lib/types'
 
-async function requireAuth() {
-  const role = await isSuperAdmin()
-  if (role !== 'admin' && role !== 'superadmin') throw new Error('Não autorizado')
-}
-
 export async function GET(req: Request) {
   try {
-    await requireAuth()
+    await requireStaff()
     const url = new URL(req.url)
     const pacienteId = url.searchParams.get('paciente_id') ?? ''
     const page = Number(url.searchParams.get('page')) || 1
@@ -41,7 +36,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    await requireAuth()
+    await requireStaff()
     const body = await req.json()
     const { data } = await supabaseRequest<EvolucaoClinica[]>('evolucoes_clinicas', {
       method: 'POST',

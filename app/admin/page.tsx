@@ -12,7 +12,7 @@ function Admin() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const { status, refreshSession } = useAuth()
+  const { status, session, refreshSession } = useAuth()
   const router = useRouter()
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -43,8 +43,15 @@ function Admin() {
         return
       }
 
+      const sessionRes = await fetch('/api/me', { cache: 'no-store' })
+      const sessionData = sessionRes.ok ? await sessionRes.json() : null
+      const userRole = sessionData?.role
       await refreshSession()
-      router.push('/admin/bookings')
+      if (userRole === 'paciente') {
+        router.push('/portal')
+      } else {
+        router.push('/admin/bookings')
+      }
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -53,12 +60,18 @@ function Admin() {
   }
 
   useEffect(() => {
-    document.title = 'Entrar administrativo | AmpeDent'
+    document.title = 'Entrar administrativo | DentalSys'
   }, [])
 
-  if (status === 'authenticated') {
-    router.push('/admin/bookings')
-  }
+  useEffect(() => {
+    if (status === 'authenticated') {
+      if (session?.role === 'paciente') {
+        router.push('/portal')
+      } else {
+        router.push('/admin/bookings')
+      }
+    }
+  }, [status, session, router])
 
   return (
     <section>
@@ -67,7 +80,7 @@ function Admin() {
           className='mx-auto mb-4 max-w-md w-full pb-4'
           onSubmit={handleSubmit}>
           <h1 className='text-center text-3xl my-8'>
-            {isRegistering ? 'Criar conta AmpeDent' : 'Entrar na AmpeDent'}
+            {isRegistering ? 'Criar conta DentalSys' : 'Entrar na DentalSys'}
           </h1>
           {isRegistering && (
             <div className='relative'>

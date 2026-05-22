@@ -1,10 +1,5 @@
-import { isSuperAdmin } from '@/lib/isSuperAdmin'
+import { requireStaff } from '@/lib/authHelpers'
 import { supabaseRequest } from '@/lib/supabaseAdmin'
-
-async function requireAuth() {
-  const role = await isSuperAdmin()
-  if (role !== 'admin' && role !== 'superadmin') throw new Error('Não autorizado')
-}
 
 async function countTable(table: string, filter?: Record<string, string>) {
   const searchParams: Record<string, string> = { select: 'id', ...filter }
@@ -17,7 +12,7 @@ async function countTable(table: string, filter?: Record<string, string>) {
 
 export async function GET() {
   try {
-    await requireAuth()
+    await requireStaff()
 
     const now = new Date()
     const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]

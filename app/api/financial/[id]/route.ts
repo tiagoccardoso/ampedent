@@ -1,15 +1,10 @@
-import { isSuperAdmin } from '@/lib/isSuperAdmin'
+import { requireStaff } from '@/lib/authHelpers'
 import { supabaseRequest } from '@/lib/supabaseAdmin'
 import { FinanceiroRegistro } from '@/lib/types'
 
-async function requireAuth() {
-  const role = await isSuperAdmin()
-  if (role !== 'admin' && role !== 'superadmin') throw new Error('Não autorizado')
-}
-
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth()
+    await requireStaff()
     const { id } = await params
     const body = await req.json()
     const { data } = await supabaseRequest<FinanceiroRegistro[]>('financeiro_registros', {
@@ -26,7 +21,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth()
+    await requireStaff()
     const { id } = await params
     await supabaseRequest('financeiro_registros', {
       method: 'PATCH',

@@ -32,7 +32,7 @@ export default function DashboardPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    document.title = 'Dashboard | AmpeDent'
+    document.title = 'Dashboard | DentalSys'
     async function load() {
       try {
         const res = await fetch('/api/dashboard')

@@ -1,15 +1,10 @@
-import { isSuperAdmin } from '@/lib/isSuperAdmin'
+import { requireStaff } from '@/lib/authHelpers'
 import { supabaseRequest } from '@/lib/supabaseAdmin'
 import { Procedimento } from '@/lib/types'
 
-async function requireAuth() {
-  const role = await isSuperAdmin()
-  if (role !== 'admin' && role !== 'superadmin') throw new Error('Não autorizado')
-}
-
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth()
+    await requireStaff()
     const { id } = await params
     const { data } = await supabaseRequest<Procedimento[]>('procedimentos', {
       searchParams: { select: '*', id: `eq.${id}`, limit: 1 },
@@ -23,7 +18,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth()
+    await requireStaff()
     const { id } = await params
     const body = await req.json()
     const { data } = await supabaseRequest<Procedimento[]>('procedimentos', {
@@ -40,7 +35,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAuth()
+    await requireStaff()
     const { id } = await params
     await supabaseRequest('procedimentos', {
       method: 'PATCH',

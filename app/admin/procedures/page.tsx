@@ -50,7 +50,7 @@ export default function ProceduresPage() {
   const [formError, setFormError] = useState('')
 
   useEffect(() => {
-    document.title = 'Procedimentos | AmpeDent'
+    document.title = 'Procedimentos | DentalSys'
   }, [])
 
   async function load() {
