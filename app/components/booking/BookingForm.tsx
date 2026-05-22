@@ -155,7 +155,7 @@ function BookingForm() {
                 {incrementTimeByOneHour(selectedTime)}. <br />
                 Se tiver dúvidas ou precisar fazer alterações, entre em contato
                 pelo <br />
-                <span className='font-bold'>ampedent@example.com</span> ou
+                <span className='font-bold'>contato@dentalsys.com</span> ou
                 ligue para <span className='font-bold'>+1234567890</span>
                 <br />
               </p>

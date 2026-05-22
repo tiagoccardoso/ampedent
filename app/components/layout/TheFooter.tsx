@@ -50,7 +50,7 @@ function TheFooter() {
                 height={24}
               />
               <p className='text-slate-600 max-[479px]:text-sm'>
-                ampedent@example.com
+                contato@dentalsys.com
               </p>
             </div>
             <div className='mb-4 flex max-w-[272px] items-start justify-start'>
@@ -100,7 +100,7 @@ function TheFooter() {
               href='https://github.com/atalek/ampedent'
               target='_blank'
               className='text-slate-600   flex flex-row items-center gap-1 '>
-              © {currentYear} AmpeDent - Criado por atalek <Github />
+              © {currentYear} DentalSys - Criado por atalek <Github />
             </Link>
           </div>
         </div>
