@@ -18,11 +18,11 @@ export class SupabaseRequestError extends Error {
 }
 
 function getSupabaseConfig() {
-  const url = process.env.SUPABASE_URL
+  const url = process.env.NEON_AUTH_BASE_URL ?? process.env.SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
   if (!url) {
-    throw new Error('Variável de ambiente SUPABASE_URL ausente')
+    throw new Error('Variável de ambiente NEON_AUTH_BASE_URL/SUPABASE_URL ausente')
   }
 
   if (!serviceRoleKey) {

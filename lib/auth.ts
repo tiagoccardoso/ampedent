@@ -18,8 +18,8 @@ type SessionPayload = {
 }
 
 function getAuthSecret() {
-  const secret = process.env.AUTH_SECRET
-  if (!secret) throw new Error('Variável de ambiente AUTH_SECRET ausente')
+  const secret = process.env.NEON_AUTH_COOKIE_SECRET ?? process.env.AUTH_SECRET
+  if (!secret) throw new Error('Variável de ambiente NEON_AUTH_COOKIE_SECRET/AUTH_SECRET ausente')
   return secret
 }
 
