@@ -65,8 +65,8 @@ function Admin() {
   }, [router, status])
 
   return (
-    <section className='mx-auto flex min-h-[100dvh] w-full max-w-7xl items-center justify-center overflow-x-hidden px-4 py-8 sm:px-6 sm:py-10 lg:px-8'>
-      <div className='w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-sm sm:p-8'>
+    <section className='flex min-h-[100dvh] w-full items-center justify-center bg-slate-50 px-4 py-8 sm:px-6'>
+      <div className='w-full max-w-[28rem] rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8'>
         <form className='flex w-full flex-col gap-4' onSubmit={handleSubmit} aria-busy={isLoading}>
           <h1 className='text-center text-2xl font-semibold text-slate-900 sm:text-3xl'>
             {isRegistering ? 'Criar conta DentalSys' : 'Entrar na DentalSys'}
