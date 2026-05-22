@@ -21,14 +21,15 @@ function getSupabaseConfig() {
   const url = process.env.NEON_AUTH_BASE_URL ?? process.env.SUPABASE_URL
   const serviceRoleKey =
     process.env.NEON_AUTH_SERVICE_ROLE_KEY ??
-    process.env.SUPABASE_SERVICE_ROLE_KEY ??
-    process.env.NEON_AUTH_ANON_KEY ??
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    process.env.SUPABASE_SERVICE_ROLE_KEY
 
   if (!url) {
     throw new Error('Variável de ambiente NEON_AUTH_BASE_URL/SUPABASE_URL ausente')
   }
 
+  if (!serviceRoleKey) {
+    throw new Error('Variável de ambiente NEON_AUTH_SERVICE_ROLE_KEY/SUPABASE_SERVICE_ROLE_KEY ausente')
+  }
 
   return {
     url: url.replace(/\/$/, ''),
@@ -66,7 +67,7 @@ export async function supabaseRequest<T>(
     const message =
       typeof data?.message === 'string'
         ? data.message
-        : `Requisição ao Supabase falhou com status ${response.status}`
+        : `Requisição à API de dados falhou com status ${response.status}`
 
     throw new SupabaseRequestError(message, response.status, data)
   }
