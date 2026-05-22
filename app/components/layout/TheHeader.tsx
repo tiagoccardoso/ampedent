@@ -62,7 +62,7 @@ function TheHeader() {
             className={
               pathName === '/about'
                 ? 'text-blue-600 font-bold'
-                : '' + 'hover:text-blue-600'
+                : 'hover:text-blue-600'
             }>
             Sobre nós
           </Link>
@@ -72,7 +72,7 @@ function TheHeader() {
             className={
               pathName === '/services'
                 ? 'text-blue-600 font-bold'
-                : '' + 'hover:text-blue-600'
+                : 'hover:text-blue-600'
             }>
             Serviços
           </Link>
@@ -90,7 +90,7 @@ function TheHeader() {
                 className={
                   pathName.startsWith('/admin')
                     ? 'text-blue-600 font-bold'
-                    : '' + 'hover:text-blue-600'
+                    : 'hover:text-blue-600'
                 }>
                 Admin
               </Link>

@@ -30,8 +30,7 @@ function UserList() {
           setIsLoading(false)
         }
       } catch (err: any) {
-        setIsLoading(true)
-
+        setIsLoading(false)
         setError(err.message)
       }
     }
@@ -50,63 +49,95 @@ function UserList() {
   }
 
   if (status === 'unauthenticated') {
-    router.push('/')
+    router.push('/admin')
   }
 
   useEffect(() => {
     document.title = 'Usuários | Admin | AmpeDent'
   }, [])
+
   return (
     <>
-      {isLoading && <Spinner />}
-      {error && <p className='text-red-600 text-center '>{error}</p>}
-      <section className='relative w-full overflow-auto'>
-        <table className='w-full caption-bottom text-sm'>
-          <thead>
-            <tr className='border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted'>
-              <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground  w-16'>
-                ID
-              </th>
-              <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground '>
-                Nome de usuário
-              </th>
-              <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground '>
-                Email
-              </th>
-              <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground '>
-                Função
-              </th>
-              <th className='h-12 px-4 align-middle font-medium text-muted-foreground  w-20 text-right'>
-                Ações
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.length > 0 &&
-              users.map(user => (
-                <tr
-                  className='border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted'
-                  key={user._id.toString()}>
-                  <td className='p-4 align-middle  font-semibold'>
-                    {user._id.toString()}
-                  </td>
-                  <td className='p-4 align-middle '>{user.name}</td>
-                  <td className='p-4 align-middle '>{user.email}</td>
-                  <td className='p-4 align-middle '>
-                    {user.role === 'superadmin' ? 'superadministrador' : 'administrador'}
-                  </td>
-                  <td className='p-4 align-middle  flex justify-end gap-2'>
-                    <EditUserModal user={user} onUserUpdate={triggerRefresh} />
-                    <DeleteButton
-                      label='Excluir'
-                      onDelete={() => handleDeleteClick(user._id.toString())}
-                    />
-                  </td>
+      {isLoading && (
+        <div className='flex justify-center py-8'>
+          <Spinner />
+        </div>
+      )}
+      {error && (
+        <div className='rounded-md bg-red-50 border border-red-200 p-4 mb-4'>
+          <p className='text-red-700 text-sm'>{error}</p>
+        </div>
+      )}
+      {!isLoading && (
+        <div className='rounded-lg border border-gray-200 overflow-hidden'>
+          <div className='overflow-x-auto'>
+            <table className='w-full caption-bottom text-sm'>
+              <thead className='bg-gray-50'>
+                <tr className='border-b border-gray-200'>
+                  <th className='h-11 px-4 text-left align-middle font-semibold text-gray-600 hidden lg:table-cell'>
+                    ID
+                  </th>
+                  <th className='h-11 px-4 text-left align-middle font-semibold text-gray-600'>
+                    Nome
+                  </th>
+                  <th className='h-11 px-4 text-left align-middle font-semibold text-gray-600 hidden md:table-cell'>
+                    Email
+                  </th>
+                  <th className='h-11 px-4 text-left align-middle font-semibold text-gray-600'>
+                    Função
+                  </th>
+                  <th className='h-11 px-4 align-middle font-semibold text-gray-600 text-right'>
+                    Ações
+                  </th>
                 </tr>
-              ))}
-          </tbody>
-        </table>
-      </section>
+              </thead>
+              <tbody className='divide-y divide-gray-100'>
+                {users.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className='p-8 text-center text-gray-500 text-sm'>
+                      Nenhum usuário cadastrado
+                    </td>
+                  </tr>
+                )}
+                {users.map(user => (
+                  <tr
+                    className='transition-colors hover:bg-gray-50'
+                    key={user._id.toString()}>
+                    <td className='px-4 py-3 align-middle font-mono text-xs text-gray-400 hidden lg:table-cell'>
+                      {user._id.toString().slice(0, 8)}…
+                    </td>
+                    <td className='px-4 py-3 align-middle'>
+                      <span className='font-medium text-gray-900'>{user.name}</span>
+                      <div className='text-xs text-gray-500 md:hidden mt-0.5'>{user.email}</div>
+                    </td>
+                    <td className='px-4 py-3 align-middle text-gray-600 hidden md:table-cell'>
+                      {user.email}
+                    </td>
+                    <td className='px-4 py-3 align-middle'>
+                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                        user.role === 'superadmin'
+                          ? 'bg-purple-100 text-purple-700'
+                          : 'bg-blue-100 text-blue-700'
+                      }`}>
+                        {user.role === 'superadmin' ? 'Super Admin' : 'Admin'}
+                      </span>
+                    </td>
+                    <td className='px-4 py-3 align-middle'>
+                      <div className='flex justify-end gap-2'>
+                        <EditUserModal user={user} onUserUpdate={triggerRefresh} />
+                        <DeleteButton
+                          label='Excluir'
+                          onDelete={() => handleDeleteClick(user._id.toString())}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </>
   )
 }

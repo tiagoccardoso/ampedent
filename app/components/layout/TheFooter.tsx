@@ -81,10 +81,10 @@ function TheFooter() {
               Serviços
             </Link>
             <Link
-              href='booking'
+              href='/booking'
               aria-label='Link para criar agendamento'
               className='inline-block font-normal text-slate-600 transition hover:text-blue-600 sm:pr-6 lg:pr-12 py-1.5 sm:py-2 pr-6'>
-              Booking
+              Agendamento
             </Link>
             {status === 'authenticated' && (
               <Link

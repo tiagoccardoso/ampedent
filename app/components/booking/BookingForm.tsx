@@ -104,10 +104,11 @@ function BookingForm() {
     fetchAvailableTimes()
   }, [selectedDate])
 
-  function handleAppointment(e: FormEvent<HTMLFormElement>) {
+  async function handleAppointment(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     try {
       setIsLoading(true)
+      setError('')
       const body = {
         firstName,
         lastName,
@@ -117,18 +118,21 @@ function BookingForm() {
         date: selectedDate,
         time: selectedTime,
       }
-      fetch('/api/booking', {
+      const res = await fetch('/api/booking', {
         method: 'POST',
         body: JSON.stringify(body),
         headers: {
           'Content-Type': 'application/json',
         },
-      }).then(() => {
-        setIsLoading(false)
-        setCreated(true)
       })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.message ?? 'Não foi possível criar o agendamento')
+      }
+      setCreated(true)
     } catch (err: any) {
       setError(err.message)
+    } finally {
       setIsLoading(false)
     }
   }
@@ -140,163 +144,168 @@ function BookingForm() {
   }, [created])
 
   return (
-    <section className='max-w-3xl w-full min-h-lvh mx-auto flex items-center justify-center p-4'>
-      <div>
-        {created && (
-          <SuccessBox ref={successBoxRef}>
-            <div className='my-8'>
-              <h1 className='text-center mb-8 text-3xl font-bold md:text-5xl'>
-                Consulta agendada
-              </h1>
-              <p className='mx-auto text-lg mb-8 mt-4  text-slate-600 md:mb-16'>
-                Obrigado! Sua consulta foi agendada com sucesso. <br />
-                Esperamos ver você em {formatDate(selectedDate!.toString())} às{' '}
-                {formatTime(selectedTime)} -{' '}
-                {incrementTimeByOneHour(selectedTime)}. <br />
-                Se tiver dúvidas ou precisar fazer alterações, entre em contato
-                pelo <br />
-                <span className='font-bold'>ampedent@example.com</span> ou
-                ligue para <span className='font-bold'>+1234567890</span>
-                <br />
-              </p>
-            </div>
-          </SuccessBox>
-        )}
-        {!created && (
-          <>
-            <BookingHeader />
-            {error && <p className='text-red-600 text-center '>{error}</p>}
+    <section className='max-w-2xl w-full mx-auto py-8 px-4'>
+      {created && (
+        <SuccessBox ref={successBoxRef}>
+          <div className='my-8'>
+            <h1 className='text-center mb-6 text-2xl font-bold sm:text-4xl'>
+              Consulta agendada!
+            </h1>
+            <p className='mx-auto text-base mb-8 mt-4 text-slate-600 leading-relaxed'>
+              Obrigado! Sua consulta foi agendada com sucesso.{' '}
+              Esperamos ver você em{' '}
+              <strong>{formatDate(selectedDate!.toString())}</strong> às{' '}
+              <strong>{formatTime(selectedTime)} – {incrementTimeByOneHour(selectedTime)}</strong>.
+            </p>
+            <p className='text-slate-600 text-sm'>
+              Dúvidas? Entre em contato:{' '}
+              <strong>ampedent@example.com</strong> ou{' '}
+              <strong>+1234567890</strong>
+            </p>
+          </div>
+        </SuccessBox>
+      )}
+      {!created && (
+        <>
+          <BookingHeader />
 
-            <form className=' mx-auto' onSubmit={handleAppointment}>
-              <div className='grid md:grid-cols-2 gap-4 items-center'>
-                <div>
-                  <label htmlFor='name'>
-                    Nome
-                    {!isValidName(firstName) && (
-                      <span className='text-red-600 ml-1'>*</span>
-                    )}
-                  </label>
-                  <input
-                    disabled={isLoading}
-                    type='text'
-                    id='name'
-                    value={firstName}
-                    onChange={e => setFirstName(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label htmlFor='lastName'>
-                    Sobrenome
-                    {!isValidName(lastName) && (
-                      <span className='text-red-600 ml-1'>*</span>
-                    )}
-                  </label>
-                  <input
-                    disabled={isLoading}
-                    type='text'
-                    id='lastName'
-                    value={lastName}
-                    onChange={e => setLastName(e.target.value)}
-                  />
-                </div>
-              </div>
-              <div className=' flex flex-col my-4'>
-                <label htmlFor='email'>
-                  Email
-                  {!isValidEmail(email) && (
-                    <span className='text-red-600 ml-1'>*</span>
-                  )}
-                </label>
-                <input
-                  disabled={isLoading}
-                  type='email'
-                  id='email'
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                />
-              </div>
-              <div className=' flex flex-col my-4'>
-                <label htmlFor='phone'>
-                  Telefone
-                  {!isValidPhone(phone) && (
-                    <span className='text-red-600 ml-1'>*</span>
+          {error && (
+            <div className='rounded-md bg-red-50 border border-red-200 p-4 mb-6'>
+              <p className='text-red-700 text-sm'>{error}</p>
+            </div>
+          )}
+
+          <form className='space-y-5' onSubmit={handleAppointment}>
+            <div className='grid sm:grid-cols-2 gap-4'>
+              <div>
+                <label htmlFor='name'>
+                  Nome
+                  {!isValidName(firstName) && firstName.length > 0 && (
+                    <span className='text-red-500 ml-1 text-xs'>mínimo 3 caracteres</span>
                   )}
                 </label>
                 <input
                   disabled={isLoading}
                   type='text'
-                  id='phone'
-                  value={phone}
-                  onChange={e => setPhone(e.target.value)}
+                  id='name'
+                  value={firstName}
+                  onChange={e => setFirstName(e.target.value)}
+                  placeholder='Seu nome'
+                  autoComplete='given-name'
                 />
               </div>
-
-              <div className='grid md:grid-cols-2 gap-4 items-center'>
-                <div className='flex flex-col'>
-                  <label htmlFor='date' className='mb-[2px]'>
-                    Data
-                    {!selectedDate && (
-                      <span className='text-red-600 ml-1'>*</span>
-                    )}
-                  </label>
-                  <DatePicker
-                    id='date'
-                    disabled={isLoading}
-                    selected={selectedDate}
-                    onChange={(date: Date | null) => setSelectedDate(date)}
-                    dateFormat='dd MMMM yyyy'
-                    filterDate={filterDates}
-                  />
-                </div>
-                <div className='flex flex-col'>
-                  <label htmlFor='time' className='mb-[2px]'>
-                    Horário
-                    {!selectedTime && (
-                      <span className='text-red-600 ml-1'>*</span>
-                    )}
-                  </label>
-                  <select
-                    value={selectedTime}
-                    onChange={e => setSelectedTime(e.target.value)}
-                    disabled={isLoading}
-                    id='time'
-                    className='appearance-none bg-white'>
-                    {availableTimes.length > 0 ? (
-                      availableTimes.map((time: string) => (
-                        <option value={time} key={time}>
-                          {formatTime(time)} - {incrementTimeByOneHour(time)}
-                        </option>
-                      ))
-                    ) : (
-                      <option disabled>Nenhum horário disponível para esta data</option>
-                    )}
-                  </select>
-                </div>
-              </div>
-
-              <div className=' flex flex-col my-4'></div>
-              <div className=' flex flex-col my-4'>
-                <label htmlFor='message'>Mensagem</label>
-                <textarea
+              <div>
+                <label htmlFor='lastName'>
+                  Sobrenome
+                  {!isValidName(lastName) && lastName.length > 0 && (
+                    <span className='text-red-500 ml-1 text-xs'>mínimo 3 caracteres</span>
+                  )}
+                </label>
+                <input
                   disabled={isLoading}
-                  value={message}
-                  onChange={e => setMessage(e.target.value)}
-                  name='message'
-                  id='message'
-                  cols={30}
-                  rows={10}
-                  placeholder='Informe solicitações específicas ou informações adicionais aqui...'></textarea>
+                  type='text'
+                  id='lastName'
+                  value={lastName}
+                  onChange={e => setLastName(e.target.value)}
+                  placeholder='Seu sobrenome'
+                  autoComplete='family-name'
+                />
               </div>
-              <button
-                type='submit'
-                className=' rounded px-6 py-3 text-center font-semibold text-white bg-blue-600  hover:bg-blue-800'
-                disabled={isDisabled || isLoading}>
-                {isLoading ? 'Enviando' : 'Enviar'}
-              </button>
-            </form>
-          </>
-        )}
-      </div>
+            </div>
+
+            <div>
+              <label htmlFor='email'>Email</label>
+              <input
+                disabled={isLoading}
+                type='email'
+                id='email'
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder='seu@email.com'
+                autoComplete='email'
+              />
+            </div>
+
+            <div>
+              <label htmlFor='phone'>Telefone</label>
+              <input
+                disabled={isLoading}
+                type='tel'
+                id='phone'
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+                placeholder='(xx) xxxxx-xxxx'
+                autoComplete='tel'
+              />
+            </div>
+
+            <div className='grid sm:grid-cols-2 gap-4'>
+              <div className='flex flex-col'>
+                <label htmlFor='date'>Data</label>
+                <DatePicker
+                  id='date'
+                  disabled={isLoading}
+                  selected={selectedDate}
+                  onChange={(date: Date | null) => setSelectedDate(date)}
+                  dateFormat='dd/MM/yyyy'
+                  filterDate={filterDates}
+                  placeholderText='Selecione a data'
+                />
+              </div>
+              <div className='flex flex-col'>
+                <label htmlFor='time'>Horário</label>
+                <select
+                  value={selectedTime}
+                  onChange={e => setSelectedTime(e.target.value)}
+                  disabled={isLoading || availableTimes.length === 0}
+                  id='time'>
+                  {availableTimes.length > 0 ? (
+                    availableTimes.map((time: string) => (
+                      <option value={time} key={time}>
+                        {formatTime(time)} – {incrementTimeByOneHour(time)}
+                      </option>
+                    ))
+                  ) : (
+                    <option disabled value=''>
+                      Nenhum horário disponível
+                    </option>
+                  )}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor='message'>
+                Mensagem{' '}
+                <span className='text-gray-400 font-normal text-xs'>(opcional)</span>
+              </label>
+              <textarea
+                disabled={isLoading}
+                value={message}
+                onChange={e => setMessage(e.target.value)}
+                name='message'
+                id='message'
+                rows={5}
+                placeholder='Informe solicitações específicas ou informações adicionais...' />
+            </div>
+
+            <button
+              type='submit'
+              className='w-full sm:w-auto rounded-md px-8 py-3 text-center font-semibold text-white bg-blue-600 hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-blue-400 transition-colors'
+              disabled={isDisabled || isLoading}>
+              {isLoading ? (
+                <span className='flex items-center justify-center gap-2'>
+                  <svg className='animate-spin w-4 h-4' fill='none' viewBox='0 0 24 24'>
+                    <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4' />
+                    <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z' />
+                  </svg>
+                  Enviando...
+                </span>
+              ) : 'Confirmar agendamento'}
+            </button>
+          </form>
+        </>
+      )}
     </section>
   )
 }

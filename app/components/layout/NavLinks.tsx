@@ -22,36 +22,41 @@ export default function NavLinks() {
     fetchRole()
   }, [])
 
+  const linkBase =
+    'flex flex-1 md:flex-none flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-2 px-2 md:px-3 py-2 md:py-2 text-xs md:text-sm font-medium rounded-md transition-colors'
+  const activeClass = 'bg-blue-50 text-blue-600'
+  const inactiveClass = 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+
   return (
     <>
       <Link
         href='/admin/bookings'
-        className={`flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3 ${
-          pathname.startsWith('/admin/bookings')
-            ? 'bg-sky-100 text-blue-600'
-            : ''
+        className={`${linkBase} ${
+          pathname.startsWith('/admin/bookings') ? activeClass : inactiveClass
         }`}>
-        <Bookings /> Agendamentos
+        <Bookings />
+        <span>Agendamentos</span>
       </Link>
       {role === 'superadmin' && (
         <>
           <Link
             href='/admin/users'
-            className={`flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3 ${
-              pathname === '/admin/users' ? 'bg-sky-100 text-blue-600' : ''
+            className={`${linkBase} ${
+              pathname.startsWith('/admin/users') && pathname !== '/admin/users/create'
+                ? activeClass
+                : inactiveClass
             }`}>
             <Users />
-            Usuários
+            <span>Usuários</span>
           </Link>
           <Link
             href='/admin/users/create'
-            className={`flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3 ${
-              pathname === '/admin/users/create'
-                ? 'bg-sky-100 text-blue-600'
-                : ''
+            className={`${linkBase} ${
+              pathname === '/admin/users/create' ? activeClass : inactiveClass
             }`}>
-            <CreateUser /> Criar{' '}
-            <span className='md:block hidden'> novo usuário</span>
+            <CreateUser />
+            <span className='hidden md:inline'>Novo usuário</span>
+            <span className='md:hidden'>Novo</span>
           </Link>
         </>
       )}
