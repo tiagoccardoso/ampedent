@@ -37,7 +37,6 @@ export type BookingRow = {
 
 export type AdminUserRow = {
   id: string
-  auth_user_id?: string | null
   mongo_id?: string | null
   email?: string | null
   name: string

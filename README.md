@@ -55,14 +55,14 @@ agendamento de consultas e um painel administrativo seguro.
 4. **Configure as variáveis de ambiente.**
 
 - Crie um arquivo `.env` na raiz do projeto.
-- Adicione as variáveis de ambiente necessárias para Supabase.
+- Adicione as variáveis de ambiente necessárias para acesso ao Postgres via API e autenticação local por sessão.
 
   ```env
   # Supabase
   SUPABASE_URL=your_supabase_project_url
   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-  NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
   SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+  AUTH_SECRET=uma_chave_aleatoria_longa_para_assinar_sessao
 
   NODE_ENV='development'
   ```
@@ -95,8 +95,7 @@ npm run migrate:mongo-to-supabase
 A migração copia os valores `_id` do Mongo para as colunas `mongo_id` e
 normaliza os status dos agendamentos para `pending`, `completed` ou `canceled`.
 Depois da migração, crie usuários correspondentes no Supabase Auth e preencha
-`admin_users.auth_user_id` para habilitar o login administrativo por email e
-senha.
+`admin_users.password_hash` para habilitar o login administrativo por email e senha.
 
 ## Versão online
 
