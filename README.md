@@ -54,18 +54,21 @@ agendamento de consultas e um painel administrativo seguro.
 
   ```env
   # Obrigatórias em produção e desenvolvimento
-  # URL base REST do projeto Supabase/Neon (ex.: https://<project>.supabase.co)
-  NEON_AUTH_BASE_URL=your_project_rest_base_url
+  # Endpoint REST usado pela camada de dados (ex.: https://<project>.supabase.co)
+  DATABASE_URL=your_project_rest_base_url
   # Chave server-side com permissão de leitura/escrita nas tabelas usadas pelo painel
   NEON_AUTH_SERVICE_ROLE_KEY=your_service_role_key
   # Segredo usado para assinar o cookie de sessão administrativa
   NEON_AUTH_COOKIE_SECRET=uma_chave_aleatoria_longa_para_assinar_sessao
+  # URL pública da aplicação para callbacks/sessão
+  NEXTAUTH_URL=http://localhost:3000
+  # Compatibilidade com bibliotecas que ainda leem NEXTAUTH_SECRET
+  NEXTAUTH_SECRET=uma_chave_aleatoria_longa_para_assinar_sessao
 
   # Compatibilidade com nomenclatura antiga (opcional)
-  SUPABASE_URL=your_project_rest_base_url
+  NEON_AUTH_BASE_URL=your_project_rest_base_url
   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
   AUTH_SECRET=uma_chave_aleatoria_longa_para_assinar_sessao
-  NEXTAUTH_SECRET=uma_chave_aleatoria_longa_para_assinar_sessao
 
   NODE_ENV='development'
   ```
