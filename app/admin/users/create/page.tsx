@@ -29,9 +29,12 @@ function CreateUser() {
         body: JSON.stringify(body),
         headers: { 'Content-Type': 'application/json' },
       })
+      const data = await res.json()
       if (res.ok) {
         router.push('/admin/users')
+        return
       }
+      setError(data.message ?? 'Não foi possível cadastrar o usuário.')
       setIsLoading(false)
     } catch (err: any) {
       setIsLoading(false)
