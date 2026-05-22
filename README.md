@@ -3,7 +3,7 @@
 ![Página inicial](https://res.cloudinary.com/dkofkuquf/image/upload/v1707530071/nuxtshop/lqnlwdzylzf5u2zgu2bo.png)
 
 Ampedent é um site completo para consultório odontológico criado com **Next.js**,
-**Tailwind CSS**, **Supabase Postgres** e **Supabase Auth**. Ele conta com um sistema intuitivo de
+**Tailwind CSS**, **Supabase/Neon Postgres REST** e sessão administrativa própria baseada em cookie assinado. Ele conta com um sistema intuitivo de
 agendamento de consultas e um painel administrativo seguro.
 
 ## Recursos
@@ -14,10 +14,7 @@ agendamento de consultas e um painel administrativo seguro.
 - **Painel administrativo:** gerencie consultas e outros conteúdos do site por
   meio de um painel administrativo seguro. Acesse `/admin` para entrar com suas
   credenciais administrativas.
-- **Autenticação:** o site usa Supabase Auth com email e senha. O painel
-  administrativo é acessível apenas para administradores. Um usuário pode se
-  cadastrar em `/admin`, e um superadministrador pode criar outros usuários
-  administradores comuns.
+- **Autenticação:** o painel administrativo usa autenticação própria por email/senha contra a tabela `admin_users` e sessão assinada em cookie HTTP-only.
 
 ## Tecnologias utilizadas
 
@@ -27,8 +24,6 @@ agendamento de consultas e um painel administrativo seguro.
   com rapidez.
 - **Supabase Postgres**: banco de dados PostgreSQL hospedado usado para armazenar
   agendamentos e perfis administrativos.
-- **Supabase Auth**: autenticação por email e senha para o painel
-  administrativo.
 
 ![Painel administrativo](https://res.cloudinary.com/dkofkuquf/image/upload/v1707585171/nuxtshop/go7j387zbdkslzrayolk.png)
 
@@ -58,23 +53,19 @@ agendamento de consultas e um painel administrativo seguro.
 - Adicione as variáveis de ambiente necessárias para acesso ao Postgres via API e autenticação local por sessão.
 
   ```env
-  # Auth/API server-side (Neon Auth naming accepted)
+  # Obrigatórias em produção e desenvolvimento
+  # URL base REST do projeto Supabase/Neon (ex.: https://<project>.supabase.co)
   NEON_AUTH_BASE_URL=your_project_rest_base_url
-  SUPABASE_URL=your_project_rest_base_url
+  # Chave server-side com permissão de leitura/escrita nas tabelas usadas pelo painel
   NEON_AUTH_SERVICE_ROLE_KEY=your_service_role_key
-  SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-
-  # Session cookie signing secret (server-only)
+  # Segredo usado para assinar o cookie de sessão administrativa
   NEON_AUTH_COOKIE_SECRET=uma_chave_aleatoria_longa_para_assinar_sessao
+
+  # Compatibilidade com nomenclatura antiga (opcional)
+  SUPABASE_URL=your_project_rest_base_url
+  SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
   AUTH_SECRET=uma_chave_aleatoria_longa_para_assinar_sessao
   NEXTAUTH_SECRET=uma_chave_aleatoria_longa_para_assinar_sessao
-
-  # API keys (optional fallback when service role is not configured)
-  NEON_AUTH_ANON_KEY=your_anon_key
-  NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-
-  # Public URL consumed by client-side reads
-  NEXT_PUBLIC_SUPABASE_URL=your_project_rest_base_url
 
   NODE_ENV='development'
   ```

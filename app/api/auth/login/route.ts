@@ -16,9 +16,14 @@ export async function POST(req: Request) {
     return Response.json({ message: 'Login realizado com sucesso' })
   } catch (error: unknown) {
     if (error instanceof SupabaseRequestError) {
+      const isConfigOrPermissionIssue = error.status === 401 || error.status === 403
       return Response.json(
-        { message: 'Serviço de autenticação indisponível no momento. Tente novamente em instantes.' },
-        { status: 503 },
+        {
+          message: isConfigOrPermissionIssue
+            ? 'Configuração de autenticação indisponível no momento. Tente novamente em instantes.'
+            : 'Serviço de autenticação indisponível no momento. Tente novamente em instantes.',
+        },
+        { status: isConfigOrPermissionIssue ? 500 : 503 },
       )
     }
 
