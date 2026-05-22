@@ -17,22 +17,33 @@ export class SupabaseRequestError extends Error {
   }
 }
 
-function getSupabaseConfig() {
-  const url = process.env.NEON_AUTH_BASE_URL ?? process.env.SUPABASE_URL
-  const serviceRoleKey =
-    process.env.NEON_AUTH_SERVICE_ROLE_KEY ??
-    process.env.SUPABASE_SERVICE_ROLE_KEY
+function getDatabaseConfig() {
+  const databaseUrl = process.env.DATABASE_URL
 
-  if (!url) {
-    throw new Error('Variável de ambiente NEON_AUTH_BASE_URL/SUPABASE_URL ausente')
+  if (!databaseUrl) {
+    throw new Error('Variável de ambiente DATABASE_URL ausente')
   }
 
+  let parsed: URL
+  try {
+    parsed = new URL(databaseUrl)
+  } catch {
+    throw new Error('DATABASE_URL inválida')
+  }
+
+  // Mantém compatibilidade com a camada atual baseada em PostgREST.
+  if (!['http:', 'https:'].includes(parsed.protocol)) {
+    throw new Error('DATABASE_URL deve apontar para o endpoint HTTP(S) da API de dados neste projeto')
+  }
+
+  const serviceRoleKey = process.env.NEON_AUTH_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY
+
   if (!serviceRoleKey) {
-    throw new Error('Variável de ambiente NEON_AUTH_SERVICE_ROLE_KEY/SUPABASE_SERVICE_ROLE_KEY ausente')
+    throw new Error('Variável de ambiente de service role ausente')
   }
 
   return {
-    url: url.replace(/\/$/, ''),
+    baseUrl: parsed.toString().replace(/\/$/, ''),
     serviceRoleKey,
   }
 }
@@ -41,8 +52,8 @@ export async function supabaseRequest<T>(
   resource: string,
   options: SupabaseRequestOptions = {},
 ) {
-  const { url, serviceRoleKey } = getSupabaseConfig()
-  const endpoint = new URL(`${url}/rest/v1/${resource}`)
+  const { baseUrl, serviceRoleKey } = getDatabaseConfig()
+  const endpoint = new URL(`${baseUrl}/rest/v1/${resource}`)
 
   Object.entries(options.searchParams ?? {}).forEach(([key, value]) => {
     if (value !== undefined) {
@@ -53,7 +64,8 @@ export async function supabaseRequest<T>(
   const response = await fetch(endpoint, {
     method: options.method ?? 'GET',
     headers: {
-      ...(serviceRoleKey ? { apikey: serviceRoleKey, Authorization: `Bearer ${serviceRoleKey}` } : {}),
+      apikey: serviceRoleKey,
+      Authorization: `Bearer ${serviceRoleKey}`,
       'Content-Type': 'application/json',
       ...options.headers,
     },

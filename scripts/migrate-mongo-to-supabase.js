@@ -1,10 +1,10 @@
 const { MongoClient } = require('mongodb')
 
 async function supabaseRequest(resource, options = {}) {
-  const supabaseUrl = process.env.SUPABASE_URL
+  const supabaseUrl = process.env.DATABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-  if (!supabaseUrl) throw new Error('Missing SUPABASE_URL')
+  if (!supabaseUrl) throw new Error('Missing DATABASE_URL')
   if (!serviceRoleKey) throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY')
 
   const endpoint = new URL(`${supabaseUrl.replace(/\/$/, '')}/rest/v1/${resource}`)
