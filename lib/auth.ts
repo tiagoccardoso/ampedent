@@ -61,13 +61,27 @@ function verifyToken(token: string): SessionPayload | null {
 }
 
 export async function createUser(email: string, name: string, password: string, role: AdminRole = 'admin') {
+  const normalizedEmail = email.toLowerCase().trim()
+  const normalizedName = name.trim()
+
   const { data } = await supabaseRequest<AdminUserRow[]>('admin_users', {
     method: 'POST',
-    body: { email, name, role, password_hash: hashPassword(password) },
+    body: { email: normalizedEmail, name: normalizedName, role, password_hash: hashPassword(password) },
     searchParams: { select: 'id,email,name,role' },
     headers: { Prefer: 'return=representation' },
   })
-  return data[0]
+
+  if (data?.[0]) return data[0]
+
+  // Alguns gateways podem ignorar `Prefer: return=representation` e devolver 201 sem corpo.
+  // Nesses cenários, buscamos o usuário recém-criado para evitar falso negativo no cadastro.
+  const fallback = await supabaseRequest<AdminUserRow[]>('admin_users', {
+    searchParams: { select: 'id,email,name,role', email: `eq.${normalizedEmail}`, limit: 1 },
+  })
+
+  if (fallback.data?.[0]) return fallback.data[0]
+
+  throw new Error('Usuário criado, mas a API de dados não retornou o registro para confirmação')
 }
 
 export async function authenticate(email: string, password: string) {
