@@ -1,9 +1,9 @@
 async function supabaseRequest(resource, options = {}) {
-  const supabaseUrl = process.env.SUPABASE_URL
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const supabaseUrl = process.env.NEON_AUTH_BASE_URL || process.env.SUPABASE_URL
+  const serviceRoleKey = process.env.NEON_AUTH_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
 
-  if (!supabaseUrl) throw new Error('Missing SUPABASE_URL')
-  if (!serviceRoleKey) throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY')
+  if (!supabaseUrl) throw new Error('Missing NEON_AUTH_BASE_URL (or SUPABASE_URL)')
+  if (!serviceRoleKey) throw new Error('Missing NEON_AUTH_SERVICE_ROLE_KEY (or SUPABASE_SERVICE_ROLE_KEY)')
 
   const endpoint = new URL(
     `${supabaseUrl.replace(/\/$/, '')}/rest/v1/${resource}`,
@@ -34,11 +34,11 @@ async function supabaseRequest(resource, options = {}) {
 }
 
 async function supabaseAuthRequest(path, options = {}) {
-  const supabaseUrl = process.env.SUPABASE_URL
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const supabaseUrl = process.env.NEON_AUTH_BASE_URL || process.env.SUPABASE_URL
+  const serviceRoleKey = process.env.NEON_AUTH_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
 
-  if (!supabaseUrl) throw new Error('Missing SUPABASE_URL')
-  if (!serviceRoleKey) throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY')
+  if (!supabaseUrl) throw new Error('Missing NEON_AUTH_BASE_URL (or SUPABASE_URL)')
+  if (!serviceRoleKey) throw new Error('Missing NEON_AUTH_SERVICE_ROLE_KEY (or SUPABASE_SERVICE_ROLE_KEY)')
 
   const response = await fetch(
     `${supabaseUrl.replace(/\/$/, '')}/auth/v1/${path}`,
