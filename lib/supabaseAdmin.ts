@@ -18,28 +18,28 @@ export class SupabaseRequestError extends Error {
 }
 
 function getDatabaseConfig() {
-  const databaseUrl = process.env.DATABASE_URL
+  const dataApiBaseUrl = process.env.NEON_AUTH_BASE_URL
 
-  if (!databaseUrl) {
-    throw new Error('Variável de ambiente DATABASE_URL ausente')
+  if (!dataApiBaseUrl) {
+    throw new Error('Variável de ambiente NEON_AUTH_BASE_URL ausente para acesso à API de dados')
   }
 
   let parsed: URL
   try {
-    parsed = new URL(databaseUrl)
+    parsed = new URL(dataApiBaseUrl)
   } catch {
-    throw new Error('DATABASE_URL inválida')
+    throw new Error('NEON_AUTH_BASE_URL inválida')
   }
 
   // Mantém compatibilidade com a camada atual baseada em PostgREST.
   if (!['http:', 'https:'].includes(parsed.protocol)) {
-    throw new Error('DATABASE_URL deve apontar para o endpoint HTTP(S) da API de dados neste projeto')
+    throw new Error('NEON_AUTH_BASE_URL deve apontar para o endpoint HTTP(S) da API de dados neste projeto')
   }
 
   const serviceRoleKey = process.env.NEON_AUTH_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY
 
   if (!serviceRoleKey) {
-    throw new Error('Variável de ambiente de service role ausente')
+    throw new Error('Variável de ambiente NEON_AUTH_SERVICE_ROLE_KEY (ou SUPABASE_SERVICE_ROLE_KEY) ausente')
   }
 
   return {

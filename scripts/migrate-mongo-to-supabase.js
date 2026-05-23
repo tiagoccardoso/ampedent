@@ -1,11 +1,11 @@
 const { MongoClient } = require('mongodb')
 
 async function supabaseRequest(resource, options = {}) {
-  const supabaseUrl = process.env.DATABASE_URL
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const supabaseUrl = process.env.NEON_AUTH_BASE_URL || process.env.DATABASE_URL
+  const serviceRoleKey = process.env.NEON_AUTH_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
 
   if (!supabaseUrl) throw new Error('Missing DATABASE_URL')
-  if (!serviceRoleKey) throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY')
+  if (!serviceRoleKey) throw new Error('Missing NEON_AUTH_SERVICE_ROLE_KEY (or SUPABASE_SERVICE_ROLE_KEY)')
 
   const endpoint = new URL(`${supabaseUrl.replace(/\/$/, '')}/rest/v1/${resource}`)
   Object.entries(options.searchParams ?? {}).forEach(([key, value]) => {
