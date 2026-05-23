@@ -14,10 +14,23 @@ export default function DashboardLayout({
   const router = useRouter()
 
   useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/admin')
+    }
     if (status === 'authenticated' && session?.role === 'paciente') {
       router.push('/portal')
     }
   }, [status, session, router])
+
+  if (status === 'loading') {
+    return (
+      <div className='flex items-center justify-center min-h-screen'>
+        <div className='animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full' />
+      </div>
+    )
+  }
+
+  if (status === 'unauthenticated') return null
 
   return (
     <div className='flex min-h-screen flex-col md:flex-row'>

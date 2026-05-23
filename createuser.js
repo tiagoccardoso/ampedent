@@ -1,102 +1,46 @@
-async function supabaseRequest(resource, options = {}) {
-  const supabaseUrl = process.env.SUPABASE_URL
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+// Script para criar o primeiro usuário superadmin no Neon.
+// Uso: node createuser.js
+// Requer: DATABASE_URL no ambiente (ou em .env.local)
 
-  if (!supabaseUrl) throw new Error('Missing SUPABASE_URL')
-  if (!serviceRoleKey) throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY')
+require('dotenv').config({ path: '.env.local' })
 
-  const endpoint = new URL(
-    `${supabaseUrl.replace(/\/$/, '')}/rest/v1/${resource}`,
-  )
-  Object.entries(options.searchParams ?? {}).forEach(([key, value]) => {
-    if (value !== undefined) endpoint.searchParams.set(key, String(value))
-  })
+const { neon } = require('@neondatabase/serverless')
+const bcrypt = require('bcryptjs')
 
-  const response = await fetch(endpoint, {
-    method: options.method ?? 'GET',
-    headers: {
-      apikey: serviceRoleKey,
-      Authorization: `Bearer ${serviceRoleKey}`,
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-    body: options.body === undefined ? undefined : JSON.stringify(options.body),
-  })
-
-  const text = await response.text()
-  const data = text ? JSON.parse(text) : null
-
-  if (!response.ok) {
-    throw new Error(data?.message ?? `Supabase request failed: ${response.status}`)
-  }
-
-  return data
-}
-
-async function supabaseAuthRequest(path, options = {}) {
-  const supabaseUrl = process.env.SUPABASE_URL
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  if (!supabaseUrl) throw new Error('Missing SUPABASE_URL')
-  if (!serviceRoleKey) throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY')
-
-  const response = await fetch(
-    `${supabaseUrl.replace(/\/$/, '')}/auth/v1/${path}`,
-    {
-      method: options.method ?? 'GET',
-      headers: {
-        apikey: serviceRoleKey,
-        Authorization: `Bearer ${serviceRoleKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: options.body === undefined ? undefined : JSON.stringify(options.body),
-    },
-  )
-
-  const text = await response.text()
-  const data = text ? JSON.parse(text) : null
-
-  if (!response.ok) {
-    throw new Error(data?.message ?? data?.msg ?? `Supabase Auth failed: ${response.status}`)
-  }
-
-  return data
-}
+// ── Configuração ──────────────────────────────────────────────
+const NAME = 'admin'
+const EMAIL = 'admin@example.com'
+const PASSWORD = '123456'
+const ROLE = 'superadmin'
+// ─────────────────────────────────────────────────────────────
 
 async function createSuperUser() {
-  // modify name, email and password to your liking
-  const name = 'admin'
-  const email = 'admin@example.com'
-  const password = '123456'
-  const role = 'superadmin'
+  const url = process.env.DATABASE_URL
+  if (!url) throw new Error('DATABASE_URL ausente. Configure .env.local ou exporte a variável.')
 
-  const authUser = await supabaseAuthRequest('admin/users', {
-    method: 'POST',
-    body: {
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: { name },
-    },
-  })
+  const sql = neon(url)
+  const passwordHash = await bcrypt.hash(PASSWORD, 12)
 
-  await supabaseRequest('admin_users', {
-    method: 'POST',
-    body: {
-      auth_user_id: authUser.id,
-      email,
-      name,
-      role,
-    },
-    headers: {
-      Prefer: 'return=minimal',
-    },
-  })
+  const rows = await sql`
+    INSERT INTO users (email, password_hash, name, role)
+    VALUES (${EMAIL.toLowerCase()}, ${passwordHash}, ${NAME.toLowerCase()}, ${ROLE})
+    ON CONFLICT (email) DO UPDATE
+      SET password_hash = EXCLUDED.password_hash,
+          name = EXCLUDED.name,
+          role = EXCLUDED.role,
+          updated_at = NOW()
+    RETURNING id, email, name, role
+  `
 
-  console.log('superadmin user created')
+  const user = rows[0]
+  console.log('Usuário criado/atualizado com sucesso:')
+  console.log(`  id:    ${user.id}`)
+  console.log(`  email: ${user.email}`)
+  console.log(`  name:  ${user.name}`)
+  console.log(`  role:  ${user.role}`)
 }
 
-createSuperUser().catch(error => {
-  console.error(error)
+createSuperUser().catch(err => {
+  console.error('Erro:', err.message)
   process.exit(1)
 })
