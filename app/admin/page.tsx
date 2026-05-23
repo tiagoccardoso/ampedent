@@ -1,6 +1,7 @@
 'use client'
 
 import { useAuth } from '@/app/components/AppProvider'
+import { authClient } from '@/lib/auth-client'
 import { useRouter } from 'next/navigation'
 import { FormEvent, useEffect, useState } from 'react'
 
@@ -12,48 +13,34 @@ function Admin() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const { status, session, refreshSession } = useAuth()
+  const { status, session } = useAuth()
   const router = useRouter()
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    if (!email || !password || (isRegistering && !name)) return
+
+    setIsLoading(true)
+    setError('')
+    setSuccess('')
+
     try {
-      if (!email || !password || (isRegistering && !name)) return
-      setIsLoading(true)
-      setError('')
-      setSuccess('')
-
-      const res = await fetch(
-        isRegistering ? '/api/auth/register' : '/api/auth/login',
-        {
-          method: 'POST',
-          body: JSON.stringify({ name, email, password }),
-          headers: { 'Content-Type': 'application/json' },
-        },
-      )
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(data.message ?? 'Não foi possível autenticar')
-      }
-
-      if (isRegistering && data.authenticated === false) {
-        setSuccess(data.message)
+      if (isRegistering) {
+        const { error: err } = await authClient.signUp.email({
+          email: email.toLowerCase(),
+          password,
+          name: name.toLowerCase(),
+          role: 'paciente',
+        } as any)
+        if (err) throw new Error(err.message ?? 'Não foi possível cadastrar')
+        setSuccess('Cadastro realizado com sucesso')
         return
       }
 
-      const sessionRes = await fetch('/api/me', { cache: 'no-store' })
-      const sessionData = sessionRes.ok ? await sessionRes.json() : null
-      const userRole = sessionData?.role
-      await refreshSession()
-      if (userRole === 'paciente') {
-        router.push('/portal')
-      } else {
-        router.push('/admin/bookings')
-      }
-    } catch (err: any) {
-      setError(err.message)
+      const { error: err } = await authClient.signIn.email({ email, password })
+      if (err) throw new Error(err.message ?? 'Email ou senha incorretos')
+    } catch (e: any) {
+      setError(e.message)
     } finally {
       setIsLoading(false)
     }

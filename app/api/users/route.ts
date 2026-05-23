@@ -1,8 +1,8 @@
 import { isSuperAdmin } from '@/lib/isSuperAdmin'
 import { mapUser } from '@/lib/supabaseMappers'
 import { getDb } from '@/lib/db'
-import { updateUser, deleteUser } from '@/lib/auth'
 import { AdminRole } from '@/lib/types'
+import { hashPassword } from '@better-auth/utils/password'
 
 export async function GET() {
   try {
@@ -38,13 +38,38 @@ export async function PUT(req: Request) {
       return Response.json({ message: 'Usuário inválido' }, { status: 400 })
     }
 
-    const updated = await updateUser(_id, {
-      email: email?.toLowerCase(),
-      password,
-      name: name?.toLowerCase(),
-    })
+    const sql = getDb()
+    const userFields: string[] = []
+    const userParams: unknown[] = []
 
-    if (!updated) throw new Error('Usuário não encontrado')
+    if (name !== undefined) {
+      userParams.push(name.toLowerCase())
+      userFields.push(`name = $${userParams.length}`)
+    }
+    if (email !== undefined) {
+      userParams.push(email.toLowerCase())
+      userFields.push(`email = $${userParams.length}`)
+    }
+
+    if (userFields.length > 0) {
+      userParams.push(_id)
+      await sql.query(
+        `UPDATE users SET ${userFields.join(', ')}, updated_at = NOW() WHERE id = $${userParams.length}`,
+        userParams as string[],
+      )
+    }
+
+    if (password) {
+      const pwHash = await hashPassword(password)
+      await sql.query(
+        `UPDATE account SET password = $1, updated_at = NOW() WHERE user_id = $2 AND provider_id = 'credential'`,
+        [pwHash, _id],
+      )
+    }
+
+    if (!userFields.length && !password) {
+      return Response.json({ message: 'Nenhum campo para atualizar' }, { status: 400 })
+    }
 
     return Response.json({ message: 'Usuário atualizado' })
   } catch (error: any) {
@@ -73,7 +98,7 @@ export async function DELETE(req: Request) {
     if (!user) throw new Error('Usuário não encontrado')
     if (user.role === 'superadmin') throw new Error('Cannot delete superadmin')
 
-    await deleteUser(_id)
+    await sql`DELETE FROM users WHERE id = ${_id}`
     return Response.json({ message: 'Usuário excluído' })
   } catch (error: any) {
     return Response.json({ message: error.message }, { status: 500 })

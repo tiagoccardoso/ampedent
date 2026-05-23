@@ -1,16 +1,19 @@
-import { isSuperAdmin } from './isSuperAdmin'
+import { auth } from './auth'
+import { headers } from 'next/headers'
+import type { AdminRole } from './auth'
 
-export type UserRole = 'paciente' | 'doutor' | 'admin' | 'superadmin'
+export type { AdminRole as UserRole }
 
-// Staff roles (not patients)
-const STAFF_ROLES: UserRole[] = ['doutor', 'admin', 'superadmin']
-const ADMIN_ROLES: UserRole[] = ['admin', 'superadmin']
+const STAFF_ROLES: AdminRole[] = ['doutor', 'admin', 'superadmin']
+const ADMIN_ROLES: AdminRole[] = ['admin', 'superadmin']
 
-export async function getRole(): Promise<UserRole | false> {
-  return isSuperAdmin() as Promise<UserRole | false>
+export async function getRole(): Promise<AdminRole | false> {
+  const session = await auth.api.getSession({ headers: await headers() })
+  const role = (session?.user as any)?.role as AdminRole | undefined
+  return role ?? false
 }
 
-export async function requireStaff() {
+export async function requireStaff(): Promise<AdminRole> {
   const role = await getRole()
   if (!role || !STAFF_ROLES.includes(role)) {
     throw new Error('Não autorizado')
@@ -18,7 +21,7 @@ export async function requireStaff() {
   return role
 }
 
-export async function requireAdmin() {
+export async function requireAdmin(): Promise<AdminRole> {
   const role = await getRole()
   if (!role || !ADMIN_ROLES.includes(role)) {
     throw new Error('Não autorizado')

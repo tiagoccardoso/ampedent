@@ -4,10 +4,9 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
-  useState,
 } from 'react'
+import { authClient } from '@/lib/auth-client'
 
 type AdminSession = {
   user: string
@@ -25,33 +24,26 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
 function AppProvider({ children }: { children: React.ReactNode }) {
-  const [session, setSession] = useState<AdminSession | null>(null)
-  const [status, setStatus] = useState<AuthContextValue['status']>('loading')
+  const { data, isPending } = authClient.useSession()
+
+  const status: AuthContextValue['status'] = isPending
+    ? 'loading'
+    : data
+      ? 'authenticated'
+      : 'unauthenticated'
+
+  const sessionUser = data?.user as any
+  const session: AdminSession | null = sessionUser
+    ? { user: sessionUser.name, email: sessionUser.email, role: sessionUser.role ?? '' }
+    : null
 
   const refreshSession = useCallback(async () => {
-    setStatus('loading')
-    const res = await fetch('/api/me', { cache: 'no-store' })
-
-    if (res.ok) {
-      const data = await res.json()
-      setSession({ user: data.user, email: data.email, role: data.role })
-      setStatus('authenticated')
-      return
-    }
-
-    setSession(null)
-    setStatus('unauthenticated')
+    // better-auth handles session refresh automatically
   }, [])
 
   const logout = useCallback(async () => {
-    await fetch('/api/auth/logout', { method: 'POST' })
-    setSession(null)
-    setStatus('unauthenticated')
+    await authClient.signOut()
   }, [])
-
-  useEffect(() => {
-    refreshSession()
-  }, [refreshSession])
 
   const value = useMemo(
     () => ({ session, status, refreshSession, logout }),

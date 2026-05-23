@@ -41,13 +41,15 @@ $$ LANGUAGE plpgsql;
 
 -- ============================================================
 -- TABELA: users
--- Substitui auth.users + admin_users do Supabase.
+-- Gerenciada pelo better-auth. Não armazena senha aqui.
+-- Senha fica na tabela account (account.password).
 -- ============================================================
 CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT NOT NULL UNIQUE,
-  password_hash TEXT NOT NULL,
   name TEXT NOT NULL,
+  email_verified BOOLEAN NOT NULL DEFAULT FALSE,
+  image TEXT,
   role admin_role NOT NULL DEFAULT 'paciente',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -59,6 +61,52 @@ CREATE INDEX users_role_idx ON users (role);
 CREATE TRIGGER set_users_updated_at
   BEFORE UPDATE ON users
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+-- ============================================================
+-- TABELAS DE AUTENTICAÇÃO (better-auth)
+-- ============================================================
+
+CREATE TABLE session (
+  id TEXT PRIMARY KEY,
+  expires_at TIMESTAMPTZ NOT NULL,
+  token TEXT NOT NULL UNIQUE,
+  ip_address TEXT,
+  user_agent TEXT,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX session_user_id_idx ON session (user_id);
+CREATE INDEX session_token_idx ON session (token);
+
+CREATE TABLE account (
+  id TEXT PRIMARY KEY,
+  account_id TEXT NOT NULL,
+  provider_id TEXT NOT NULL,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  access_token TEXT,
+  refresh_token TEXT,
+  id_token TEXT,
+  access_token_expires_at TIMESTAMPTZ,
+  refresh_token_expires_at TIMESTAMPTZ,
+  scope TEXT,
+  password TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (account_id, provider_id)
+);
+
+CREATE INDEX account_user_id_idx ON account (user_id);
+
+CREATE TABLE verification (
+  id TEXT PRIMARY KEY,
+  identifier TEXT NOT NULL,
+  value TEXT NOT NULL,
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
 
 -- ============================================================
 -- TABELA: bookings (agendamentos públicos)

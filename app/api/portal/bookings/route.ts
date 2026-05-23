@@ -1,10 +1,13 @@
-import { getCurrentUser } from '@/lib/auth'
+import { auth } from '@/lib/auth'
 import { getDb } from '@/lib/db'
 import { BookingRow } from '@/lib/types'
+import { headers } from 'next/headers'
 
 export async function GET() {
   try {
-    const user = await getCurrentUser()
+    const session = await auth.api.getSession({ headers: await headers() })
+    const user = session?.user as any
+
     if (!user || user.role !== 'paciente') {
       return Response.json({ message: 'Não autorizado' }, { status: 401 })
     }
