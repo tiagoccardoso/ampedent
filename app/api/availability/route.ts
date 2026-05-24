@@ -1,5 +1,5 @@
 import { allTimes } from '@/data/times'
-import { supabaseRequest } from '@/lib/supabaseAdmin'
+import { dataApiRequest } from '@/lib/dataApi'
 import { BookingRow } from '@/lib/types'
 import { unstable_noStore as noStore } from 'next/cache'
 
@@ -22,7 +22,7 @@ export async function GET(req: Request) {
     }
 
     const selectedDay = selectedDate.toISOString().split('T')[0]
-    const { data: bookings } = await supabaseRequest<
+    const { data: bookings } = await dataApiRequest<
       Pick<BookingRow, 'time' | 'status'>[]
     >('bookings', {
       searchParams: {

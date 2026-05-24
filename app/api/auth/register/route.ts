@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     return Response.json({ authenticated: true, message: 'Cadastro realizado com sucesso' })
   } catch (error: unknown) {
     const safeError = toSafeAuthError(error)
-    if (safeError.status >= 500) console.error('[auth/register] erro no cadastro:', error)
+    console.error('[auth/register] erro no cadastro:', error)
     return Response.json({ message: safeError.message }, { status: safeError.status })
   }
 }

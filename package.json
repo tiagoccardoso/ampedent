@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "migrate:mongo-to-supabase": "node scripts/migrate-mongo-to-supabase.js"
+    "migrate:mongo-to-neon": "node scripts/migrate-mongo-to-neon.js"
   },
   "dependencies": {
     "@uidotdev/usehooks": "^2.4.1",

@@ -1,13 +1,13 @@
 const { MongoClient } = require('mongodb')
 
-async function supabaseRequest(resource, options = {}) {
-  const supabaseUrl = process.env.NEON_AUTH_BASE_URL || process.env.DATABASE_URL
-  const serviceRoleKey = process.env.NEON_AUTH_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
+async function neonDataRequest(resource, options = {}) {
+  const dataApiUrl = process.env.NEON_AUTH_BASE_URL
+  const serviceRoleKey = process.env.NEON_AUTH_SERVICE_ROLE_KEY
 
-  if (!supabaseUrl) throw new Error('Missing DATABASE_URL')
-  if (!serviceRoleKey) throw new Error('Missing NEON_AUTH_SERVICE_ROLE_KEY (or SUPABASE_SERVICE_ROLE_KEY)')
+  if (!dataApiUrl) throw new Error('Missing NEON_AUTH_BASE_URL')
+  if (!serviceRoleKey) throw new Error('Missing NEON_AUTH_SERVICE_ROLE_KEY')
 
-  const endpoint = new URL(`${supabaseUrl.replace(/\/$/, '')}/rest/v1/${resource}`)
+  const endpoint = new URL(`${dataApiUrl.replace(/\/$/, '')}/rest/v1/${resource}`)
   Object.entries(options.searchParams ?? {}).forEach(([key, value]) => {
     if (value !== undefined) endpoint.searchParams.set(key, String(value))
   })
@@ -27,7 +27,7 @@ async function supabaseRequest(resource, options = {}) {
   const data = text ? JSON.parse(text) : null
 
   if (!response.ok) {
-    throw new Error(data?.message ?? `Supabase request failed: ${response.status}`)
+    throw new Error(data?.message ?? `Data API request failed: ${response.status}`)
   }
 
   return data
@@ -54,7 +54,7 @@ async function main() {
   const bookings = await db.collection('bookings').find().toArray()
 
   if (bookings.length > 0) {
-    await supabaseRequest('bookings', {
+    await neonDataRequest('bookings', {
       method: 'POST',
       body: bookings.map(booking => ({
         mongo_id: booking._id.toString(),
@@ -81,7 +81,7 @@ async function main() {
   const users = await db.collection('users').find().toArray()
 
   if (users.length > 0) {
-    await supabaseRequest('admin_users', {
+    await neonDataRequest('admin_users', {
       method: 'POST',
       body: users.map(user => ({
         mongo_id: user._id.toString(),
@@ -102,7 +102,7 @@ async function main() {
 
   await mongo.close()
   console.log(`Migrated ${bookings.length} bookings and ${users.length} user profiles`)
-  console.log('Create matching Supabase Auth users and set admin_users.auth_user_id before using admin login.')
+  console.log('Após migração, defina password_hash em admin_users para habilitar login administrativo.')
 }
 
 main().catch(error => {
