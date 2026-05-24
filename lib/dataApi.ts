@@ -1,17 +1,17 @@
-type SupabaseRequestOptions = {
+type DataApiRequestOptions = {
   method?: string
   searchParams?: Record<string, string | number | boolean | undefined>
   body?: unknown
   headers?: HeadersInit
 }
 
-export class SupabaseRequestError extends Error {
+export class DataApiRequestError extends Error {
   status: number
   details: unknown
 
   constructor(message: string, status: number, details: unknown) {
     super(message)
-    this.name = 'SupabaseRequestError'
+    this.name = 'DataApiRequestError'
     this.status = status
     this.details = details
   }
@@ -36,10 +36,10 @@ function getDatabaseConfig() {
     throw new Error('NEON_AUTH_BASE_URL deve apontar para o endpoint HTTP(S) da API de dados neste projeto')
   }
 
-  const serviceRoleKey = process.env.NEON_AUTH_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY
+  const serviceRoleKey = process.env.NEON_AUTH_SERVICE_ROLE_KEY
 
   if (!serviceRoleKey) {
-    throw new Error('Variável de ambiente NEON_AUTH_SERVICE_ROLE_KEY (ou SUPABASE_SERVICE_ROLE_KEY) ausente')
+    throw new Error('Variável de ambiente NEON_AUTH_SERVICE_ROLE_KEY ausente')
   }
 
   return {
@@ -48,9 +48,9 @@ function getDatabaseConfig() {
   }
 }
 
-export async function supabaseRequest<T>(
+export async function dataApiRequest<T>(
   resource: string,
-  options: SupabaseRequestOptions = {},
+  options: DataApiRequestOptions = {},
 ) {
   const { baseUrl, serviceRoleKey } = getDatabaseConfig()
   const endpoint = new URL(`${baseUrl}/rest/v1/${resource}`)
@@ -81,7 +81,7 @@ export async function supabaseRequest<T>(
         ? data.message
         : `Requisição à API de dados falhou com status ${response.status}`
 
-    throw new SupabaseRequestError(message, response.status, data)
+    throw new DataApiRequestError(message, response.status, data)
   }
 
   const contentRange = response.headers.get('content-range')

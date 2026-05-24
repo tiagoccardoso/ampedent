@@ -1,6 +1,6 @@
 import { isSuperAdmin } from '@/lib/isSuperAdmin'
-import { mapBooking } from '@/lib/supabaseMappers'
-import { supabaseRequest } from '@/lib/supabaseAdmin'
+import { mapBooking } from '@/lib/dbMappers'
+import { dataApiRequest } from '@/lib/dataApi'
 import { BookingRow } from '@/lib/types'
 
 function normalizeBookingDate(date: string | Date) {
@@ -25,7 +25,7 @@ export async function GET(req: Request) {
       const _id = url.searchParams.get('_id')
 
       if (_id) {
-        const { data } = await supabaseRequest<BookingRow[]>('bookings', {
+        const { data } = await dataApiRequest<BookingRow[]>('bookings', {
           searchParams: {
             select: '*',
             id: `eq.${_id}`,
@@ -61,7 +61,7 @@ export async function GET(req: Request) {
         searchParams.or = searchFilter
       }
 
-      const { data, count } = await supabaseRequest<BookingRow[]>('bookings', {
+      const { data, count } = await dataApiRequest<BookingRow[]>('bookings', {
         searchParams,
         headers: {
           Prefer: 'count=exact',
@@ -86,7 +86,7 @@ export async function POST(req: Request) {
     const body = await req.json()
     const { firstName, lastName, email, phone, message, date, time } = body
 
-    const { data } = await supabaseRequest<BookingRow[]>('bookings', {
+    const { data } = await dataApiRequest<BookingRow[]>('bookings', {
       method: 'POST',
       body: {
         first_name: firstName,
@@ -122,7 +122,7 @@ export async function PUT(req: Request) {
 
     if (role === 'superadmin' || role === 'admin') {
       if (_id) {
-        const { data } = await supabaseRequest<BookingRow[]>('bookings', {
+        const { data } = await dataApiRequest<BookingRow[]>('bookings', {
           method: 'PATCH',
           body: { status: 'completed' },
           searchParams: {

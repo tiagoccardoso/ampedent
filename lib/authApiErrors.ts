@@ -1,18 +1,18 @@
-import { SupabaseRequestError } from '@/lib/supabaseAdmin'
+import { DataApiRequestError } from '@/lib/dataApi'
 
 type PublicError = {
   status: number
   message: string
 }
 
-function isDuplicateEmailError(error: SupabaseRequestError) {
+function isDuplicateEmailError(error: DataApiRequestError) {
   const details = error.details as { code?: string; message?: string; details?: string } | null
   const text = `${details?.message ?? ''} ${details?.details ?? ''}`.toLowerCase()
   return details?.code === '23505' || text.includes('duplicate') || text.includes('email')
 }
 
 export function toSafeAuthError(error: unknown): PublicError {
-  if (error instanceof SupabaseRequestError) {
+  if (error instanceof DataApiRequestError) {
     if (isDuplicateEmailError(error)) {
       return { status: 409, message: 'Este e-mail já está cadastrado.' }
     }

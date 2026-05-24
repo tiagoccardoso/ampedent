@@ -1,6 +1,6 @@
 import { isSuperAdmin } from '@/lib/isSuperAdmin'
-import { mapBooking } from '@/lib/supabaseMappers'
-import { supabaseRequest } from '@/lib/supabaseAdmin'
+import { mapBooking } from '@/lib/dbMappers'
+import { dataApiRequest } from '@/lib/dataApi'
 import { BookingRow } from '@/lib/types'
 
 export async function PUT(req: Request) {
@@ -11,7 +11,7 @@ export async function PUT(req: Request) {
     const role = await isSuperAdmin()
     if (role === 'superadmin' || role === 'admin') {
       if (_id) {
-        const { data } = await supabaseRequest<BookingRow[]>('bookings', {
+        const { data } = await dataApiRequest<BookingRow[]>('bookings', {
           method: 'PATCH',
           body: { status: 'canceled' },
           searchParams: {
