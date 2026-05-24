@@ -17,7 +17,22 @@ export async function POST(req: Request) {
     return Response.json({ authenticated: true, message: 'Cadastro realizado com sucesso' })
   } catch (error: unknown) {
     const safeError = toSafeAuthError(error)
-    if (safeError.status >= 500) console.error('[auth/register] erro no cadastro:', error)
+    const dbError = error as { message?: string; code?: string; detail?: string; constraint?: string } | null
+    const hasDbLikeSignal = !!(
+      dbError?.message ||
+      dbError?.code ||
+      dbError?.detail ||
+      dbError?.constraint
+    )
+    if (safeError.status >= 500 || (safeError.status >= 400 && safeError.status < 500 && hasDbLikeSignal)) {
+      console.error('[auth/register] db error', {
+        status: safeError.status,
+        message: dbError?.message,
+        code: dbError?.code,
+        detail: dbError?.detail,
+        constraint: dbError?.constraint,
+      })
+    }
     return Response.json({ message: safeError.message }, { status: safeError.status })
   }
 }
