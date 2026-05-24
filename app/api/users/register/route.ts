@@ -1,17 +1,19 @@
 import { isSuperAdmin } from '@/lib/isSuperAdmin'
 import { createUser } from '@/lib/auth'
 import { toSafeAuthError } from '@/lib/authApiErrors'
+import { normalizeRole, validateRegisterInput } from '@/lib/userValidation'
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password, role } = await req.json()
+    const payload = await req.json()
     const currentRole = await isSuperAdmin()
     if (currentRole !== 'superadmin') return Response.json({ message: 'Permissão insuficiente para cadastrar usuários.' }, { status: 403 })
-    if (!name || !email || !password) return Response.json({ message: 'Nome, email e senha são obrigatórios' }, { status: 400 })
-    if (String(password).length < 8) return Response.json({ message: 'A senha deve ter pelo menos 8 caracteres.' }, { status: 400 })
 
-    const targetRole = role === 'superadmin' ? 'superadmin' : 'admin'
-    const user = await createUser(email.toLowerCase().trim(), String(name).trim(), password, targetRole)
+    const validated = validateRegisterInput(payload)
+    if (!validated.ok) return Response.json({ message: validated.message }, { status: validated.status })
+
+    const targetRole = normalizeRole(payload.role, 'admin')
+    const user = await createUser(validated.data.email, validated.data.name, validated.data.password, targetRole)
     return Response.json({ message: 'Novo usuário criado', name: user?.name, email: user?.email, role: user?.role })
   } catch (error: unknown) {
     const safeError = toSafeAuthError(error)
