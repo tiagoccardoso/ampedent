@@ -35,5 +35,18 @@ export function toSafeAuthError(error: unknown): PublicError {
     return { status: 500, message: 'Não foi possível cadastrar no momento. Tente novamente em instantes.' }
   }
 
+  if (error instanceof Error) {
+    const message = error.message.toLowerCase()
+    if (message.includes('duplicate key') || message.includes('admin_users_email_key')) {
+      return { status: 409, message: 'Este e-mail já está cadastrado.' }
+    }
+    if (message.includes('null value') || message.includes('violates not-null constraint')) {
+      return { status: 400, message: 'Dados obrigatórios ausentes ou inválidos. Revise os campos e tente novamente.' }
+    }
+    if (message.includes('invalid input syntax')) {
+      return { status: 400, message: 'Formato de dados inválido. Revise os campos e tente novamente.' }
+    }
+  }
+
   return { status: 400, message: 'Não foi possível cadastrar o usuário. Revise os dados e tente novamente.' }
 }

@@ -14,7 +14,22 @@ export async function POST(req: Request) {
     return Response.json({ message: 'Novo usuário criado', name: user?.name, email: user?.email, role: user?.role })
   } catch (error: unknown) {
     const safeError = toSafeAuthError(error)
-    if (safeError.status >= 500) console.error('[users/register] erro no cadastro:', error)
+    const dbError = error as { message?: string; code?: string; detail?: string; constraint?: string } | null
+    const hasDbLikeSignal = !!(
+      dbError?.message ||
+      dbError?.code ||
+      dbError?.detail ||
+      dbError?.constraint
+    )
+    if (safeError.status >= 500 || (safeError.status >= 400 && safeError.status < 500 && hasDbLikeSignal)) {
+      console.error('[users/register] db error', {
+        status: safeError.status,
+        message: dbError?.message,
+        code: dbError?.code,
+        detail: dbError?.detail,
+        constraint: dbError?.constraint,
+      })
+    }
     return Response.json({ message: safeError.message }, { status: safeError.status })
   }
 }
