@@ -42,6 +42,18 @@ export async function POST(req: Request) {
       role: user.role,
     })
   } catch (error: any) {
-    return Response.json({ message: error.message }, { status: 500 })
+    const raw: string = error.message ?? ''
+    let message = 'Não foi possível criar o usuário. Tente novamente.'
+    if (raw.includes('User already exists') || raw.includes('already exists')) {
+      message = 'Este email já está cadastrado.'
+    } else if (raw.includes('Failed to create user') || raw.includes('FAILED_TO_CREATE_USER')) {
+      message = 'Erro ao criar usuário no banco de dados. Verifique se o schema do banco foi atualizado (neon_migration_v2.sql).'
+    } else if (raw.includes('Password is too short') || raw.includes('PASSWORD_TOO_SHORT')) {
+      message = 'Senha muito curta (mínimo 6 caracteres).'
+    } else if (raw.includes('Invalid email') || raw.includes('INVALID_EMAIL')) {
+      message = 'Email inválido.'
+    }
+    const status = raw.includes('already exists') ? 409 : 500
+    return Response.json({ message }, { status })
   }
 }

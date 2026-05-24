@@ -5,6 +5,25 @@ import { authClient } from '@/lib/auth-client'
 import { useRouter } from 'next/navigation'
 import { FormEvent, useEffect, useState } from 'react'
 
+const AUTH_ERRORS: Record<string, string> = {
+  'User already exists': 'Este email já está cadastrado. Tente fazer login.',
+  'Failed to create user': 'Não foi possível criar o usuário. Verifique os dados e tente novamente.',
+  'Failed to create session': 'Erro ao iniciar sessão. Tente novamente.',
+  'Password is too short': 'Senha muito curta (mínimo 6 caracteres).',
+  'Password is too long': 'Senha muito longa.',
+  'Invalid email': 'Email inválido.',
+  'Invalid credentials': 'Email ou senha incorretos.',
+  'User not found': 'Email ou senha incorretos.',
+}
+
+function translateAuthError(msg: string | undefined): string {
+  if (!msg) return 'Ocorreu um erro. Tente novamente.'
+  for (const [key, pt] of Object.entries(AUTH_ERRORS)) {
+    if (msg.includes(key)) return pt
+  }
+  return msg
+}
+
 function Admin() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -32,13 +51,15 @@ function Admin() {
           name: name.toLowerCase(),
           role: 'paciente',
         } as any)
-        if (err) throw new Error(err.message ?? 'Não foi possível cadastrar')
-        setSuccess('Cadastro realizado com sucesso')
+        if (err) throw new Error(translateAuthError(err.message))
+        setSuccess('Cadastro realizado com sucesso! Você já pode fazer login.')
+        setIsRegistering(false)
+        setPassword('')
         return
       }
 
       const { error: err } = await authClient.signIn.email({ email, password })
-      if (err) throw new Error(err.message ?? 'Email ou senha incorretos')
+      if (err) throw new Error(translateAuthError(err.message))
     } catch (e: any) {
       setError(e.message)
     } finally {

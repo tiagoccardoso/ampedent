@@ -21,22 +21,24 @@ function CreateUser() {
 
   async function handleLogin(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    if (!name || !email || !password) return
     try {
-      if (!name || !email || !password) return
       setIsLoading(true)
-      const body = { name, email, password, role }
+      setError('')
       const res = await fetch('/api/users/register', {
         method: 'POST',
-        body: JSON.stringify(body),
+        body: JSON.stringify({ name, email, password, role }),
         headers: { 'Content-Type': 'application/json' },
       })
-      if (res.ok) {
-        router.push('/admin/users')
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.message ?? 'Não foi possível criar o usuário')
       }
-      setIsLoading(false)
+      router.push('/admin/users')
     } catch (err: unknown) {
-      setIsLoading(false)
       setError(err instanceof Error ? err.message : 'Erro desconhecido')
+    } finally {
+      setIsLoading(false)
     }
   }
   if (status === 'unauthenticated') {
