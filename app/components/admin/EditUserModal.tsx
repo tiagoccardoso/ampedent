@@ -14,12 +14,16 @@ function EditUserModal({
   const [name, setName] = useState(user.name || '')
   const [email, setEmail] = useState(user.email || '')
   const [password, setPassword] = useState('')
+  const [role, setRole] = useState<'admin' | 'superadmin'>(user.role)
   const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
   async function handleEdit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    setError('')
     try {
-      const body = { _id: user._id, name, email, password }
+      setIsLoading(true)
+      const body = { _id: user._id, name, email, password, role }
       const res = await fetch('/api/users/', {
         method: 'PUT',
         body: JSON.stringify(body),
@@ -29,8 +33,14 @@ function EditUserModal({
         onUserUpdate()
         setShowUser(false)
         setPassword('')
+        setIsLoading(false)
+        return
       }
+      const data = await res.json()
+      setError(data.message ?? 'Não foi possível atualizar o usuário.')
+      setIsLoading(false)
     } catch (error: any) {
+      setIsLoading(false)
       setError(error.message)
     }
   }
@@ -56,6 +66,7 @@ function EditUserModal({
                     <div className='relative'>
                       <input
                         value={name}
+                        disabled={isLoading}
                         onChange={e => setName(e.target.value)}
                         type='text'
                         className='my-4 '
@@ -67,6 +78,7 @@ function EditUserModal({
                     <div className='relative'>
                       <input
                         value={email}
+                        disabled={isLoading}
                         onChange={e => setEmail(e.target.value)}
                         type='email'
                         className='my-4 '
@@ -78,11 +90,23 @@ function EditUserModal({
                     <div className='relative mb-4 pb-2'>
                       <input
                         value={password}
+                        disabled={isLoading}
                         onChange={e => setPassword(e.target.value)}
                         type='password'
                         className='my-4 '
                         placeholder='senha'
                       />
+                    </div>
+                    <div className='relative mb-4 pb-2'>
+                      <label className='block text-sm mb-2'>Perfil</label>
+                      <select
+                        className='my-2 w-full border rounded p-3'
+                        value={role}
+                        disabled={isLoading}
+                        onChange={e => setRole(e.target.value as 'admin' | 'superadmin')}>
+                        <option value='admin'>Administrador</option>
+                        <option value='superadmin'>Superadministrador</option>
+                      </select>
                     </div>
                     {error && (
                       <p className='text-red-600 text-center '>{error}</p>
@@ -90,7 +114,7 @@ function EditUserModal({
                     <button
                       type='submit'
                       className=' rounded px-6 py-3 text-center font-semibold text-white bg-blue-600  hover:bg-blue-800'>
-                      Confirmar
+                      {isLoading ? 'Salvando...' : 'Confirmar'}
                     </button>
                   </form>
                 </div>

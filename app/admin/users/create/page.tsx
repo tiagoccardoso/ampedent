@@ -9,8 +9,10 @@ function CreateUser() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [role, setRole] = useState<'admin' | 'superadmin'>('admin')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   const { status } = useAuth()
   const router = useRouter()
 
@@ -20,10 +22,15 @@ function CreateUser() {
 
   async function handleLogin(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    setError('')
+    setSuccess('')
     try {
-      if (!name || !email || !password) return
+      if (!name || !email || !password) {
+        setError('Preencha os campos obrigatórios.')
+        return
+      }
       setIsLoading(true)
-      const body = { name, email, password }
+      const body = { name, email, password, role }
       const res = await fetch('/api/users/register', {
         method: 'POST',
         body: JSON.stringify(body),
@@ -31,6 +38,7 @@ function CreateUser() {
       })
       const data = await res.json()
       if (res.ok) {
+        setSuccess('Usuário criado com sucesso.')
         router.push('/admin/users')
         return
       }
@@ -88,12 +96,24 @@ function CreateUser() {
               required
             />
           </div>
+          <div className='relative mb-6'>
+            <label className='block text-sm mb-2'>Perfil</label>
+            <select
+              className='my-2 w-full border rounded p-3'
+              value={role}
+              onChange={e => setRole(e.target.value as 'admin' | 'superadmin')}
+              disabled={isLoading}>
+              <option value='admin'>Administrador</option>
+              <option value='superadmin'>Superadministrador</option>
+            </select>
+          </div>
           {error && <p className='text-red-600 text-center my-4'>{error}</p>}
+          {success && <p className='text-green-600 text-center my-4'>{success}</p>}
           <button
             disabled={isLoading}
             type='submit'
             className=' rounded px-6 py-3 text-center font-semibold text-white bg-blue-600  hover:bg-blue-800'>
-            Criar usuário
+            {isLoading ? 'Salvando...' : 'Criar usuário'}
           </button>
         </form>
       </div>
