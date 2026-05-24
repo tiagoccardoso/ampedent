@@ -9,6 +9,7 @@ function CreateUser() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [role, setRole] = useState<'admin' | 'superadmin'>('admin')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
@@ -25,12 +26,16 @@ function CreateUser() {
     setError('')
     setSuccess('')
     try {
-      if (!name || !email || !password) {
+      if (!name || !email || !password || !confirmPassword) {
         setError('Preencha os campos obrigatórios.')
         return
       }
+      if (password !== confirmPassword) {
+        setError('A confirmação de senha não confere.')
+        return
+      }
       setIsLoading(true)
-      const body = { name, email, password, role }
+      const body = { name, email, password, confirmPassword, role }
       const res = await fetch('/api/users/register', {
         method: 'POST',
         body: JSON.stringify(body),
@@ -96,6 +101,19 @@ function CreateUser() {
               required
             />
           </div>
+
+          <div className='relative mb-4 pb-2'>
+            <input
+              disabled={isLoading}
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
+              type='password'
+              className='my-4 '
+              placeholder='confirmar senha'
+              required
+            />
+          </div>
+
           <div className='relative mb-6'>
             <label className='block text-sm mb-2'>Perfil</label>
             <select

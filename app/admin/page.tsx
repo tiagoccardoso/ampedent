@@ -8,6 +8,7 @@ function Admin() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [isRegistering, setIsRegistering] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
@@ -21,6 +22,10 @@ function Admin() {
 
     try {
       if (!email || !password || (isRegistering && !name)) return
+      if (isRegistering && password !== confirmPassword) {
+        setError('A confirmação de senha não confere.')
+        return
+      }
       setIsLoading(true)
       setError('')
       setSuccess('')
@@ -29,7 +34,7 @@ function Admin() {
         isRegistering ? '/api/auth/register' : '/api/auth/login',
         {
           method: 'POST',
-          body: JSON.stringify({ name, email, password }),
+          body: JSON.stringify({ name, email, password, confirmPassword }),
           headers: { 'Content-Type': 'application/json' },
         },
       )
@@ -126,6 +131,26 @@ function Admin() {
               required
             />
           </div>
+
+
+          {isRegistering && (
+            <div className='flex flex-col gap-2'>
+              <label htmlFor='confirm-password' className='text-sm font-medium text-slate-700'>
+                Confirmar senha
+              </label>
+              <input
+                disabled={isLoading}
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                type='password'
+                id='confirm-password'
+                name='confirmPassword'
+                placeholder='Confirme a senha'
+                className='min-h-11 w-full rounded-md border border-slate-300 px-3 py-2 text-base outline-none transition focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-100'
+                required
+              />
+            </div>
+          )}
 
           {error && (
             <p className='rounded-md border border-red-200 bg-red-50 px-3 py-2 text-center text-sm text-red-700'>
