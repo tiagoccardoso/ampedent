@@ -3,6 +3,7 @@ import { deleteAdminById, getAdminById, listAdminUsers } from '@/lib/db'
 import { isSuperAdmin } from '@/lib/isSuperAdmin'
 import { mapUser } from '@/lib/dbMappers'
 import { sql } from '@/lib/neon'
+import { toSafeAuthError } from '@/lib/authApiErrors'
 
 export async function GET() {
   try {
@@ -18,16 +19,18 @@ export async function GET() {
 export async function PUT(req: Request) {
   try {
     const role = await isSuperAdmin()
-    if (role !== 'superadmin') return Response.json({ message: 'Não autorizado' }, { status: 401 })
-    const { _id, name, email, password } = await req.json()
+    if (role !== 'superadmin') return Response.json({ message: 'Permissão insuficiente para editar usuários.' }, { status: 403 })
+    const { _id, name, email, password, role: nextRole } = await req.json()
     if (!_id) return Response.json({ message: 'Usuário inválido' }, { status: 400 })
-    if (name || email) {
-      await sql`UPDATE admin_users SET name = COALESCE(${name?.toLowerCase?.() ?? null}, name), email = COALESCE(${email?.toLowerCase?.() ?? null}, email), updated_at = NOW() WHERE id = ${_id}`
+    if (!name || !email) return Response.json({ message: 'Nome e e-mail são obrigatórios.' }, { status: 400 })
+    if (name || email || nextRole) {
+      await sql`UPDATE admin_users SET name = ${String(name).trim()}, email = ${String(email).toLowerCase().trim()}, role = COALESCE(${nextRole ?? null}, role), updated_at = NOW() WHERE id = ${_id}`
     }
     if (password) await updateUserPassword(_id, password)
     return Response.json({ message: 'Usuário atualizado' })
   } catch (error: any) {
-    return Response.json({ message: error.message }, { status: 500 })
+    const safeError = toSafeAuthError(error)
+    return Response.json({ message: safeError.message }, { status: safeError.status >= 500 ? 500 : safeError.status })
   }
 }
 
