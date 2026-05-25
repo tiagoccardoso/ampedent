@@ -24,11 +24,6 @@ function Hero() {
             className='w-full sm:w-auto inline-block rounded-lg bg-[#0e7490] hover:bg-[#005a71] px-8 py-3.5 text-center text-sm font-bold text-white transition-colors'>
             AGENDAR ONLINE
           </Link>
-          <Link
-            href='/admin'
-            className='w-full sm:w-auto inline-block rounded-lg border border-[#0e7490] text-[#0e7490] bg-white/80 hover:bg-white px-8 py-3.5 text-center text-sm font-semibold transition-colors'>
-            ENTRAR
-          </Link>
         </div>
       </div>
     </HeroContainer>

@@ -72,12 +72,19 @@ function TheHeader() {
             className='px-5 py-2 rounded-lg bg-[#0e7490] text-white text-sm font-semibold hover:bg-[#005a71] transition-colors'>
             Agendar agora
           </Link>
-          {status === 'authenticated' && (
+          {status === 'authenticated' ? (
             <button
               onClick={logout}
               className='px-4 py-2 text-sm font-medium text-[#0e7490] border border-[#0e7490] rounded-lg hover:bg-[#f0f9ff] transition-colors'>
               Sair
             </button>
+          ) : (
+            <Link
+              href='/admin'
+              aria-label='Entrar no painel administrativo'
+              className='px-4 py-2 text-sm font-medium text-[#0e7490] border border-[#0e7490] rounded-lg hover:bg-[#f0f9ff] transition-colors'>
+              Entrar
+            </Link>
           )}
         </nav>
 
@@ -104,7 +111,7 @@ function TheHeader() {
           <Link href='/booking' className='rounded-lg p-3 bg-[#0e7490] text-white text-sm font-semibold text-center animate-link'>
             Agendar agora
           </Link>
-          {status === 'authenticated' && (
+          {status === 'authenticated' ? (
             <>
               <Link href='/admin/dashboard' className='border border-[#e5e7eb] rounded-lg p-3 text-sm font-medium text-center text-[#0f172a] hover:border-[#0e7490] hover:text-[#0e7490] animate-link transition-colors'>
                 Admin
@@ -113,6 +120,10 @@ function TheHeader() {
                 Sair
               </button>
             </>
+          ) : (
+            <Link href='/admin' className='border border-[#0e7490] rounded-lg p-3 text-sm font-semibold text-center text-[#0e7490] hover:bg-[#f0f9ff] animate-link transition-colors'>
+              Entrar
+            </Link>
           )}
         </div>
       )}
