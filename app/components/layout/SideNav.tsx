@@ -11,29 +11,30 @@ function SideNav() {
   return (
     <>
       {status === 'authenticated' && (
-        <div className='flex h-full flex-col px-3 py-4 md:px-2'>
+        <div className='flex h-full flex-col bg-white border-r border-[#e5e7eb]'>
           <Link
-            className='mb-2 h-20 items-center rounded-md bg-sky-50 p-4 md:h-40 hidden md:flex'
+            className='hidden md:flex items-center gap-3 px-5 py-5 border-b border-[#e5e7eb] hover:bg-[#f8f9ff] transition-colors'
             href='/'>
-            <div className='w-32 text-white md:w-40'>
-              <Image
-                alt='ampedent logo'
-                width={160}
-                height={124}
-                src={'/ampedent.webp'}
-              />
-            </div>
+            <Image
+              alt='DentalSys logo'
+              width={40}
+              height={40}
+              src={'/ampedent.webp'}
+              className='h-8 w-auto'
+            />
+            <span className='font-bold text-[#0e7490] text-base tracking-tight'>DentalSys</span>
           </Link>
-          <div className='flex grow flex-row justify-between space-x-2 md:flex-col md:space-x-0 md:space-y-2'>
+
+          <div className='flex grow flex-row md:flex-col overflow-y-auto py-2'>
             <NavLinks />
-            <div className='hidden h-auto w-full grow rounded-md bg-gray-50 md:block'>
-              <form className='hidden md:block'>
-                <Link
-                  href='/admin/bookings'
-                  className='flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3'>
-                  {session?.user}
-                </Link>
-              </form>
+          </div>
+
+          <div className='hidden md:block border-t border-[#e5e7eb] px-3 py-3'>
+            <div className='flex items-center gap-3 px-3 py-2 rounded-lg bg-[#f8f9ff]'>
+              <div className='w-7 h-7 rounded-full bg-[#0e7490] flex items-center justify-center text-white text-xs font-bold flex-shrink-0'>
+                {session?.user?.charAt(0)?.toUpperCase() ?? 'A'}
+              </div>
+              <span className='text-sm font-medium text-[#0f172a] truncate'>{session?.user}</span>
             </div>
           </div>
         </div>

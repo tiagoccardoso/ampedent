@@ -1,11 +1,11 @@
 function BookingHeader() {
   return (
-    <div className='my-8'>
-      <h1 className='text-center mb-8 text-3xl font-bold md:text-5xl'>
-        Agende uma consulta
+    <div className='mb-6'>
+      <h1 className='text-2xl font-bold text-[#0f172a] mb-2'>
+        Agendar consulta
       </h1>
-      <p className='mx-auto mb-8 mt-4  text-slate-600 md:mb-16'>
-        A DentalSys pode ajudar você a manter ou criar o sorriso que deseja com odontologia preventiva, estética e restauradora. Nossa clínica utiliza tecnologia de ponta para oferecer uma experiência confortável. Entre em contato hoje para saber mais.
+      <p className='text-sm text-[#64748b] leading-relaxed'>
+        Preencha os dados abaixo para confirmar seu horário. Utilizamos tecnologia de ponta para garantir uma experiência confortável.
       </p>
     </div>
   )

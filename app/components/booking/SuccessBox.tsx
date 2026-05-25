@@ -7,7 +7,7 @@ function SuccessBox(
   return (
     <div
       ref={ref}
-      className='text-center bg-green-100 p-4 rounded-lg border border-green-300 max-w-3xl w-full'>
+      className='bg-white rounded-xl border border-[#e5e7eb] shadow-card max-w-lg w-full p-8 text-center'>
       {children}
     </div>
   )

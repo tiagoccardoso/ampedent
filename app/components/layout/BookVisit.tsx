@@ -2,15 +2,18 @@ import Link from 'next/link'
 
 function BookVisit() {
   return (
-    <section className='bg-[#276981] w-full h-full text-white'>
-      <div className=' flex items-center flex-col text-center my-20'>
-        <h4 className='font-bold  text-4xl'>Agende sua consulta online</h4>
-        <p className='mt-8 text-lg'>
-          Veja os horários disponíveis e aproveite a odontologia bem feita. +Clareamento dental grátis para sempre.
+    <section className='bg-[#0e7490] w-full'>
+      <div className='mx-auto max-w-3xl px-5 py-20 md:py-28 text-center'>
+        <h4 className='font-bold text-3xl md:text-4xl text-white mb-4'>
+          Agende sua consulta online
+        </h4>
+        <p className='text-white/80 text-base md:text-lg mt-4 max-w-lg mx-auto'>
+          Veja os horários disponíveis e aproveite a odontologia bem feita.<br />
+          <span className='font-semibold text-white'>+Clareamento dental grátis para sempre.</span>
         </p>
         <Link
           href='/booking'
-          className='mx-auto mt-16 inline-block rounded-md bg-blue-800 hover:bg-blue-600 px-8 py-4 text-center font-semibold text-white'>
+          className='mt-10 inline-block rounded-lg bg-white text-[#0e7490] px-8 py-3 text-sm font-bold hover:bg-[#f0f9ff] transition-colors'>
           AGENDAR ONLINE
         </Link>
       </div>

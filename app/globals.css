@@ -1,5 +1,28 @@
 @import "tailwindcss";
 
+:root {
+  --primary: #0e7490;
+  --primary-dark: #005a71;
+  --primary-light: #b9eaff;
+  --secondary: #10b981;
+  --secondary-dark: #006c49;
+  --bg: #f8f9ff;
+  --surface: #ffffff;
+  --surface-muted: #f9fafb;
+  --border: #e5e7eb;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --error: #ba1a1a;
+  --error-bg: #ffdad6;
+  --success: #006c49;
+  --success-bg: #dcfce7;
+  --radius-sm: 0.25rem;
+  --radius: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
 .hero-container {
   position: relative;
   width: 100vw;
@@ -42,29 +65,65 @@ input[type='tel'],
 input[type='text'],
 input[type='number'],
 input[type='search'],
+input[type='date'],
+input[type='time'],
 select {
-  @apply block w-full mb-1 rounded-md;
-  @apply border p-2 border-gray-200;
+  @apply block w-full mb-1 rounded-lg;
+  @apply border p-2.5;
+  border-color: var(--border);
+  background: var(--surface);
+  color: var(--text-main);
+  font-size: 0.875rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
+
+textarea:focus,
+input[type='email']:focus,
+input[type='password']:focus,
+input[type='tel']:focus,
+input[type='text']:focus,
+input[type='number']:focus,
+input[type='search']:focus,
+input[type='date']:focus,
+input[type='time']:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(14, 116, 144, 0.15);
+}
+
 input[type='email']:disabled,
 input[type='password']:disabled,
 input[type='tel']:disabled,
 input[type='text']:disabled,
+input[type='date']:disabled,
+input[type='time']:disabled,
+input[type='number']:disabled,
 select:disabled,
 textarea:disabled {
-  @apply bg-gray-300 border-0 cursor-not-allowed text-gray-500;
+  @apply cursor-not-allowed text-gray-500;
+  background: #f1f5f9;
+  border-color: var(--border);
 }
+
 label {
-  @apply text-gray-800 text-sm leading-tight;
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  line-height: 1.4;
 }
+
 label + input,
-textarea {
-  margin-top: 2px;
+label + textarea,
+label + select {
+  margin-top: 0;
 }
 
 button[type='submit']:disabled,
 .submit:disabled {
-  @apply cursor-not-allowed  bg-blue-400;
+  @apply cursor-not-allowed opacity-60;
 }
 
 .hamburger-top,
@@ -75,14 +134,67 @@ button[type='submit']:disabled,
   left: 0;
   width: 24px;
   height: 2px;
-  background: #000;
+  background: var(--text-main);
   transform: rotate(0);
   transition: all 0.5s;
 }
 
 .btn {
-  @apply flex justify-center gap-2 text-gray-800 font-semibold;
-  @apply border border-gray-300 rounded px-6 py-2 hover:text-black hover:border-black;
+  @apply flex justify-center gap-2 font-semibold;
+  @apply border rounded-lg px-4 py-2 transition-colors;
+  border-color: var(--border);
+  color: var(--text-main);
+  background: var(--surface);
+  font-size: 0.875rem;
+}
+
+.btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.btn-primary:hover {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+  color: white;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  box-shadow: var(--shadow-card);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badge-success {
+  background: #dcfce7;
+  color: var(--secondary-dark);
+}
+
+.badge-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge-error {
+  background: var(--error-bg);
+  color: var(--error);
 }
 
 .hamburger-middle {
@@ -127,23 +239,11 @@ button[type='submit']:disabled,
   animation: fadeIn 0.2s ease-in-out forwards;
 }
 
-.animate-link:nth-child(1) {
-  animation-delay: 0.1s;
-}
-
-.animate-link:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.animate-link:nth-child(3) {
-  animation-delay: 0.3s;
-}
-.animate-link:nth-child(4) {
-  animation-delay: 0.4s;
-}
-.animate-link:nth-child(5) {
-  animation-delay: 0.5s;
-}
+.animate-link:nth-child(1) { animation-delay: 0.1s; }
+.animate-link:nth-child(2) { animation-delay: 0.2s; }
+.animate-link:nth-child(3) { animation-delay: 0.3s; }
+.animate-link:nth-child(4) { animation-delay: 0.4s; }
+.animate-link:nth-child(5) { animation-delay: 0.5s; }
 
 .wave {
   position: absolute;
@@ -163,10 +263,86 @@ button[type='submit']:disabled,
 }
 
 .wave .shape-fill {
-  fill: #276981;
+  fill: var(--primary);
 }
 
-/** For mobile devices **/
+/* Admin table styles */
+.admin-table {
+  width: 100%;
+  font-size: 0.875rem;
+  border-collapse: collapse;
+}
+
+.admin-table thead tr {
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-muted);
+}
+
+.admin-table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.admin-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-main);
+  vertical-align: middle;
+}
+
+.admin-table tbody tr:hover {
+  background: #f0f9ff;
+}
+
+.admin-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Page header */
+.page-header {
+  margin-bottom: 1.5rem;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.25;
+}
+
+.page-subtitle {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+/* Section card wrapper */
+.section-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.section-card-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-card-body {
+  padding: 1.25rem;
+}
+
 @media (max-width: 767px) {
   .wave svg {
     width: calc(149% + 1.3px);
