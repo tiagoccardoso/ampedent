@@ -51,10 +51,10 @@ export function toSafeAuthError(error: unknown): PublicError {
 
   if (error instanceof Error) {
     const message = error.message.toLowerCase()
-    if (message.includes('duplicate key') || message.includes('admin_users_email_key')) {
+    if (message.includes('duplicate key') || message.includes('"user"_email_key')) {
       return { status: 409, message: 'Este e-mail já está cadastrado.' }
     }
-    if (message.includes('admin_users_name_key')) {
+    if (message.includes('"user"_name_key')) {
       return { status: 409, message: 'Este nome de usuário já está em uso.' }
     }
     if (message.includes('null value') || message.includes('violates not-null constraint')) {
