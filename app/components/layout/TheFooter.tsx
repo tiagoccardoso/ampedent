@@ -9,7 +9,7 @@ function TheFooter() {
   const { status } = useAuth()
 
   return (
-    <footer className='block relative'>
+    <footer className='relative bg-white border-t border-slate-200'>
       <div className='wave'>
         <svg
           data-name='Layer 1'
@@ -18,91 +18,61 @@ function TheFooter() {
           preserveAspectRatio='none'>
           <path
             d='M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z'
-            className='shape-fill'></path>
+            className='shape-fill'
+          />
         </svg>
       </div>
-      <div className='py-16 md:py-24 lg:py-32 mx-auto w-full max-w-7xl px-5 md:px-10'>
-        <div className='flex-row flex justify-between max-[767px]:flex-col max-[767px]:items-start'>
-          <div className='w-full max-w-[560px] max-[991px]:mr-4 max-[991px]:flex-initial max-[767px]:'>
-            <h2 className='font-bold text-3xl md:text-5xl'>
-              Cuidado personalizado, resultados excepcionais
-            </h2>
+
+      <div className='mx-auto w-full max-w-7xl px-5 py-16 md:py-24'>
+        <div className='flex flex-col md:flex-row justify-between gap-10'>
+          {/* Brand */}
+          <div className='max-w-xs'>
+            <p className='text-2xl font-bold text-blue-700 mb-2'>DentalSys</p>
+            <p className='text-slate-500 text-sm leading-relaxed'>
+              Cuidado personalizado e resultados excepcionais para o seu sorriso.
+            </p>
           </div>
-          <div className='max-[991px]:ml-4 max-[991px]:flex-none max-[767px]: max-[767px]:mt-8'>
-            <div className='mb-4 flex max-w-[272px] items-start justify-start'>
+
+          {/* Contact */}
+          <div className='flex flex-col gap-3 text-sm text-slate-600'>
+            <div className='flex items-start gap-2'>
               <img
                 src='https://assets.website-files.com/6458c625291a94a195e6cf3a/6458c625291a94bb99e6cf78_MapPin.svg'
-                alt=''
-                className='inline-block mr-3'
-                width={24}
-                height={24}
-              />
-              <p className='text-slate-600 max-[479px]:text-sm'>
-                123 Main St, Anytown, CA 90210, USA
-              </p>
+                alt='' width={18} height={18} className='mt-0.5 flex-shrink-0' />
+              <span>123 Main St, Anytown, CA 90210, USA</span>
             </div>
-            <div className='mb-4 flex max-w-[272px] items-start justify-start'>
+            <div className='flex items-center gap-2'>
               <img
                 src='https://assets.website-files.com/6458c625291a94a195e6cf3a/6458c625291a944119e6cf76_EnvelopeSimple-2.svg'
-                alt='ícone de e-mail'
-                className='inline-block mr-3'
-                width={24}
-                height={24}
-              />
-              <p className='text-slate-600 max-[479px]:text-sm'>
-                contato@dentalsys.com
-              </p>
+                alt='' width={18} height={18} />
+              <span>contato@dentalsys.com</span>
             </div>
-            <div className='mb-4 flex max-w-[272px] items-start justify-start'>
+            <div className='flex items-center gap-2'>
               <img
                 src='https://www.svgrepo.com/show/79112/telephone.svg'
-                alt='ícone de telefone'
-                className='inline-block mr-3 '
-                width={24}
-                height={24}
-              />
-              <p className='text-slate-600 max-[479px]:text-sm'>+1234567890</p>
+                alt='' width={18} height={18} />
+              <span>+1234567890</span>
             </div>
           </div>
         </div>
-        <div className='mb-14 w-full [border-bottom:1.7px_solid_rgb(0,_0,_0)] mt-16'></div>
-        <div className='flex-row flex justify-between max-[991px]:items-center max-[767px]:flex-col max-[767px]:items-start'>
-          <div className='font-semibold max-[991px]: max-[479px]:mb-4 max-[991px]:py-1 text-center sm:text-center'>
-            <Link
-              href='/about'
-              aria-label='Link para a página sobre nós'
-              className='inline-block font-normal text-slate-600 transition hover:text-blue-600 sm:pr-6 lg:pr-12 py-1.5 sm:py-2 pr-6'>
-              Sobre nós
-            </Link>
-            <Link
-              href='/services'
-              aria-label='Link para a página de serviços'
-              className='inline-block font-normal text-slate-600 transition hover:text-blue-600 sm:pr-6 lg:pr-12 py-1.5 sm:py-2 pr-6'>
-              Serviços
-            </Link>
-            <Link
-              href='booking'
-              aria-label='Link para criar agendamento'
-              className='inline-block font-normal text-slate-600 transition hover:text-blue-600 sm:pr-6 lg:pr-12 py-1.5 sm:py-2 pr-6'>
-              Booking
-            </Link>
+
+        <div className='divider' />
+
+        <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
+          <nav className='flex flex-wrap gap-x-5 gap-y-1 text-sm text-slate-500'>
+            <Link href='/about' className='hover:text-blue-700 transition-colors'>Sobre nós</Link>
+            <Link href='/services' className='hover:text-blue-700 transition-colors'>Serviços</Link>
+            <Link href='/booking' className='hover:text-blue-700 transition-colors'>Agendamento</Link>
             {status === 'authenticated' && (
-              <Link
-                href='/admin/bookings'
-                aria-label='Link para o painel administrativo de agendamentos'
-                className='inline-block font-normal text-slate-600 transition hover:text-blue-600 sm:pr-6 lg:pr-12 py-1.5 sm:py-2 pr-6'>
-                Admin
-              </Link>
+              <Link href='/admin/bookings' className='hover:text-blue-700 transition-colors'>Admin</Link>
             )}
-          </div>
-          <div className='max-[991px]:flex-none '>
-            <Link
-              href='https://github.com/atalek/ampedent'
-              target='_blank'
-              className='text-slate-600   flex flex-row items-center gap-1 '>
-              © {currentYear} DentalSys - Criado por atalek <Github />
-            </Link>
-          </div>
+          </nav>
+          <Link
+            href='https://github.com/atalek/ampedent'
+            target='_blank'
+            className='flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-600 transition-colors'>
+            © {currentYear} DentalSys <Github />
+          </Link>
         </div>
       </div>
     </footer>

@@ -11,157 +11,116 @@ import { useAuth } from '@/app/components/AppProvider'
 function TheHeader() {
   const [isOpen, setIsOpen] = useState(false)
   const pathName = usePathname()
-
   const [y, setY] = useState(0)
-
-  const goTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    })
-  }
   const { status, logout } = useAuth()
 
+  const goTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
+
   useEffect(() => {
-    const updateScroll = () => {
-      setY(window.scrollY)
-    }
-
-    window.addEventListener('scroll', updateScroll)
-    window.addEventListener('resize', updateScroll)
-
+    const update = () => setY(window.scrollY)
+    window.addEventListener('scroll', update)
+    window.addEventListener('resize', update)
     return () => {
-      window.removeEventListener('scroll', updateScroll)
-      window.removeEventListener('resize', updateScroll)
+      window.removeEventListener('scroll', update)
+      window.removeEventListener('resize', update)
     }
   }, [])
 
+  const navLinkClass = (href: string) =>
+    pathName === href
+      ? 'text-blue-700 font-semibold'
+      : 'text-slate-600 hover:text-blue-700 transition-colors'
+
   return (
     <header
-      className={`w-full z-50 sticky top-0 bg-sky-50  ${
-        y > 0 ? 'border-b border-blue-400' : ''
-      }`}>
-      <div className='mx-auto flex flex-row items-center justify-between p-4  max-w-[1400px]'>
+      className={`w-full z-50 sticky top-0 bg-white/95 backdrop-blur-sm ${
+        y > 0 ? 'border-b border-slate-200 shadow-sm' : ''
+      } transition-shadow`}>
+      <div className='mx-auto flex items-center justify-between px-4 py-3 max-w-7xl'>
+        {/* Logo */}
         <Link
           onClick={() => setIsOpen(false)}
           href='/'
-          className=' flex gap-2 items-center text-xl font-bold md:text-3xl text-blue-600  hover:text-blue-800'>
-          <Image
-            src={logo}
-            priority
-            height={96}
-            width={75}
-            alt='logotipo da DentalSys'
-          />
+          className='flex items-center gap-2 text-xl font-bold text-blue-700 hover:text-blue-800 transition-colors'>
+          <Image src={logo} priority height={40} width={32} alt='DentalSys' />
           DentalSys
         </Link>
-        <nav className='hidden md:flex gap-6 items-center text-lg'>
-          <Link
-            href='/about'
-            aria-label='Link para a página sobre nós'
-            className={
-              pathName === '/about'
-                ? 'text-blue-600 font-bold'
-                : '' + 'hover:text-blue-600'
-            }>
+
+        {/* Desktop nav */}
+        <nav className='hidden md:flex items-center gap-6 text-sm'>
+          <Link href='/about' aria-label='Sobre nós' className={navLinkClass('/about')}>
             Sobre nós
           </Link>
-          <Link
-            href='/services'
-            aria-label='Link para a página de serviços'
-            className={
-              pathName === '/services'
-                ? 'text-blue-600 font-bold'
-                : '' + 'hover:text-blue-600'
-            }>
+          <Link href='/services' aria-label='Serviços' className={navLinkClass('/services')}>
             Serviços
           </Link>
           <Link
             href='/booking'
-            aria-label='Link para criar agendamento'
-            className='p-2 rounded-full bg-blue-600 text-white hover:bg-blue-800 '>
+            aria-label='Agendar consulta'
+            className='rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 transition-colors'>
             Agendar agora
           </Link>
           {status === 'authenticated' && (
             <>
               <Link
                 href='/admin/bookings'
-                aria-label='Link para o painel administrativo de agendamentos'
-                className={
-                  pathName.startsWith('/admin')
-                    ? 'text-blue-600 font-bold'
-                    : '' + 'hover:text-blue-600'
-                }>
+                aria-label='Painel administrativo'
+                className={pathName.startsWith('/admin') ? 'text-blue-700 font-semibold' : 'text-slate-600 hover:text-blue-700 transition-colors'}>
                 Admin
               </Link>
               <button
                 onClick={logout}
-                className='p-2 text-blue-600 border border-blue-600 rounded  hover:text-blue-800 hover:border-blue-800'>
+                className='rounded-lg border border-blue-700 px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50 transition-colors'>
                 Sair
               </button>
             </>
           )}
         </nav>
-        <div className='flex md:hidden gap-8 items-center'>
-          <button
-            aria-label='botão para expandir o menu móvel'
-            className={`hamburger ${isOpen ? 'open' : ''} focus:outline-none `}
-            onClick={() => setIsOpen(prev => !prev)}>
-            <span className='hamburger-top'></span>
-            <span className='hamburger-middle'></span>
-            <span className='hamburger-bottom'></span>
-          </button>
-        </div>
+
+        {/* Mobile hamburger */}
+        <button
+          aria-label='Abrir menu'
+          className={`hamburger md:hidden focus:outline-none ${isOpen ? 'open' : ''}`}
+          onClick={() => setIsOpen(p => !p)}>
+          <span className='hamburger-top' />
+          <span className='hamburger-middle' />
+          <span className='hamburger-bottom' />
+        </button>
       </div>
+
+      {/* Mobile dropdown */}
       {isOpen && (
         <div
           onClick={() => setIsOpen(false)}
-          className='md:hidden p-4 bg-sky-50  mt-2 flex flex-col gap-2 text-center'>
-          <Link
-            href={'/about'}
-            aria-label='Link para a página sobre nós'
-            className='border rounded p-2 border-blue-400 animate-link'>
+          className='md:hidden bg-white border-t border-slate-100 px-4 pb-4 pt-2 flex flex-col gap-2 shadow-md'>
+          <Link href='/about' className='animate-link rounded-lg border border-slate-200 p-3 text-center text-sm font-medium text-slate-700 hover:border-blue-300 hover:text-blue-700'>
             Sobre nós
           </Link>
-          <Link
-            href={'/services'}
-            aria-label='Link para a página de serviços'
-            className='border rounded p-2 border-blue-400 animate-link'>
+          <Link href='/services' className='animate-link rounded-lg border border-slate-200 p-3 text-center text-sm font-medium text-slate-700 hover:border-blue-300 hover:text-blue-700'>
             Serviços
           </Link>
-          <Link
-            href={'/booking'}
-            aria-label='Link para criar agendamento'
-            className=' rounded p-2 bg-blue-600 text-white animate-link font-bold'>
+          <Link href='/booking' className='animate-link rounded-lg bg-blue-700 p-3 text-center text-sm font-semibold text-white'>
             Agendar agora
           </Link>
           {status === 'authenticated' && (
             <>
-              <Link
-                href={'/admin/bookings'}
-                aria-label='Link para o painel administrativo de agendamentos'
-                className='border rounded p-2 border-blue-400 animate-link'>
+              <Link href='/admin/bookings' className='animate-link rounded-lg border border-slate-200 p-3 text-center text-sm font-medium text-slate-700 hover:border-blue-300 hover:text-blue-700'>
                 Admin
               </Link>
-              <button
-                className=' rounded p-2 bg-blue-600 text-white animate-link font-bold'
-                onClick={logout}>
+              <button className='animate-link rounded-lg bg-blue-700 p-3 text-center text-sm font-semibold text-white' onClick={logout}>
                 Sair
               </button>
             </>
           )}
         </div>
       )}
-      <div className='fixed bottom-0 -right-6 p-10 z-[10]'>
+
+      {/* Scroll-to-top button */}
+      <div className='fixed bottom-6 right-6 z-10'>
         <button
-          aria-label='botão para voltar ao topo'
+          aria-label='Voltar ao topo'
           onClick={goTop}
-          className={
-            y < 40
-              ? 'hidden'
-              : '' +
-                'rounded-full border-2 border-blue-600 px-3 sm:px-4 hover:bg-slate-200 cursor-pointer aspect-square grid place-items-center'
-          }>
+          className={`${y < 40 ? 'opacity-0 pointer-events-none' : 'opacity-100'} transition-opacity rounded-full border-2 border-blue-700 bg-white w-10 h-10 grid place-items-center shadow-md hover:bg-blue-50`}>
           <UpArrow />
         </button>
       </div>

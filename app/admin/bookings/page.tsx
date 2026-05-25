@@ -6,14 +6,20 @@ import { useEffect, useState } from 'react'
 import { useDebounce } from '@uidotdev/usehooks'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/app/components/AppProvider'
-
-import {
-  formatDate,
-  formatTime,
-  incrementTimeByOneHour,
-} from '@/lib/dateAndTimeUtils'
+import { formatDate, formatTime, incrementTimeByOneHour } from '@/lib/dateAndTimeUtils'
 import Spinner from '@/app/components/Spinner'
 import Pagination from '@/app/components/admin/Pagination'
+
+const statusLabel: Record<string, string> = {
+  completed: 'Concluído',
+  canceled:  'Cancelado',
+  pending:   'Pendente',
+}
+const statusBadge: Record<string, string> = {
+  completed: 'badge-completed',
+  canceled:  'badge-canceled',
+  pending:   'badge-pending',
+}
 
 function Bookings() {
   const [bookings, setBookings] = useState<BookingType[]>([])
@@ -23,140 +29,124 @@ function Bookings() {
   const [error, setError] = useState('')
   const [page, setPage] = useState(1)
   const [pages, setPages] = useState<number>()
-  const debouncedSearchTerm = useDebounce(search, 400)
+  const debouncedSearch = useDebounce(search, 400)
   const router = useRouter()
   const { status } = useAuth()
 
-  useEffect(() => {
-    setPage(1)
-  }, [debouncedSearchTerm])
+  useEffect(() => { setPage(1) }, [debouncedSearch])
 
   useEffect(() => {
     async function fetchBookings() {
       try {
         setIsLoading(true)
-        const res = await fetch(
-          `/api/booking?status=${filter}&page=${page}&search=${search}`,
-        )
+        const res = await fetch(`/api/booking?status=${filter}&page=${page}&search=${search}`)
         if (res.ok) {
           const data = await res.json()
           setBookings(data.bookings)
           setPages(data.totalPages)
-          setIsLoading(false)
         }
       } catch (err: any) {
-        setIsLoading(false)
         setError(err.message)
+      } finally {
+        setIsLoading(false)
       }
     }
     fetchBookings()
-  }, [filter, debouncedSearchTerm, page])
+  }, [filter, debouncedSearch, page])
 
   useEffect(() => {
     document.title = 'Agendamentos | Admin | DentalSys'
   }, [])
 
-  if (status === 'unauthenticated') {
-    router.push('/admin')
-  }
+  if (status === 'unauthenticated') router.push('/admin')
 
   return (
-    <section className='grid gap-4'>
-      <div className='relative'>
-        {isLoading && <Spinner />}
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className='max-w-md items-center'
-          placeholder='Buscar por nome ou e-mail'
-          type='search'
-        />
+    <section className='space-y-5'>
+      <div className='page-header'>
+        <div>
+          <h1 className='page-title'>Agendamentos</h1>
+          <p className='page-subtitle'>Consultas via formulário público</p>
+        </div>
       </div>
-      {error && <p className='text-red-600 text-center '>{error}</p>}
-      <div className='md:min-h-[700px] h-full relative w-full overflow-auto'>
-        <table className='w-full caption-bottom text-sm'>
-          <thead>
-            <tr className='border-b transition-colors hover:bg-muted/50 '>
-              <th className='h-12 px-4 text-left  align-middle font-medium text-muted-foreground w-[100px] whitespace-nowrap'>
-                ID do agendamento
-              </th>
-              <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground'>
-                Nome
-              </th>
-              <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground'>
-                Email
-              </th>
-              <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground'>
-                Telefone
-              </th>
-              <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground'>
-                <div className='flex flex-row items-center gap-4'>
-                  <label htmlFor='status'>Status</label>
-                  <select
-                    name='status'
-                    id='status'
-                    onChange={e => setFilter(e.target.value)}
-                    className='bg-white max-w-[150px]'>
-                    <option value='all'>todos</option>
-                    <option value='pending'>pendente</option>
-                    <option value='completed'>concluído</option>
-                    <option value='canceled'>cancelado</option>
-                  </select>
-                </div>
-              </th>
-              <th className='h-12 px-4 align-middle font-medium text-muted-foreground text-right'>
-                Agendado
-              </th>
-              <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground'></th>
-            </tr>
-          </thead>
-          <tbody>
-            {bookings.length > 0 &&
-              bookings.map(booking => (
-                <tr
-                  className='border-b transition-colors hover:bg-muted/50 '
-                  key={booking._id.toString()}>
-                  <td className='p-4 align-middle font-medium'>
-                    {booking._id.toString()}
-                  </td>
-                  <td className='p-4 align-middle capitalize'>
-                    {booking.firstName} {booking.lastName}
-                  </td>
-                  <td className='p-4 align-middle '>{booking.email}</td>
-                  <td className='p-4 align-middle'>{booking.phone}</td>
-                  <td
-                    className={`p-4 align-middle font-bold ${
-                      booking.status === 'completed'
-                        ? 'text-green-600'
-                        : booking.status === 'canceled'
-                        ? 'text-red-600'
-                        : ''
-                    }`}>
-                    {booking.status === 'completed'
-                      ? 'concluído'
-                      : booking.status === 'canceled'
-                      ? 'cancelado'
-                      : 'pendente'}
-                  </td>
-                  <td className='p-4 align-middle md:text-right text-center'>
-                    {formatTime(booking.time.toString())} -{' '}
-                    {incrementTimeByOneHour(booking.time.toString())} ,{' '}
-                    {formatDate(booking.date.toString())}
-                  </td>
-                  <td className='p-4 align-middle'>
-                    <button>
-                      <Link
-                        href={`/admin/bookings/${booking._id.toString()}`}
-                        className='btn '>
+
+      {/* Filters */}
+      <div className='flex flex-col sm:flex-row gap-3'>
+        <div className='relative flex-1 max-w-sm'>
+          {isLoading && (
+            <span className='absolute right-3 top-1/2 -translate-y-1/2'>
+              <Spinner />
+            </span>
+          )}
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder='Buscar por nome ou e-mail'
+            type='search'
+            className='pr-10'
+          />
+        </div>
+        <select
+          value={filter}
+          onChange={e => setFilter(e.target.value)}
+          className='w-full sm:w-44'>
+          <option value='all'>Todos</option>
+          <option value='pending'>Pendente</option>
+          <option value='completed'>Concluído</option>
+          <option value='canceled'>Cancelado</option>
+        </select>
+      </div>
+
+      {error && <div className='alert alert-error'><span>{error}</span></div>}
+
+      {/* Table */}
+      <div className='card overflow-hidden'>
+        <div className='md:min-h-[500px] overflow-x-auto'>
+          {bookings.length === 0 && !isLoading ? (
+            <div className='px-6 py-12 text-center text-slate-400 text-sm'>
+              Nenhum agendamento encontrado.
+            </div>
+          ) : (
+            <table className='data-table'>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>E-mail</th>
+                  <th>Telefone</th>
+                  <th>Status</th>
+                  <th>Horário</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {bookings.map(booking => (
+                  <tr key={booking._id.toString()}>
+                    <td className='font-medium capitalize'>
+                      {booking.firstName} {booking.lastName}
+                    </td>
+                    <td>{booking.email}</td>
+                    <td>{booking.phone}</td>
+                    <td>
+                      <span className={`badge ${statusBadge[booking.status] ?? 'badge-pending'}`}>
+                        {statusLabel[booking.status] ?? booking.status}
+                      </span>
+                    </td>
+                    <td className='whitespace-nowrap text-slate-600'>
+                      {formatTime(booking.time.toString())} – {incrementTimeByOneHour(booking.time.toString())},&nbsp;
+                      {formatDate(booking.date.toString())}
+                    </td>
+                    <td>
+                      <Link href={`/admin/bookings/${booking._id}`} className='btn text-xs'>
                         Ver detalhes
                       </Link>
-                    </button>
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
+
       {bookings.length > 0 && pages && (
         <Pagination page={page} setPage={setPage} pages={pages} />
       )}

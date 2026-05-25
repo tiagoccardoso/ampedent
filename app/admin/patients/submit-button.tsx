@@ -2,5 +2,5 @@
 import { useFormStatus } from 'react-dom'
 export function SubmitButton() {
   const { pending } = useFormStatus()
-  return <button className='btn' type='submit'>{pending ? 'Salvando...' : 'Salvar'}</button>
+  return <button className='btn btn-primary' type='submit' disabled={pending}>{pending ? 'Salvando…' : 'Salvar'}</button>
 }

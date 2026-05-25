@@ -14,96 +14,67 @@ function Pagination({
   const [visiblePages, setVisiblePages] = useState<number[]>([])
 
   useEffect(() => {
-    const generateVisiblePages = () => {
-      const visiblePageCount = 5
-      const halfVisibleCount = Math.floor(visiblePageCount / 2)
-
-      let startPage = page - halfVisibleCount
-      let endPage = page + halfVisibleCount
-
-      if (startPage <= 0) {
-        startPage = 1
-        endPage = Math.min(pages, visiblePageCount)
-      }
-
-      if (endPage > pages) {
-        endPage = pages
-        startPage = Math.max(1, pages - visiblePageCount + 1)
-      }
-
-      const visiblePagesArray = Array.from(
-        { length: endPage - startPage + 1 },
-        (_, i) => i + startPage,
-      )
-      setVisiblePages(visiblePagesArray)
-    }
-
-    generateVisiblePages()
+    const count = 5
+    const half = Math.floor(count / 2)
+    let start = Math.max(1, page - half)
+    let end = Math.min(pages, start + count - 1)
+    if (end - start < count - 1) start = Math.max(1, end - count + 1)
+    setVisiblePages(Array.from({ length: end - start + 1 }, (_, i) => i + start))
   }, [page, pages])
 
   return (
-    <div className='flex items-center justify-between  bg-white px-4 py-3 sm:px-6'>
+    <div className='flex items-center justify-between px-1 py-3'>
+      {/* Mobile */}
       <div className='flex flex-1 justify-between sm:hidden'>
         <button
           disabled={page === 1}
-          onClick={() => setPage(prevPage => Math.min(prevPage - 1, pages))}
-          className='relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed'>
+          onClick={() => setPage(p => p - 1)}
+          className='btn text-sm disabled:opacity-40'>
           Anterior
         </button>
         <button
           disabled={page === pages}
-          onClick={() => setPage(prevPage => Math.min(prevPage + 1, pages))}
-          className='relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed'>
+          onClick={() => setPage(p => p + 1)}
+          className='btn text-sm disabled:opacity-40'>
           Próxima
         </button>
       </div>
+
+      {/* Desktop */}
       <div className='hidden sm:flex sm:flex-1 sm:items-center sm:justify-between'>
-        <div>
-          <p className='text-sm text-gray-700'>
-            Exibindo{' '}
-            <span className='font-medium'>
-              página {page} de {pages} páginas no total
-            </span>
-          </p>
-        </div>
-        <div>
-          <nav
-            className='isolate inline-flex -space-x-px rounded-md shadow-sm'
-            aria-label='Paginação'>
+        <p className='text-sm text-slate-500'>
+          Página <span className='font-medium text-slate-700'>{page}</span> de{' '}
+          <span className='font-medium text-slate-700'>{pages}</span>
+        </p>
+        <nav className='flex items-center gap-1' aria-label='Paginação'>
+          <button
+            disabled={page === 1}
+            onClick={() => setPage(p => p - 1)}
+            className='btn w-9 h-9 p-0 disabled:opacity-40'>
+            <AlignLeft aria-hidden />
+          </button>
+          {visiblePages.map(n => (
             <button
-              disabled={page === 1}
-              onClick={() => setPage(prevPage => Math.min(prevPage - 1, pages))}
-              className='relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:cursor-not-allowed disabled:bg-gray-300'>
-              <span className='sr-only'>Anterior</span>
-              <AlignLeft aria-hidden='true' />
+              key={n}
+              onClick={() => setPage(n)}
+              aria-current={page === n ? 'page' : undefined}
+              className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
+                page === n
+                  ? 'bg-blue-700 text-white'
+                  : 'text-slate-700 hover:bg-slate-100'
+              }`}>
+              {n}
             </button>
-
-            {visiblePages.map(pageNumber => (
-              <button
-                key={pageNumber}
-                onClick={() => setPage(pageNumber)}
-                aria-current={page === pageNumber ? 'page' : undefined}
-                className={`relative z-10 inline-flex items-center px-4 py-2 text-sm font-semibold ${
-                  page === pageNumber
-                    ? 'bg-blue-600 text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-                    : 'text-gray-700 hover:bg-gray-50 focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-                }`}>
-                {pageNumber}
-              </button>
-            ))}
-
-            <button
-              disabled={page === pages}
-              onClick={() => setPage(prevPage => Math.min(prevPage + 1, pages))}
-              className='relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:cursor-not-allowed disabled:bg-gray-300'>
-              <span className='sr-only'>Próxima</span>
-              <AlignRight aria-hidden='true' />
-            </button>
-          </nav>
-        </div>
+          ))}
+          <button
+            disabled={page === pages}
+            onClick={() => setPage(p => p + 1)}
+            className='btn w-9 h-9 p-0 disabled:opacity-40'>
+            <AlignRight aria-hidden />
+          </button>
+        </nav>
       </div>
     </div>
   )
 }
-
 export default Pagination

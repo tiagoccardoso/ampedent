@@ -1,10 +1,6 @@
 'use client'
 
-import {
-  formatDate,
-  formatTime,
-  incrementTimeByOneHour,
-} from '@/lib/dateAndTimeUtils'
+import { formatDate, formatTime, incrementTimeByOneHour } from '@/lib/dateAndTimeUtils'
 import { BookingType } from '@/lib/types'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
@@ -27,10 +23,10 @@ function IndividualBooking({ params }: { params: { id: string } }) {
         if (res.ok) {
           const data = await res.json()
           setBooking(data.booking)
-          setIsLoading(false)
         }
       } catch (err: any) {
         setError(err.message)
+      } finally {
         setIsLoading(false)
       }
     }
@@ -40,16 +36,11 @@ function IndividualBooking({ params }: { params: { id: string } }) {
   async function completeBooking() {
     try {
       setIsLoading(true)
-      const res = await fetch(`/api/booking?_id=${params.id}`, {
-        method: 'PUT',
-      })
-      if (res.ok) {
-        router.push('/admin/bookings')
-      }
-      setIsLoading(false)
+      const res = await fetch(`/api/booking?_id=${params.id}`, { method: 'PUT' })
+      if (res.ok) router.push('/admin/bookings')
     } catch (err: any) {
       setError(err.message)
-
+    } finally {
       setIsLoading(false)
     }
   }
@@ -57,150 +48,82 @@ function IndividualBooking({ params }: { params: { id: string } }) {
   async function cancelBooking() {
     try {
       setIsLoading(true)
-      const res = await fetch(`/api/booking/cancel?_id=${params.id}`, {
-        method: 'PUT',
-      })
-      if (res.ok) {
-        router.push('/admin/bookings')
-      }
-      setIsLoading(false)
+      const res = await fetch(`/api/booking/cancel?_id=${params.id}`, { method: 'PUT' })
+      if (res.ok) router.push('/admin/bookings')
     } catch (err: any) {
       setError(err.message)
-
+    } finally {
       setIsLoading(false)
     }
   }
 
-  if (status === 'unauthenticated') {
-    router.push('/')
-  }
+  if (status === 'unauthenticated') router.push('/admin')
 
   return (
-    <section className=''>
-      <Link
-        href='/admin/bookings'
-        className='p-3 border rounded hover:border-black'>
-        Voltar
-      </Link>
-      {booking && (
-        <section className='max-w-3xl w-full mx-auto flex items-center justify-center p-4'>
-          <div className='w-full'>
-            <div className='mb-1'>
-              <h1 className=' text-center mb-8 text-wrap text-2xl font-bold md:text-5xl'>
-                Agendamento: {booking._id.toString()}
-              </h1>
-              {isLoading && <Spinner />}
-              {error && <p className='text-red-600 text-center '>{error}</p>}
-            </div>
-            <form className='mx-auto flex flex-col'>
-              <div className='grid md:grid-cols-2 gap-4 items-center'>
-                <div>
-                  <label htmlFor='firstName'>Nome</label>
-                  <input
-                    disabled={true}
-                    type='text'
-                    id='firstName'
-                    value={booking.firstName}
-                  />
-                </div>
-                <div>
-                  <label htmlFor='lastName'>Sobrenome</label>
-                  <input
-                    disabled={true}
-                    type='text'
-                    id='lastName'
-                    value={booking.lastName}
-                  />
-                </div>
-              </div>
-              <div className='flex flex-col my-4'>
-                <label htmlFor='email'>Email</label>
-                <input
-                  disabled={true}
-                  type='email'
-                  id='email'
-                  value={booking.email}
-                />
-              </div>
-              <div className='flex flex-col my-4'>
-                <label htmlFor='phone'>Telefone</label>
-                <input
-                  disabled={true}
-                  type='text'
-                  id='phone'
-                  value={booking.phone}
-                />
-              </div>
-              <div className='grid md:grid-cols-2 gap-4 items-center'>
-                <div className='flex flex-col'>
-                  <label htmlFor='date' className='mb-[2px]'>
-                    Data
-                  </label>
-                  <input
-                    disabled={true}
-                    type='text'
-                    id='date'
-                    value={formatDate(booking.date.toString())}
-                  />
-                </div>
-                <div className='flex flex-col'>
-                  <label htmlFor='time' className='mb-[2px]'>
-                    Horário
-                  </label>
-                  <input
-                    disabled={true}
-                    type='text'
-                    id='time'
-                    value={
-                      formatTime(booking.time) +
-                      ' ' +
-                      '-' +
-                      ' ' +
-                      incrementTimeByOneHour(booking.time)
-                    }
-                  />
-                </div>
-              </div>
-              <div className='flex flex-col my-4'></div>
-              <div className='flex flex-col my-4'>
-                <label htmlFor='message'>Mensagem</label>
-                <textarea
-                  disabled={true}
-                  value={booking.message}
-                  id='message'
-                  cols={30}
-                  rows={10}></textarea>
-              </div>
+    <section className='space-y-5'>
+      <div className='flex items-center gap-3'>
+        <Link href='/admin/bookings' className='btn text-sm'>
+          ← Voltar
+        </Link>
+        <h1 className='page-title text-lg'>Detalhes do agendamento</h1>
+      </div>
 
-              {booking && booking.status === 'pending' && (
-                <div className='flex md:flex-row flex-col items-center justify-between gap-4'>
-                  <button
-                    type='button'
-                    className='rounded w-full md:max-w-[100px] px-6 py-3 text-center font-semibold text-white bg-blue-600 hover:bg-blue-800'>
-                    Notificar
-                  </button>
-                  <div className='flex w-full md:flex-row flex-col items-center gap-4'>
-                    <button
-                      onClick={cancelBooking}
-                      type='button'
-                      className='rounded w-full md:max-w-[200px] whitespace-nowrap px-6 py-3 text-center font-semibold text-white bg-red-500 hover:bg-red-800'>
-                      Cancelar consulta
-                    </button>
-                    <button
-                      onClick={completeBooking}
-                      type='button'
-                      className='rounded w-full md:max-w-[200px] px-6 py-3 text-center font-semibold text-white bg-green-600 hover:bg-green-800'>
-                      Marcar como concluído
-                    </button>
-                  </div>
-                </div>
-              )}
-            </form>
+      {isLoading && <Spinner />}
+      {error && <div className='alert alert-error'><span>{error}</span></div>}
+
+      {booking && (
+        <div className='card p-6 max-w-2xl'>
+          <p className='text-xs text-slate-400 mb-4 font-mono'>{booking._id.toString()}</p>
+
+          <div className='grid md:grid-cols-2 gap-4'>
+            <div className='field'>
+              <label>Nome</label>
+              <input disabled type='text' value={booking.firstName} />
+            </div>
+            <div className='field'>
+              <label>Sobrenome</label>
+              <input disabled type='text' value={booking.lastName} />
+            </div>
+            <div className='field'>
+              <label>E-mail</label>
+              <input disabled type='email' value={booking.email} />
+            </div>
+            <div className='field'>
+              <label>Telefone</label>
+              <input disabled type='text' value={booking.phone} />
+            </div>
+            <div className='field'>
+              <label>Data</label>
+              <input disabled type='text' value={formatDate(booking.date.toString())} />
+            </div>
+            <div className='field'>
+              <label>Horário</label>
+              <input
+                disabled
+                type='text'
+                value={`${formatTime(booking.time)} – ${incrementTimeByOneHour(booking.time)}`}
+              />
+            </div>
+            <div className='field md:col-span-2'>
+              <label>Mensagem</label>
+              <textarea disabled value={booking.message} rows={5} />
+            </div>
           </div>
-        </section>
+
+          {booking.status === 'pending' && (
+            <div className='flex flex-wrap gap-3 mt-6 pt-5 border-t border-slate-100'>
+              <button onClick={cancelBooking} disabled={isLoading} type='button' className='btn btn-danger'>
+                Cancelar consulta
+              </button>
+              <button onClick={completeBooking} disabled={isLoading} type='button'
+                className='btn btn-primary'>
+                Marcar como concluído
+              </button>
+            </div>
+          )}
+        </div>
       )}
     </section>
   )
 }
-
 export default IndividualBooking
