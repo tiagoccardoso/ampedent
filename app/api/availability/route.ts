@@ -1,58 +1,92 @@
-import { allTimes } from '@/data/times'
 import { dataApiRequest } from '@/lib/dataApi'
 import { BookingRow } from '@/lib/types'
 import { unstable_noStore as noStore } from 'next/cache'
 
+type ProfessionalScheduleRow = {
+  professional_id: string
+  weekday: number
+  start_time: string
+  end_time: string
+  break_start: string | null
+  break_end: string | null
+  appointment_duration_minutes: number
+  is_active: boolean
+}
+
+const TZ = 'America/Sao_Paulo'
+
+function toDateInSaoPaulo(dateText: string) {
+  return new Date(`${dateText}T00:00:00-03:00`)
+}
+
+function toMinuteOfDay(time: string) {
+  const [h, m] = time.slice(0, 5).split(':').map(Number)
+  return h * 60 + m
+}
+
+function toTime(minutes: number) {
+  const h = String(Math.floor(minutes / 60)).padStart(2, '0')
+  const m = String(minutes % 60).padStart(2, '0')
+  return `${h}:${m}:00`
+}
+
 export async function GET(req: Request) {
   noStore()
-  try {
-    const url = new URL(req.url)
-    const date = url.searchParams.get('date')
+  const url = new URL(req.url)
+  const date = url.searchParams.get('date')
+  const professionalId = url.searchParams.get('professionalId')
 
-    let selectedDate: Date | null = null
-    if (date !== null) {
-      selectedDate = new Date(date)
-    } else {
-      throw new Error('Data inválida')
-    }
-
-    const dayOfWeek = selectedDate.getDay()
-    if (dayOfWeek === 0 || dayOfWeek === 6) {
-      throw new Error('No available times on Saturday or Sunday')
-    }
-
-    const selectedDay = selectedDate.toISOString().split('T')[0]
-    const { data: bookings } = await dataApiRequest<
-      Pick<BookingRow, 'time' | 'status'>[]
-    >('bookings', {
-      searchParams: {
-        select: 'time,status',
-        date: `eq.${selectedDay}`,
-      },
-    })
-
-    const bookedAndNotCanceledTimes = bookings
-      .filter(booking => booking.status !== 'canceled')
-      .map(booking => booking.time)
-
-    const utcTime = new Date().getTime()
-    const dstOffset = new Date(utcTime).getTimezoneOffset() / 60
-    const cetOffset = dstOffset < 60 ? 60 : 120
-    const currentCETTime = new Date(utcTime + cetOffset * 60 * 1000)
-
-    const availableTimes = allTimes.filter(time => {
-      const availableTime = new Date(`${selectedDay}T${time}`)
-      return (
-        availableTime.getTime() > currentCETTime.getTime() &&
-        !bookedAndNotCanceledTimes.includes(time)
-      )
-    })
-
-    return Response.json({
-      message: 'Horários disponíveis encontrados',
-      availableTimes: availableTimes,
-    })
-  } catch (error) {
-    throw new Error('Não foi possível buscar horários disponíveis: ' + error)
+  if (!date || !professionalId) {
+    return Response.json({ message: 'Profissional e data são obrigatórios', availableTimes: [] }, { status: 400 })
   }
+
+  const selectedDate = toDateInSaoPaulo(date)
+  const weekday = selectedDate.getUTCDay()
+
+  const { data: schedules } = await dataApiRequest<ProfessionalScheduleRow[]>('professional_schedules', {
+    searchParams: {
+      professional_id: `eq.${professionalId}`,
+      weekday: `eq.${weekday}`,
+      is_active: 'eq.true',
+      select: '*',
+      limit: 1,
+    },
+  })
+
+  if (!schedules.length) {
+    return Response.json({ message: 'Nenhum horário configurado para este dia', availableTimes: [] })
+  }
+
+  const schedule = schedules[0]
+  const { data: bookings } = await dataApiRequest<Pick<BookingRow, 'time' | 'status'>[]>('bookings', {
+    searchParams: {
+      select: 'time,status',
+      date: `eq.${date}`,
+      professional_id: `eq.${professionalId}`,
+    },
+  })
+
+  const booked = new Set(bookings.filter(b => b.status !== 'canceled').map(b => b.time))
+
+  const start = toMinuteOfDay(schedule.start_time)
+  const end = toMinuteOfDay(schedule.end_time)
+  const breakStart = schedule.break_start ? toMinuteOfDay(schedule.break_start) : null
+  const breakEnd = schedule.break_end ? toMinuteOfDay(schedule.break_end) : null
+
+  const nowInBr = new Date(new Date().toLocaleString('en-US', { timeZone: TZ }))
+  const todayBr = nowInBr.toISOString().slice(0, 10)
+
+  const slots: string[] = []
+  for (let current = start; current + schedule.appointment_duration_minutes <= end; current += schedule.appointment_duration_minutes) {
+    const isInBreak = breakStart !== null && breakEnd !== null && current >= breakStart && current < breakEnd
+    if (isInBreak) continue
+
+    const time = toTime(current)
+    const isPastToday = date === todayBr && toMinuteOfDay(time) <= (nowInBr.getHours() * 60 + nowInBr.getMinutes())
+    if (isPastToday) continue
+    if (booked.has(time)) continue
+    slots.push(time)
+  }
+
+  return Response.json({ message: 'Horários disponíveis encontrados', availableTimes: slots })
 }

@@ -31,6 +31,7 @@ export type BookingRow = {
   status: BookingStatus
   date: string
   time: string
+  professional_id?: string | null
   created_at?: string
   updated_at?: string
 }
