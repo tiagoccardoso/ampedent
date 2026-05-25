@@ -8,19 +8,19 @@ import { FormFeedback } from '../_components/form-feedback'
 
 async function save(formData: FormData) {
   'use server'
+  const patient_id = String(formData.get('patient_id') || '')
+  const appointment_date = String(formData.get('appointment_date') || '')
+  const start_time = String(formData.get('start_time') || '')
+  const end_time = String(formData.get('end_time') || '')
+  if (!patient_id || !appointment_date || !start_time || !end_time) redirect('/admin/agenda?error=Verifique+os+campos+obrigat%C3%B3rios')
   try {
-    const patient_id = String(formData.get('patient_id') || '')
-    const appointment_date = String(formData.get('appointment_date') || '')
-    const start_time = String(formData.get('start_time') || '')
-    const end_time = String(formData.get('end_time') || '')
-    if (!patient_id || !appointment_date || !start_time || !end_time) redirect('/admin/agenda?error=Verifique+os+campos+obrigat%C3%B3rios')
     await sql`insert into appointments (patient_id, professional_id, procedure_id, notes, appointment_date, start_time, end_time, status) values (${patient_id}::uuid, ${String(formData.get('professional_id')||'')||null}::uuid, ${String(formData.get('procedure_id')||'')||null}::uuid, ${String(formData.get('notes')||'')||null}, ${appointment_date}, ${start_time}, ${end_time}, ${String(formData.get('status')||'scheduled')}::appointment_status)`
-    revalidatePath('/admin/agenda')
-    redirect('/admin/agenda?ok=Agendamento+criado+com+sucesso')
   } catch (e) {
     console.error('agenda.save', e)
     redirect('/admin/agenda?error=N%C3%A3o+foi+poss%C3%ADvel+salvar.+Verifique+os+dados+e+tente+novamente')
   }
+  revalidatePath('/admin/agenda')
+  redirect('/admin/agenda?ok=Agendamento+criado+com+sucesso')
 }
 
 const statusLabel: Record<string, string> = {

@@ -8,17 +8,17 @@ import { FormFeedback } from '../_components/form-feedback'
 
 async function savePatient(formData: FormData) {
   'use server'
+  const full_name = String(formData.get('full_name') || '').trim()
+  const phone = String(formData.get('phone') || '').trim()
+  if (!full_name || !phone) redirect('/admin/patients?error=Verifique+os+campos+obrigat%C3%B3rios')
   try {
-    const full_name = String(formData.get('full_name') || '').trim()
-    const phone = String(formData.get('phone') || '').trim()
-    if (!full_name || !phone) redirect('/admin/patients?error=Verifique+os+campos+obrigat%C3%B3rios')
     await sql`insert into patients (full_name, phone, cpf, birth_date, email, address, guardian_name, notes, status) values (${full_name}, ${phone}, ${String(formData.get('cpf')||'')||null}, ${String(formData.get('birth_date')||'')||null}, ${String(formData.get('email')||'')||null}, ${String(formData.get('address')||'')||null}, ${String(formData.get('guardian_name')||'')||null}, ${String(formData.get('notes')||'')||null}, ${String(formData.get('status') || 'active')}::patient_status)`
-    revalidatePath('/admin/patients')
-    redirect('/admin/patients?ok=Paciente+cadastrado+com+sucesso')
   } catch (e) {
     console.error('patients.save', e)
     redirect('/admin/patients?error=N%C3%A3o+foi+poss%C3%ADvel+salvar.+Verifique+os+dados+e+tente+novamente')
   }
+  revalidatePath('/admin/patients')
+  redirect('/admin/patients?ok=Paciente+cadastrado+com+sucesso')
 }
 
 const statusLabel: Record<string, string> = {

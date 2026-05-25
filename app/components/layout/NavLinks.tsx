@@ -41,12 +41,12 @@ export default function NavLinks() {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex h-10 items-center gap-2.5 rounded-lg mx-2 px-3 text-sm font-medium transition-colors
+            className={`flex h-12 md:h-10 items-center gap-2.5 rounded-lg mx-2 px-3 text-sm font-medium transition-colors
               ${isActive
                 ? 'bg-[#e5eeff] text-[#0e7490] font-semibold'
                 : 'text-[#64748b] hover:bg-[#f8f9ff] hover:text-[#0f172a]'
               } md:flex-none md:w-auto`}>
-            <span className='text-xs opacity-70'>{item.icon}</span>
+            <span className='text-lg md:text-sm flex-shrink-0 opacity-80'>{item.icon}</span>
             <span className='hidden md:inline'>{item.label}</span>
           </Link>
         )
