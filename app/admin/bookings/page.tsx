@@ -6,14 +6,20 @@ import { useEffect, useState } from 'react'
 import { useDebounce } from '@uidotdev/usehooks'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/app/components/AppProvider'
-
-import {
-  formatDate,
-  formatTime,
-  incrementTimeByOneHour,
-} from '@/lib/dateAndTimeUtils'
+import { formatDate, formatTime, incrementTimeByOneHour } from '@/lib/dateAndTimeUtils'
 import Spinner from '@/app/components/Spinner'
 import Pagination from '@/app/components/admin/Pagination'
+
+const statusLabel: Record<string, string> = {
+  completed: 'Concluído',
+  canceled: 'Cancelado',
+  pending: 'Pendente',
+}
+const statusClass: Record<string, string> = {
+  completed: 'badge badge-success',
+  canceled: 'badge badge-error',
+  pending: 'badge badge-warning',
+}
 
 function Bookings() {
   const [bookings, setBookings] = useState<BookingType[]>([])
@@ -27,26 +33,22 @@ function Bookings() {
   const router = useRouter()
   const { status } = useAuth()
 
-  useEffect(() => {
-    setPage(1)
-  }, [debouncedSearchTerm])
+  useEffect(() => { setPage(1) }, [debouncedSearchTerm])
 
   useEffect(() => {
     async function fetchBookings() {
       try {
         setIsLoading(true)
-        const res = await fetch(
-          `/api/booking?status=${filter}&page=${page}&search=${search}`,
-        )
+        const res = await fetch(`/api/booking?status=${filter}&page=${page}&search=${search}`)
         if (res.ok) {
           const data = await res.json()
           setBookings(data.bookings)
           setPages(data.totalPages)
-          setIsLoading(false)
         }
       } catch (err: any) {
-        setIsLoading(false)
         setError(err.message)
+      } finally {
+        setIsLoading(false)
       }
     }
     fetchBookings()
@@ -61,106 +63,104 @@ function Bookings() {
   }
 
   return (
-    <section className='grid gap-4'>
-      <div className='relative'>
-        {isLoading && <Spinner />}
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className='max-w-md items-center'
-          placeholder='Buscar por nome ou e-mail'
-          type='search'
-        />
+    <section className='space-y-4'>
+      <div>
+        <h1 className='text-2xl font-bold text-gray-900'>Agendamentos</h1>
+        <p className='text-sm text-gray-500 mt-1'>Gerencie e acompanhe as solicitações de consulta.</p>
       </div>
-      {error && <p className='text-red-600 text-center '>{error}</p>}
-      <div className='md:min-h-[700px] h-full relative w-full overflow-auto'>
-        <table className='w-full caption-bottom text-sm'>
+
+      {/* Search + Filter */}
+      <div className='flex flex-col sm:flex-row gap-3 items-start sm:items-center'>
+        <div className='relative flex-1 max-w-sm'>
+          {isLoading && (
+            <div className='absolute left-3 top-1/2 -translate-y-1/2'>
+              <Spinner />
+            </div>
+          )}
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder='Buscar por nome ou e-mail'
+            type='search'
+            className='pl-4'
+          />
+        </div>
+        <select
+          value={filter}
+          onChange={e => setFilter(e.target.value)}
+          className='w-auto'>
+          <option value='all'>Todos os status</option>
+          <option value='pending'>Pendente</option>
+          <option value='completed'>Concluído</option>
+          <option value='canceled'>Cancelado</option>
+        </select>
+      </div>
+
+      {error && (
+        <p className='rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700'>
+          {error}
+        </p>
+      )}
+
+      {/* Table */}
+      <div className='admin-card overflow-auto'>
+        <table className='admin-table'>
           <thead>
-            <tr className='border-b transition-colors hover:bg-muted/50 '>
-              <th className='h-12 px-4 text-left  align-middle font-medium text-muted-foreground w-[100px] whitespace-nowrap'>
-                ID do agendamento
-              </th>
-              <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground'>
-                Nome
-              </th>
-              <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground'>
-                Email
-              </th>
-              <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground'>
-                Telefone
-              </th>
-              <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground'>
-                <div className='flex flex-row items-center gap-4'>
-                  <label htmlFor='status'>Status</label>
-                  <select
-                    name='status'
-                    id='status'
-                    onChange={e => setFilter(e.target.value)}
-                    className='bg-white max-w-[150px]'>
-                    <option value='all'>todos</option>
-                    <option value='pending'>pendente</option>
-                    <option value='completed'>concluído</option>
-                    <option value='canceled'>cancelado</option>
-                  </select>
-                </div>
-              </th>
-              <th className='h-12 px-4 align-middle font-medium text-muted-foreground text-right'>
-                Agendado
-              </th>
-              <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground'></th>
+            <tr>
+              <th className='w-36'>ID</th>
+              <th>Nome</th>
+              <th>E-mail</th>
+              <th>Telefone</th>
+              <th>Status</th>
+              <th className='text-right'>Agendado para</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
-            {bookings.length > 0 &&
-              bookings.map(booking => (
-                <tr
-                  className='border-b transition-colors hover:bg-muted/50 '
-                  key={booking._id.toString()}>
-                  <td className='p-4 align-middle font-medium'>
-                    {booking._id.toString()}
-                  </td>
-                  <td className='p-4 align-middle capitalize'>
-                    {booking.firstName} {booking.lastName}
-                  </td>
-                  <td className='p-4 align-middle '>{booking.email}</td>
-                  <td className='p-4 align-middle'>{booking.phone}</td>
-                  <td
-                    className={`p-4 align-middle font-bold ${
-                      booking.status === 'completed'
-                        ? 'text-green-600'
-                        : booking.status === 'canceled'
-                        ? 'text-red-600'
-                        : ''
-                    }`}>
-                    {booking.status === 'completed'
-                      ? 'concluído'
-                      : booking.status === 'canceled'
-                      ? 'cancelado'
-                      : 'pendente'}
-                  </td>
-                  <td className='p-4 align-middle md:text-right text-center'>
-                    {formatTime(booking.time.toString())} -{' '}
-                    {incrementTimeByOneHour(booking.time.toString())} ,{' '}
-                    {formatDate(booking.date.toString())}
-                  </td>
-                  <td className='p-4 align-middle'>
-                    <button>
-                      <Link
-                        href={`/admin/bookings/${booking._id.toString()}`}
-                        className='btn '>
-                        Ver detalhes
-                      </Link>
-                    </button>
-                  </td>
-                </tr>
-              ))}
+            {bookings.length === 0 && !isLoading && (
+              <tr>
+                <td colSpan={7} className='py-12 text-center text-gray-400'>
+                  Nenhum agendamento encontrado.
+                </td>
+              </tr>
+            )}
+            {bookings.map(booking => (
+              <tr key={booking._id.toString()}>
+                <td className='font-mono text-xs text-gray-400 truncate max-w-[8rem]'>
+                  {booking._id.toString().slice(-8)}
+                </td>
+                <td className='font-medium capitalize'>
+                  {booking.firstName} {booking.lastName}
+                </td>
+                <td className='text-gray-500'>{booking.email}</td>
+                <td className='text-gray-500'>{booking.phone}</td>
+                <td>
+                  <span className={statusClass[booking.status] ?? 'badge badge-neutral'}>
+                    {statusLabel[booking.status] ?? booking.status}
+                  </span>
+                </td>
+                <td className='text-right whitespace-nowrap text-sm text-gray-600'>
+                  {formatTime(booking.time.toString())}–{incrementTimeByOneHour(booking.time.toString())},{' '}
+                  {formatDate(booking.date.toString())}
+                </td>
+                <td>
+                  <Link
+                    href={`/admin/bookings/${booking._id.toString()}`}
+                    className='btn text-xs px-3 py-1.5'>
+                    Detalhes
+                  </Link>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
+
       {bookings.length > 0 && pages && (
         <Pagination page={page} setPage={setPage} pages={pages} />
       )}
     </section>
   )
 }
+
 export default Bookings

@@ -16,11 +16,18 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className='flex min-h-screen flex-col md:flex-row md:overflow-hidden'>
-      <div className='w-full flex-none md:w-64'>
+    <div className='flex min-h-screen bg-[#F6F8FC]'>
+      {/* Sidebar */}
+      <aside className='w-16 md:w-60 shrink-0 sticky top-0 h-screen'>
         <SideNav />
-      </div>
-      <div className='flex-grow p-6 md:overflow-y-auto md:p-12'>{children}</div>
+      </aside>
+
+      {/* Main content */}
+      <main className='flex-1 min-w-0 overflow-y-auto'>
+        <div className='px-4 py-6 md:px-8 md:py-8 max-w-7xl'>
+          {children}
+        </div>
+      </main>
     </div>
   )
 }

@@ -1,5 +1,38 @@
 @import "tailwindcss";
 
+/* ─── Design Tokens (Stitch / Material Design 3) ─── */
+:root {
+  --color-primary: #1B5BDD;
+  --color-primary-light: #EBF2FF;
+  --color-primary-dark: #1048BB;
+  --color-secondary: #0FA3A3;
+  --color-surface: #FFFFFF;
+  --color-background: #F6F8FC;
+  --color-border: #DDE3EE;
+  --color-text-primary: #1F2937;
+  --color-text-secondary: #6B7280;
+  --color-success: #16A34A;
+  --color-success-light: #DCFCE7;
+  --color-error: #DC2626;
+  --color-error-light: #FEE2E2;
+  --color-warning: #D97706;
+  --color-warning-light: #FEF3C7;
+
+  /* shadcn/ui compat — usados em bg-muted/50 e text-muted-foreground */
+  --muted: #F3F4F6;
+  --muted-foreground: #6B7280;
+}
+
+@theme {
+  --color-muted: #F3F4F6;
+  --color-muted-foreground: #6B7280;
+  --color-ds-primary: #1B5BDD;
+  --color-ds-primary-light: #EBF2FF;
+  --color-ds-primary-dark: #1048BB;
+  --color-ds-surface: #F6F8FC;
+  --color-ds-border: #DDE3EE;
+}
+
 .hero-container {
   position: relative;
   width: 100vw;
@@ -43,8 +76,10 @@ input[type='text'],
 input[type='number'],
 input[type='search'],
 select {
-  @apply block w-full mb-1 rounded-md;
-  @apply border p-2 border-gray-200;
+  @apply block w-full mb-1 rounded-lg;
+  @apply border p-2.5 border-gray-200 bg-white text-gray-900;
+  @apply transition-colors outline-none;
+  @apply focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20;
 }
 input[type='email']:disabled,
 input[type='password']:disabled,
@@ -52,19 +87,61 @@ input[type='tel']:disabled,
 input[type='text']:disabled,
 select:disabled,
 textarea:disabled {
-  @apply bg-gray-300 border-0 cursor-not-allowed text-gray-500;
+  @apply bg-gray-100 border-gray-200 cursor-not-allowed text-gray-400;
 }
 label {
-  @apply text-gray-800 text-sm leading-tight;
+  @apply text-gray-700 text-sm font-medium leading-tight;
 }
 label + input,
 textarea {
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 button[type='submit']:disabled,
 .submit:disabled {
-  @apply cursor-not-allowed  bg-blue-400;
+  @apply cursor-not-allowed bg-blue-300;
+}
+
+/* ─── Admin Table Base ─── */
+.admin-table {
+  @apply w-full caption-bottom text-sm border-collapse;
+}
+.admin-table thead tr {
+  @apply border-b border-gray-200 bg-gray-50;
+}
+.admin-table th {
+  @apply h-11 px-4 text-left align-middle text-xs font-semibold uppercase tracking-wide text-gray-500;
+}
+.admin-table tbody tr {
+  @apply border-b border-gray-100 transition-colors hover:bg-gray-50/70;
+}
+.admin-table td {
+  @apply p-4 align-middle text-gray-700;
+}
+
+/* ─── Status Badge ─── */
+.badge {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+}
+.badge-success { @apply bg-green-100 text-green-700; }
+.badge-error   { @apply bg-red-100 text-red-700; }
+.badge-warning { @apply bg-yellow-100 text-yellow-700; }
+.badge-neutral { @apply bg-gray-100 text-gray-600; }
+
+/* ─── Admin Card ─── */
+.admin-card {
+  @apply rounded-xl border border-gray-200 bg-white p-5 shadow-sm;
+}
+
+/* ─── Stat Card ─── */
+.stat-card {
+  @apply rounded-xl border border-gray-200 bg-white p-5 shadow-sm flex flex-col gap-1;
+}
+.stat-card__value {
+  @apply text-3xl font-bold text-gray-900;
+}
+.stat-card__label {
+  @apply text-sm text-gray-500;
 }
 
 .hamburger-top,
@@ -81,8 +158,10 @@ button[type='submit']:disabled,
 }
 
 .btn {
-  @apply flex justify-center gap-2 text-gray-800 font-semibold;
-  @apply border border-gray-300 rounded px-6 py-2 hover:text-black hover:border-black;
+  @apply inline-flex items-center justify-center gap-2 font-medium text-sm;
+  @apply border border-gray-300 rounded-lg px-4 py-2;
+  @apply text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400;
+  @apply transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/30;
 }
 
 .hamburger-middle {
