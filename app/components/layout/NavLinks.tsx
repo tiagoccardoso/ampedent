@@ -14,6 +14,7 @@ const navItems: NavItem[] = [
   { href: '/admin/odontogram', label: 'Odontograma', roles: ['superadmin', 'admin', 'dentist'] },
   { href: '/admin/procedures', label: 'Procedimentos', roles: ['superadmin', 'admin', 'dentist'] },
   { href: '/admin/budgets', label: 'Orçamentos', roles: ['superadmin', 'admin', 'dentist', 'reception'] },
+  { href: '/admin/budget-items', label: 'Itens orçamento', roles: ['superadmin', 'admin', 'dentist', 'reception'] },
   { href: '/admin/financial', label: 'Financeiro', roles: ['superadmin', 'admin', 'financial'] },
   { href: '/admin/professionals', label: 'Profissionais', roles: ['superadmin', 'admin', 'reception'] },
   { href: '/admin/reports', label: 'Relatórios', roles: ['superadmin', 'admin', 'financial'] },
