@@ -1,5 +1,5 @@
 export type BookingStatus = 'pending' | 'completed' | 'canceled'
-export type AdminRole = 'admin' | 'superadmin'
+export type AdminRole = 'admin' | 'superadmin' | 'dentist' | 'reception' | 'financial'
 
 export type BookingType = {
   _id: string
