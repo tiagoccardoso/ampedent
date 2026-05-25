@@ -1,6 +1,7 @@
 import { isSuperAdmin } from '@/lib/isSuperAdmin'
 import { mapBooking } from '@/lib/dbMappers'
 import { dataApiRequest } from '@/lib/dataApi'
+import { sql } from '@/lib/neon'
 import { BookingRow } from '@/lib/types'
 
 function normalizeBookingDate(date: string | Date) {
@@ -9,11 +10,7 @@ function normalizeBookingDate(date: string | Date) {
 
 function buildSearchFilter(search: string) {
   const term = search.trim()
-
-  if (!term) {
-    return undefined
-  }
-
+  if (!term) return undefined
   return `(first_name.ilike.*${term}*,last_name.ilike.*${term}*,phone.ilike.*${term}*,email.ilike.*${term}*)`
 }
 
@@ -26,13 +23,8 @@ export async function GET(req: Request) {
 
       if (_id) {
         const { data } = await dataApiRequest<BookingRow[]>('bookings', {
-          searchParams: {
-            select: '*',
-            id: `eq.${_id}`,
-            limit: 1,
-          },
+          searchParams: { select: '*', id: `eq.${_id}`, limit: 1 },
         })
-
         return Response.json({
           message: 'Agendamento encontrado',
           booking: data[0] ? mapBooking(data[0]) : null,
@@ -53,19 +45,12 @@ export async function GET(req: Request) {
         order: 'status.desc,date.asc,time.asc',
       }
 
-      if (status !== 'all') {
-        searchParams.status = `eq.${status}`
-      }
-
-      if (searchFilter) {
-        searchParams.or = searchFilter
-      }
+      if (status !== 'all') searchParams.status = `eq.${status}`
+      if (searchFilter) searchParams.or = searchFilter
 
       const { data, count } = await dataApiRequest<BookingRow[]>('bookings', {
         searchParams,
-        headers: {
-          Prefer: 'count=exact',
-        },
+        headers: { Prefer: 'count=exact' },
       })
 
       return Response.json({
@@ -76,7 +61,7 @@ export async function GET(req: Request) {
     } else {
       throw new Error('Não autorizado')
     }
-  } catch (error) {
+  } catch {
     throw new Error('Could not fetch bookings')
   }
 }
@@ -84,7 +69,33 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { firstName, lastName, email, phone, message, date, time } = body
+    const { firstName, lastName, email, phone, message, date, time, professionalId } =
+      body
+
+    const normalizedDate = normalizeBookingDate(date)
+
+    // Validação básica de campos obrigatórios
+    if (!firstName || !lastName || !email || !phone || !date || !time) {
+      return Response.json({ error: 'Preencha todos os campos obrigatórios.' }, { status: 400 })
+    }
+
+    // Verificação de conflito no backend quando há profissional vinculado
+    if (professionalId) {
+      const conflict = await sql`
+        SELECT id FROM bookings
+        WHERE professional_id = ${professionalId}::uuid
+          AND date = ${normalizedDate}::date
+          AND time = ${time}
+          AND status != 'canceled'
+        LIMIT 1
+      `
+      if (conflict.length > 0) {
+        return Response.json(
+          { error: 'Horário já ocupado. Por favor, escolha outro horário.' },
+          { status: 409 },
+        )
+      }
+    }
 
     const { data } = await dataApiRequest<BookingRow[]>('bookings', {
       method: 'POST',
@@ -94,15 +105,12 @@ export async function POST(req: Request) {
         email,
         phone,
         message: message || null,
-        date: normalizeBookingDate(date),
+        date: normalizedDate,
         time,
+        professional_id: professionalId || null,
       },
-      searchParams: {
-        select: '*',
-      },
-      headers: {
-        Prefer: 'return=representation',
-      },
+      searchParams: { select: '*' },
+      headers: { Prefer: 'return=representation' },
     })
 
     return Response.json({
@@ -110,6 +118,17 @@ export async function POST(req: Request) {
       booking: data[0] ? mapBooking(data[0]) : null,
     })
   } catch (error: any) {
+    // Captura violação de constraint única do banco (race condition)
+    if (
+      error?.status === 409 ||
+      String(error?.message).toLowerCase().includes('unique') ||
+      String(error?.message).toLowerCase().includes('conflict')
+    ) {
+      return Response.json(
+        { error: 'Horário já ocupado. Por favor, escolha outro horário.' },
+        { status: 409 },
+      )
+    }
     throw new Error(error.message)
   }
 }
@@ -125,15 +144,9 @@ export async function PUT(req: Request) {
         const { data } = await dataApiRequest<BookingRow[]>('bookings', {
           method: 'PATCH',
           body: { status: 'completed' },
-          searchParams: {
-            id: `eq.${_id}`,
-            select: '*',
-          },
-          headers: {
-            Prefer: 'return=representation',
-          },
+          searchParams: { id: `eq.${_id}`, select: '*' },
+          headers: { Prefer: 'return=representation' },
         })
-
         return Response.json({
           message: 'Agendamento atualizado',
           booking: data[0] ? mapBooking(data[0]) : null,
@@ -142,7 +155,7 @@ export async function PUT(req: Request) {
     } else {
       throw new Error('Não autorizado')
     }
-  } catch (error) {
+  } catch {
     throw new Error('Could not update bookings')
   }
 }

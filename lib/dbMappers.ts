@@ -11,6 +11,7 @@ export function mapBooking(row: BookingRow): BookingType {
     status: row.status,
     date: row.date,
     time: row.time,
+    professionalId: row.professional_id ?? null,
   }
 }
 

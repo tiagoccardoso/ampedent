@@ -1,5 +1,293 @@
 @import "tailwindcss";
 
+/* ─── Stitch "Clinical Precision" – tokens CSS ───────────────────────────── */
+:root {
+  /* Palette */
+  --c-primary:        #0E7490;
+  --c-primary-dark:   #005a71;
+  --c-primary-light:  #b9eaff;
+  --c-primary-dim:    #81d1f0;
+  --c-secondary:      #006c49;
+  --c-secondary-lt:   #6cf8bb;
+
+  /* Surfaces */
+  --c-surface:        #f8f9ff;
+  --c-surface-lo:     #eff4ff;
+  --c-surface-mid:    #e5eeff;
+  --c-surface-white:  #FFFFFF;
+  --c-surface-muted:  #F9FAFB;
+
+  /* Borders */
+  --c-border:         #E5E7EB;
+  --c-border-focus:   #0E7490;
+
+  /* Text */
+  --c-text-main:      #0F172A;
+  --c-text-body:      #0b1c30;
+  --c-text-muted:     #64748B;
+  --c-text-variant:   #3f484c;
+  --c-text-on-primary:#FFFFFF;
+
+  /* Semantic */
+  --c-error:          #ba1a1a;
+  --c-error-lt:       #ffdad6;
+  --c-success:        #006c49;
+  --c-success-lt:     #6cf8bb;
+
+  /* Spacing (4px grid) */
+  --space-xs:  4px;
+  --space-sm:  8px;
+  --space-md:  16px;
+  --space-lg:  24px;
+  --space-xl:  32px;
+
+  /* Radii */
+  --r-sm:   4px;
+  --r-base: 8px;
+  --r-md:   12px;
+  --r-lg:   16px;
+  --r-full: 9999px;
+
+  /* Elevation */
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-hover: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* ─── Tipografia global ─────────────────────────────────────────────────── */
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--c-text-body);
+  background: var(--c-surface-muted);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Inputs / selects / textareas ─────────────────────────────────────── */
+textarea,
+input[type='email'],
+input[type='password'],
+input[type='tel'],
+input[type='text'],
+input[type='number'],
+input[type='search'],
+input[type='date'],
+input[type='time'],
+select {
+  @apply block w-full mb-1;
+  padding: 10px 12px;
+  border: 1.5px solid var(--c-border);
+  border-radius: var(--r-base);
+  background: var(--c-surface-white);
+  color: var(--c-text-main);
+  font-size: 14px;
+  line-height: 1.5;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  outline: none;
+}
+
+textarea:focus,
+input[type='email']:focus,
+input[type='password']:focus,
+input[type='tel']:focus,
+input[type='text']:focus,
+input[type='number']:focus,
+input[type='search']:focus,
+input[type='date']:focus,
+input[type='time']:focus,
+select:focus {
+  border-color: var(--c-border-focus);
+  box-shadow: 0 0 0 3px rgba(14, 116, 144, 0.12);
+}
+
+input[type='email']:disabled,
+input[type='password']:disabled,
+input[type='tel']:disabled,
+input[type='text']:disabled,
+input[type='number']:disabled,
+input[type='date']:disabled,
+input[type='time']:disabled,
+select:disabled,
+textarea:disabled {
+  background: var(--c-surface-muted);
+  border-color: var(--c-border);
+  color: var(--c-text-muted);
+  cursor: not-allowed;
+}
+
+label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--c-text-variant);
+  line-height: 1.4;
+}
+
+/* ─── Botões ────────────────────────────────────────────────────────────── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--c-primary);
+  color: var(--c-text-on-primary);
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: var(--r-base);
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--c-primary-dark);
+  box-shadow: var(--shadow-hover);
+}
+.btn-primary:disabled,
+button[type='submit']:disabled,
+.submit:disabled {
+  background: #7BBFCC;
+  cursor: not-allowed;
+}
+
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  background: transparent;
+  color: var(--c-error);
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: var(--r-base);
+  border: 1.5px solid var(--c-error);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.btn-danger:hover {
+  background: var(--c-error-lt);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--c-surface-white);
+  color: var(--c-text-body);
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: var(--r-base);
+  border: 1.5px solid var(--c-border);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.btn:hover {
+  border-color: var(--c-primary);
+  color: var(--c-primary-dark);
+  background: var(--c-surface-lo);
+}
+
+/* ─── Cards ─────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--c-surface-white);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--c-text-body);
+  margin-bottom: 16px;
+}
+
+/* ─── Página pública de agendamento ─────────────────────────────────────── */
+.booking-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background: var(--c-surface);
+}
+
+.booking-card {
+  width: 100%;
+  max-width: 680px;
+  background: var(--c-surface-white);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--c-border);
+  padding: 32px 24px;
+  box-shadow: var(--shadow-card);
+}
+
+@media (min-width: 640px) {
+  .booking-card { padding: 40px 40px; }
+}
+
+/* Skeleton loading para inputs */
+.input-skeleton {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1.5px solid var(--c-border);
+  border-radius: var(--r-base);
+  background: var(--c-surface-muted);
+  color: var(--c-text-muted);
+  font-size: 14px;
+  font-style: italic;
+  margin-bottom: 4px;
+  min-height: 42px;
+}
+
+/* DatePicker override para clinical design */
+.react-datepicker-wrapper,
+.react-datepicker__input-container {
+  width: 100%;
+}
+.react-datepicker__input-container input {
+  width: 100%;
+}
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background-color: var(--c-primary) !important;
+  border-radius: var(--r-sm) !important;
+}
+.react-datepicker__day:hover {
+  background-color: var(--c-surface-lo) !important;
+  border-radius: var(--r-sm) !important;
+}
+.react-datepicker__header {
+  background-color: var(--c-surface-lo) !important;
+  border-bottom-color: var(--c-border) !important;
+}
+
+/* ─── Área Administrativa ────────────────────────────────────────────────── */
+/* Sidebar link active state */
+.nav-link-active {
+  background: var(--c-surface-lo) !important;
+  color: var(--c-primary-dark) !important;
+}
+
+/* Tabelas admin */
+table th {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-text-variant);
+  text-align: left;
+}
+table td {
+  font-size: 14px;
+  color: var(--c-text-body);
+  vertical-align: middle;
+}
+
+/* ─── Utilitários legados (mantidos para compatibilidade) ────────────────── */
 .hero-container {
   position: relative;
   width: 100vw;
@@ -7,14 +295,11 @@
   display: flex;
   justify-content: center;
 }
-
 .hero-container::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
@@ -23,153 +308,60 @@
   z-index: -1;
 }
 
+/* Hamburger menu */
 .hamburger {
   cursor: pointer;
-  width: 24px;
-  height: 24px;
+  width: 24px; height: 24px;
   transition: all 0.25s;
   position: relative;
 }
-
-li {
-  @apply list-disc;
-}
-
-textarea,
-input[type='email'],
-input[type='password'],
-input[type='tel'],
-input[type='text'],
-input[type='number'],
-input[type='search'],
-select {
-  @apply block w-full mb-1 rounded-md;
-  @apply border p-2 border-gray-200;
-}
-input[type='email']:disabled,
-input[type='password']:disabled,
-input[type='tel']:disabled,
-input[type='text']:disabled,
-select:disabled,
-textarea:disabled {
-  @apply bg-gray-300 border-0 cursor-not-allowed text-gray-500;
-}
-label {
-  @apply text-gray-800 text-sm leading-tight;
-}
-label + input,
-textarea {
-  margin-top: 2px;
-}
-
-button[type='submit']:disabled,
-.submit:disabled {
-  @apply cursor-not-allowed  bg-blue-400;
-}
+li { @apply list-disc; }
 
 .hamburger-top,
 .hamburger-middle,
 .hamburger-bottom {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 24px;
-  height: 2px;
+  top: 0; left: 0;
+  width: 24px; height: 2px;
   background: #000;
   transform: rotate(0);
   transition: all 0.5s;
 }
+.hamburger-middle { transform: translateY(7px); }
+.hamburger-bottom { transform: translateY(14px); }
 
-.btn {
-  @apply flex justify-center gap-2 text-gray-800 font-semibold;
-  @apply border border-gray-300 rounded px-6 py-2 hover:text-black hover:border-black;
-}
+.open { transform: rotate(90deg) translateY(0px); }
+.open .hamburger-top    { transform: rotate(45deg) translateY(6px) translate(6px); }
+.open .hamburger-middle { display: none; }
+.open .hamburger-bottom { transform: rotate(-45deg) translateY(6px) translate(-6px); }
 
-.hamburger-middle {
-  transform: translateY(7px);
-}
-
-.hamburger-bottom {
-  transform: translateY(14px);
-}
-
-.open {
-  transform: rotate(90deg);
-  transform: translateY(0px);
-}
-
-.open .hamburger-top {
-  transform: rotate(45deg) translateY(6px) translate(6px);
-}
-
-.open .hamburger-middle {
-  display: none;
-}
-
-.open .hamburger-bottom {
-  transform: rotate(-45deg) translateY(6px) translate(-6px);
-}
-
+/* Animações */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-
 .animate-link {
   opacity: 0;
   transform: translateY(10px);
   animation: fadeIn 0.2s ease-in-out forwards;
 }
+.animate-link:nth-child(1) { animation-delay: 0.1s; }
+.animate-link:nth-child(2) { animation-delay: 0.2s; }
+.animate-link:nth-child(3) { animation-delay: 0.3s; }
+.animate-link:nth-child(4) { animation-delay: 0.4s; }
+.animate-link:nth-child(5) { animation-delay: 0.5s; }
 
-.animate-link:nth-child(1) {
-  animation-delay: 0.1s;
-}
-
-.animate-link:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.animate-link:nth-child(3) {
-  animation-delay: 0.3s;
-}
-.animate-link:nth-child(4) {
-  animation-delay: 0.4s;
-}
-.animate-link:nth-child(5) {
-  animation-delay: 0.5s;
-}
-
+/* Wave decorativo da homepage */
 .wave {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  overflow: hidden;
-  line-height: 0;
-  transform: rotate(180deg);
+  position: absolute; top: 0; left: 0;
+  width: 100%; overflow: hidden;
+  line-height: 0; transform: rotate(180deg);
 }
-
 .wave svg {
-  position: relative;
-  display: block;
-  width: calc(149% + 1.3px);
-  height: 80px;
+  position: relative; display: block;
+  width: calc(149% + 1.3px); height: 80px;
 }
-
-.wave .shape-fill {
-  fill: #276981;
-}
-
-/** For mobile devices **/
+.wave .shape-fill { fill: #276981; }
 @media (max-width: 767px) {
-  .wave svg {
-    width: calc(149% + 1.3px);
-    height: 54px;
-  }
+  .wave svg { height: 54px; }
 }

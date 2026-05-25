@@ -11,6 +11,7 @@ export type BookingType = {
   status: BookingStatus
   date: string
   time: string
+  professionalId?: string | null
 }
 
 export type UserType = {
@@ -31,6 +32,7 @@ export type BookingRow = {
   status: BookingStatus
   date: string
   time: string
+  professional_id?: string | null
   created_at?: string
   updated_at?: string
 }
@@ -43,4 +45,37 @@ export type AdminUserRow = {
   role: AdminRole
   created_at?: string
   updated_at?: string
+}
+
+export type ProfessionalRow = {
+  id: string
+  full_name: string
+  specialty: string | null
+  cro: string | null
+  schedule_notes: string | null
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export type ProfessionalScheduleRow = {
+  id: string
+  professional_id: string
+  day_of_week: number
+  start_time: string
+  end_time: string
+  slot_duration_minutes: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export type ScheduleBlockRow = {
+  id: string
+  professional_id: string
+  block_date: string
+  start_time: string | null
+  end_time: string | null
+  reason: string | null
+  created_at: string
 }
