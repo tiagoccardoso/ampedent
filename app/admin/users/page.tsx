@@ -4,6 +4,7 @@ import { useAuth } from '@/app/components/AppProvider'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
+import Link from 'next/link'
 import Spinner from '@/app/components/Spinner'
 import DeleteButton from '@/app/components/admin/DeleteButton'
 import EditUserModal from '@/app/components/admin/EditUserModal'
@@ -15,7 +16,7 @@ function UserList() {
   const [error, setError] = useState('')
   const [refreshKey, setRefreshKey] = useState(0)
   const triggerRefresh = () => setRefreshKey(refreshKey + 1)
-  const { status } = useAuth()
+  const { status, session } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
@@ -56,8 +57,23 @@ function UserList() {
     document.title = 'Usuários | Admin | DentalSys'
   }, [])
 
+  const canCreate = session?.role === 'admin' || session?.role === 'superadmin'
+
   return (
     <>
+      <div className='flex items-center justify-between mb-6'>
+        <div>
+          <h1 className='text-2xl font-bold text-gray-900'>Usuários</h1>
+          <p className='text-sm text-gray-500 mt-0.5'>Gerencie os usuários do sistema</p>
+        </div>
+        {canCreate && (
+          <Link
+            href='/admin/users/create'
+            className='px-4 py-2 rounded-md bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors'>
+            + Novo usuário
+          </Link>
+        )}
+      </div>
       {isLoading && (
         <div className='flex justify-center py-8'>
           <Spinner />
