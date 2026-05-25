@@ -57,7 +57,7 @@ function Bookings() {
   }, [])
 
   if (status === 'unauthenticated') {
-    router.push('/')
+    router.push('/admin')
   }
 
   return (

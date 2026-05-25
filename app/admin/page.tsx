@@ -51,7 +51,7 @@ function Admin() {
       }
 
       await refreshSession()
-      router.push('/admin/bookings')
+      router.push('/admin/dashboard')
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -65,7 +65,7 @@ function Admin() {
 
   useEffect(() => {
     if (status === 'authenticated') {
-      router.push('/admin/bookings')
+      router.push('/admin/dashboard')
     }
   }, [router, status])
 
