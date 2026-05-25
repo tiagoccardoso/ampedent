@@ -1,4 +1,4 @@
-export type BookingStatus = 'pending' | 'completed' | 'canceled'
+export type BookingStatus = 'pending' | 'confirmada' | 'em_atendimento' | 'completed' | 'canceled' | 'faltou'
 export type AdminRole = 'paciente' | 'doutor' | 'admin' | 'superadmin'
 
 // Clinical module enums

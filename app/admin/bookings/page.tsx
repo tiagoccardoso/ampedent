@@ -60,19 +60,26 @@ function Bookings() {
     router.push('/admin')
   }
 
-  const statusLabel = (s: string) => {
-    if (s === 'completed') return 'Concluído'
-    if (s === 'canceled') return 'Cancelado'
-    return 'Pendente'
+  const STATUS_LABELS: Record<string, string> = {
+    pending: 'Pendente',
+    confirmada: 'Confirmada',
+    em_atendimento: 'Em atendimento',
+    completed: 'Concluído',
+    canceled: 'Cancelado',
+    faltou: 'Faltou',
   }
 
-  const statusClass = (s: string) => {
-    if (s === 'completed')
-      return 'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-green-100 text-green-700'
-    if (s === 'canceled')
-      return 'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-red-100 text-red-700'
-    return 'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-yellow-100 text-yellow-700'
+  const STATUS_CLASSES: Record<string, string> = {
+    pending: 'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-yellow-100 text-yellow-700',
+    confirmada: 'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-blue-100 text-blue-700',
+    em_atendimento: 'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-purple-100 text-purple-700',
+    completed: 'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-green-100 text-green-700',
+    canceled: 'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-red-100 text-red-700',
+    faltou: 'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-orange-100 text-orange-700',
   }
+
+  const statusLabel = (s: string) => STATUS_LABELS[s] ?? s
+  const statusClass = (s: string) => STATUS_CLASSES[s] ?? 'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-gray-100 text-gray-600'
 
   return (
     <section className='grid gap-4'>
@@ -102,8 +109,11 @@ function Bookings() {
             className='bg-white text-sm'>
             <option value='all'>Todos</option>
             <option value='pending'>Pendente</option>
+            <option value='confirmada'>Confirmada</option>
+            <option value='em_atendimento'>Em atendimento</option>
             <option value='completed'>Concluído</option>
             <option value='canceled'>Cancelado</option>
+            <option value='faltou'>Faltou</option>
           </select>
         </div>
       </div>

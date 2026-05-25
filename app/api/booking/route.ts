@@ -94,6 +94,8 @@ export async function POST(req: Request) {
   }
 }
 
+const VALID_BOOKING_STATUSES = ['pending', 'confirmada', 'em_atendimento', 'completed', 'canceled', 'faltou']
+
 export async function PUT(req: Request) {
   try {
     const url = new URL(req.url)
@@ -101,21 +103,31 @@ export async function PUT(req: Request) {
     const role = await isSuperAdmin()
 
     if (role !== 'superadmin' && role !== 'admin' && role !== 'doutor') {
-      throw new Error('Não autorizado')
+      return Response.json({ message: 'Não autorizado' }, { status: 401 })
     }
 
-    if (_id) {
-      const sql = getDb()
-      const rows = await sql`
-        UPDATE bookings SET status = 'completed', updated_at = NOW()
-        WHERE id = ${_id} RETURNING *
-      ` as BookingRow[]
-      return Response.json({
-        message: 'Agendamento atualizado',
-        booking: rows[0] ? mapBooking(rows[0]) : null,
-      })
+    if (!_id) return Response.json({ message: '_id obrigatório' }, { status: 400 })
+
+    let newStatus = 'completed'
+    try {
+      const body = await req.json()
+      if (body.status && VALID_BOOKING_STATUSES.includes(body.status)) {
+        newStatus = body.status
+      }
+    } catch {
+      // No body — keep default 'completed'
     }
+
+    const sql = getDb()
+    const rows = await sql`
+      UPDATE bookings SET status = ${newStatus}, updated_at = NOW()
+      WHERE id = ${_id} RETURNING *
+    ` as BookingRow[]
+    return Response.json({
+      message: 'Agendamento atualizado',
+      booking: rows[0] ? mapBooking(rows[0]) : null,
+    })
   } catch (error) {
-    throw new Error('Could not update bookings')
+    return Response.json({ message: 'Erro ao atualizar agendamento' }, { status: 500 })
   }
 }

@@ -37,36 +37,25 @@ function IndividualBooking({ params }: { params: { id: string } }) {
     fetchBooking()
   }, [params.id])
 
-  async function completeBooking() {
+  async function updateStatus(newStatus: string) {
     try {
       setIsLoading(true)
+      setError('')
       const res = await fetch(`/api/booking?_id=${params.id}`, {
         method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
       })
       if (res.ok) {
-        router.push('/admin/bookings')
+        const data = await res.json()
+        setBooking(data.booking)
+      } else {
+        const data = await res.json().catch(() => ({}))
+        setError(data.message ?? 'Erro ao atualizar status')
       }
-      setIsLoading(false)
     } catch (err: any) {
       setError(err.message)
-
-      setIsLoading(false)
-    }
-  }
-
-  async function cancelBooking() {
-    try {
-      setIsLoading(true)
-      const res = await fetch(`/api/booking/cancel?_id=${params.id}`, {
-        method: 'PUT',
-      })
-      if (res.ok) {
-        router.push('/admin/bookings')
-      }
-      setIsLoading(false)
-    } catch (err: any) {
-      setError(err.message)
-
+    } finally {
       setIsLoading(false)
     }
   }
@@ -75,19 +64,26 @@ function IndividualBooking({ params }: { params: { id: string } }) {
     router.push('/admin')
   }
 
-  const statusLabel = (s: string) => {
-    if (s === 'completed') return 'Concluído'
-    if (s === 'canceled') return 'Cancelado'
-    return 'Pendente'
+  const STATUS_LABELS: Record<string, string> = {
+    pending: 'Pendente',
+    confirmada: 'Confirmada',
+    em_atendimento: 'Em atendimento',
+    completed: 'Concluído',
+    canceled: 'Cancelado',
+    faltou: 'Faltou',
   }
 
-  const statusClass = (s: string) => {
-    if (s === 'completed')
-      return 'inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold bg-green-100 text-green-700'
-    if (s === 'canceled')
-      return 'inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold bg-red-100 text-red-700'
-    return 'inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold bg-yellow-100 text-yellow-700'
+  const STATUS_CLASSES: Record<string, string> = {
+    pending: 'inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold bg-yellow-100 text-yellow-700',
+    confirmada: 'inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold bg-blue-100 text-blue-700',
+    em_atendimento: 'inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold bg-purple-100 text-purple-700',
+    completed: 'inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold bg-green-100 text-green-700',
+    canceled: 'inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold bg-red-100 text-red-700',
+    faltou: 'inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold bg-orange-100 text-orange-700',
   }
+
+  const statusLabel = (s: string) => STATUS_LABELS[s] ?? s
+  const statusClass = (s: string) => STATUS_CLASSES[s] ?? 'inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold bg-gray-100 text-gray-600'
 
   return (
     <section>
@@ -152,21 +148,36 @@ function IndividualBooking({ params }: { params: { id: string } }) {
               )}
             </div>
 
-              {booking.status === 'pending' && (
-                <div className='flex flex-col sm:flex-row gap-3'>
-                  <button
-                    onClick={cancelBooking}
-                    disabled={isLoading}
-                    type='button'
-                    className='flex-1 sm:flex-none rounded px-5 py-2.5 text-sm font-semibold text-white bg-red-500 hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors'>
-                    Cancelar consulta
-                  </button>
-                  <button
-                    onClick={completeBooking}
-                    disabled={isLoading}
-                    type='button'
-                    className='flex-1 sm:flex-none rounded px-5 py-2.5 text-sm font-semibold text-white bg-green-600 hover:bg-green-800 disabled:opacity-60 disabled:cursor-not-allowed transition-colors'>
-                    Marcar como concluído
+              {/* Action buttons based on current status */}
+              {booking.status !== 'completed' && booking.status !== 'canceled' && booking.status !== 'faltou' && (
+                <div className='flex flex-wrap gap-2'>
+                  {booking.status === 'pending' && (
+                    <button onClick={() => updateStatus('confirmada')} disabled={isLoading}
+                      className='rounded px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60 transition-colors'>
+                      Confirmar
+                    </button>
+                  )}
+                  {(booking.status === 'pending' || booking.status === 'confirmada') && (
+                    <button onClick={() => updateStatus('em_atendimento')} disabled={isLoading}
+                      className='rounded px-4 py-2 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-60 transition-colors'>
+                      Iniciar atendimento
+                    </button>
+                  )}
+                  {booking.status === 'em_atendimento' && (
+                    <button onClick={() => updateStatus('completed')} disabled={isLoading}
+                      className='rounded px-4 py-2 text-sm font-semibold text-white bg-green-600 hover:bg-green-700 disabled:opacity-60 transition-colors'>
+                      Concluir
+                    </button>
+                  )}
+                  {(booking.status === 'pending' || booking.status === 'confirmada') && (
+                    <button onClick={() => updateStatus('faltou')} disabled={isLoading}
+                      className='rounded px-4 py-2 text-sm font-semibold text-white bg-orange-500 hover:bg-orange-600 disabled:opacity-60 transition-colors'>
+                      Paciente faltou
+                    </button>
+                  )}
+                  <button onClick={() => updateStatus('canceled')} disabled={isLoading}
+                    className='rounded px-4 py-2 text-sm font-semibold text-white bg-red-500 hover:bg-red-600 disabled:opacity-60 transition-colors'>
+                    Cancelar
                   </button>
                 </div>
               )}
