@@ -1,20 +1,12 @@
-import { AdminRole } from '@/lib/types'
-
 export type RegisterInput = {
   name?: unknown
   email?: unknown
   password?: unknown
   confirmPassword?: unknown
-  role?: unknown
 }
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-export function normalizeRole(role: unknown, fallback: AdminRole = 'admin'): AdminRole {
-  if (role === 'superadmin') return 'superadmin'
-  if (role === 'admin') return 'admin'
-  return fallback
-}
 
 export function validateRegisterInput(input: RegisterInput) {
   const name = String(input.name ?? '').trim()

@@ -10,7 +10,6 @@ function CreateUser() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [role, setRole] = useState<'admin' | 'superadmin'>('admin')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -35,7 +34,7 @@ function CreateUser() {
         return
       }
       setIsLoading(true)
-      const body = { name, email, password, confirmPassword, role }
+      const body = { name, email, password, confirmPassword }
       const res = await fetch('/api/users/register', {
         method: 'POST',
         body: JSON.stringify(body),
@@ -47,7 +46,7 @@ function CreateUser() {
         router.push('/admin/users')
         return
       }
-      setError(data.message ?? 'Não foi possível cadastrar o usuário.')
+      setError(data.message ?? 'Não foi possível cadastrar o usuário. Revise os dados e tente novamente.')
       setIsLoading(false)
     } catch (err: any) {
       setIsLoading(false)
@@ -114,17 +113,7 @@ function CreateUser() {
             />
           </div>
 
-          <div className='relative mb-6'>
-            <label className='block text-sm mb-2'>Perfil</label>
-            <select
-              className='my-2 w-full border rounded p-3'
-              value={role}
-              onChange={e => setRole(e.target.value as 'admin' | 'superadmin')}
-              disabled={isLoading}>
-              <option value='admin'>Administrador</option>
-              <option value='superadmin'>Superadministrador</option>
-            </select>
-          </div>
+
           {error && <p className='text-red-600 text-center my-4'>{error}</p>}
           {success && <p className='text-green-600 text-center my-4'>{success}</p>}
           <button
