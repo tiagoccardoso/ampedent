@@ -1,4 +1,4 @@
-import { dataApiRequest } from '@/lib/dataApi'
+import { sql } from '@/lib/neon'
 import { BookingRow } from '@/lib/types'
 import { unstable_noStore as noStore } from 'next/cache'
 
@@ -43,29 +43,35 @@ export async function GET(req: Request) {
   const selectedDate = toDateInSaoPaulo(date)
   const weekday = selectedDate.getUTCDay()
 
-  const { data: schedules } = await dataApiRequest<ProfessionalScheduleRow[]>('professional_schedules', {
-    searchParams: {
-      professional_id: `eq.${professionalId}`,
-      weekday: `eq.${weekday}`,
-      is_active: 'eq.true',
-      select: '*',
-      limit: 1,
-    },
-  })
+  let schedules: ProfessionalScheduleRow[]
+  let bookings: Pick<BookingRow, 'time' | 'status'>[]
+  try {
+    const scheduleRows = await sql`
+      SELECT professional_id, weekday, start_time, end_time, break_start, break_end, appointment_duration_minutes, is_active
+      FROM professional_schedules
+      WHERE professional_id = ${professionalId}::uuid
+        AND weekday = ${weekday}
+        AND is_active = true
+      LIMIT 1
+    `
+    schedules = scheduleRows as ProfessionalScheduleRow[]
+
+    const bookingRows = await sql`
+      SELECT time, status FROM bookings
+      WHERE date = ${date}::date
+        AND professional_id = ${professionalId}::uuid
+    `
+    bookings = bookingRows as Pick<BookingRow, 'time' | 'status'>[]
+  } catch (error) {
+    console.error('[api/availability]', error instanceof Error ? error.message : error)
+    return Response.json({ message: 'Erro ao buscar disponibilidade', availableTimes: [] }, { status: 500 })
+  }
 
   if (!schedules.length) {
     return Response.json({ message: 'Nenhum horário configurado para este dia', availableTimes: [] })
   }
 
   const schedule = schedules[0]
-  const { data: bookings } = await dataApiRequest<Pick<BookingRow, 'time' | 'status'>[]>('bookings', {
-    searchParams: {
-      select: 'time,status',
-      date: `eq.${date}`,
-      professional_id: `eq.${professionalId}`,
-    },
-  })
-
   const booked = new Set(bookings.filter(b => b.status !== 'canceled').map(b => b.time))
 
   const start = toMinuteOfDay(schedule.start_time)

@@ -1,13 +1,11 @@
-import { dataApiRequest } from '@/lib/dataApi'
+import { sql } from '@/lib/neon'
 
 export async function GET() {
-  const { data } = await dataApiRequest<{ id: string; full_name: string }[]>('professionals', {
-    searchParams: {
-      select: 'id,full_name',
-      is_active: 'eq.true',
-      order: 'full_name.asc',
-    },
-  })
-
-  return Response.json({ professionals: data })
+  try {
+    const rows = await sql`SELECT id, full_name, specialty FROM professionals WHERE is_active = true ORDER BY full_name ASC`
+    return Response.json({ professionals: rows })
+  } catch (error) {
+    console.error('[api/professionals]', error instanceof Error ? error.message : error)
+    return Response.json({ professionals: [] }, { status: 500 })
+  }
 }

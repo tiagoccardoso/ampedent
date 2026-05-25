@@ -165,6 +165,30 @@ button[type='submit']:disabled,
   color: white;
 }
 
+.btn-sm {
+  @apply inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  background: transparent;
+}
+
+.btn-sm:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.btn-danger-sm {
+  @apply inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors;
+  border: 1px solid #fecaca;
+  color: #ef4444;
+  background: transparent;
+}
+
+.btn-danger-sm:hover {
+  background: #fee2e2;
+  border-color: #ef4444;
+}
+
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
