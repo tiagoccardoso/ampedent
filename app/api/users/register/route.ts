@@ -1,7 +1,7 @@
 import { isSuperAdmin } from '@/lib/isSuperAdmin'
 import { createUser } from '@/lib/auth'
 import { toSafeAuthError } from '@/lib/authApiErrors'
-import { normalizeRole, validateRegisterInput } from '@/lib/userValidation'
+import { validateRegisterInput } from '@/lib/userValidation'
 
 export async function POST(req: Request) {
   try {
@@ -12,8 +12,7 @@ export async function POST(req: Request) {
     const validated = validateRegisterInput(payload)
     if (!validated.ok) return Response.json({ message: validated.message }, { status: validated.status })
 
-    const targetRole = normalizeRole(payload.role, 'admin')
-    const user = await createUser(validated.data.email, validated.data.name, validated.data.password, targetRole)
+    const user = await createUser(validated.data.email, validated.data.name, validated.data.password, 'admin')
     return Response.json({ message: 'Novo usuário criado', name: user?.name, email: user?.email, role: user?.role })
   } catch (error: unknown) {
     const safeError = toSafeAuthError(error)
