@@ -1,6 +1,6 @@
 'use client'
 
-import { UserType } from '@/lib/types'
+import { AdminRole, UserType } from '@/lib/types'
 import { FormEvent, useState } from 'react'
 
 function EditUserModal({
@@ -14,7 +14,7 @@ function EditUserModal({
   const [name, setName] = useState(user.name || '')
   const [email, setEmail] = useState(user.email || '')
   const [password, setPassword] = useState('')
-  const [role, setRole] = useState<'admin' | 'superadmin'>(user.role)
+  const [role, setRole] = useState<AdminRole>(user.role)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
@@ -103,9 +103,12 @@ function EditUserModal({
                         className='my-2 w-full border rounded p-3'
                         value={role}
                         disabled={isLoading}
-                        onChange={e => setRole(e.target.value as 'admin' | 'superadmin')}>
+                        onChange={e => setRole(e.target.value as AdminRole)}>
                         <option value='admin'>Administrador</option>
                         <option value='superadmin'>Superadministrador</option>
+                        <option value='dentist'>Dentista</option>
+                        <option value='reception'>Recepção</option>
+                        <option value='financial'>Financeiro</option>
                       </select>
                     </div>
                     {error && (
