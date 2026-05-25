@@ -24,7 +24,7 @@ export async function PUT(req: Request) {
     if (!_id) return Response.json({ message: 'Usuário inválido' }, { status: 400 })
     if (!name || !email) return Response.json({ message: 'Nome e e-mail são obrigatórios.' }, { status: 400 })
     if (name || email || nextRole) {
-      await sql`UPDATE admin_users SET name = ${String(name).trim()}, email = ${String(email).toLowerCase().trim()}, role = COALESCE(${nextRole ?? null}, role), updated_at = NOW() WHERE id = ${_id}`
+      await sql`UPDATE "user" SET name = ${String(name).trim()}, email = ${String(email).toLowerCase().trim()}, role = COALESCE(${nextRole ?? null}, role), updated_at = NOW() WHERE id = ${_id}`
     }
     if (password) await updateUserPassword(_id, password)
     return Response.json({ message: 'Usuário atualizado' })
