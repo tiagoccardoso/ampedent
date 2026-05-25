@@ -11,8 +11,10 @@ function getSql(): NeonQueryFunction<false, false> {
   return _sql
 }
 
+// The Proxy target must be callable for tagged template literal calls (sql`...`)
+// to work. Using {} as target makes the Proxy non-callable and throws TypeError.
 export const sql: NeonQueryFunction<false, false> = new Proxy(
-  {} as NeonQueryFunction<false, false>,
+  (function sqlProxy() {}) as unknown as NeonQueryFunction<false, false>,
   {
     apply(_target, _thisArg, args) {
       return (getSql() as unknown as Function)(...args)
