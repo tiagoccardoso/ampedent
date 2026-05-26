@@ -1,8 +1,6 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
-import logo from '@/public/ampedent.webp'
 import { useEffect, useState } from 'react'
 import UpArrow from '../Icons/UpArrow'
 import { usePathname } from 'next/navigation'
@@ -43,14 +41,13 @@ function TheHeader() {
           onClick={() => setIsOpen(false)}
           href='/'
           className='flex gap-2.5 items-center font-bold text-[#0e7490] hover:text-[#005a71] transition-colors'>
-          <Image
-            src={logo}
-            priority
-            height={80}
-            width={62}
-            alt='logotipo da DentalSys'
+          <svg
+            aria-hidden='true'
             className='h-10 w-auto'
-          />
+            viewBox='0 0 24 24'
+            fill='currentColor'>
+            <path d='M12 2c-1.8 0-3.4.7-4.6 1.9C6.3 5 5.5 6.5 5.5 8.2c0 2 .9 3.8 1.6 5.2.5 1 .9 2 1.1 3.1.2 1.2.3 2.5.3 3.5 0 .6.5 1 1.1 1 .3 0 .6-.1.8-.4.4-.5.8-1.5 1.1-2.9.2-.8.3-1.7.5-2.5.1-.5.3-.7.5-.7s.4.2.5.7c.2.8.3 1.7.5 2.5.3 1.4.7 2.4 1.1 2.9.2.3.5.4.8.4.6 0 1.1-.4 1.1-1 0-1 .1-2.3.3-3.5.2-1.1.6-2.1 1.1-3.1.7-1.4 1.6-3.2 1.6-5.2 0-1.7-.8-3.2-2.1-4.3C15.4 2.7 13.8 2 12 2z' />
+          </svg>
           <span className='text-xl tracking-tight'>DentalSys</span>
         </Link>
 
