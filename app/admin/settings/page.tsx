@@ -5,6 +5,7 @@ import { sql } from '@/lib/neon'
 import { SubmitButton } from '../_components/submit-button'
 import { FormFeedback } from '../_components/form-feedback'
 import { ConfirmActionForm } from '../_components/confirm-action'
+import { ImageUploadField } from '../_components/image-upload-field'
 import {
   getSectionSettings,
   getSectionBlocks,
@@ -52,30 +53,33 @@ function revalidateAll() {
   revalidatePath('/admin/settings')
 }
 
+async function upsertSetting(section: string, key: string, value: string) {
+  if (!value) return
+  await sql`
+    INSERT INTO site_settings (section, key, value)
+    VALUES (${section}, ${key}, ${value})
+    ON CONFLICT (section, key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()
+  `
+}
+
 // ─── Server Actions ───────────────────────────────────────────────────────────
 
 async function saveHeroSettings(fd: FormData) {
   'use server'
-  const fields = ['badge', 'title', 'subtitle', 'description', 'cta_label', 'bg_image_url']
   const title = sanitize(String(fd.get('title') || ''))
   if (!title) redirect('/admin/settings?error=O+t%C3%ADtulo+da+se%C3%A7%C3%A3o+hero+%C3%A9+obrigat%C3%B3rio#hero')
   try {
     await ensureTables()
+    const fields = ['badge', 'title', 'subtitle', 'description', 'cta_label', 'bg_image_url'] as const
     for (const key of fields) {
-      const val = sanitize(String(fd.get(key) || ''))
-      if (!val) continue
-      await sql`
-        INSERT INTO site_settings (section, key, value)
-        VALUES ('hero', ${key}, ${val})
-        ON CONFLICT (section, key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()
-      `
+      await upsertSetting('hero', key, sanitize(String(fd.get(key) || '')))
     }
   } catch (e) {
     console.error('settings.hero.save', e)
-    redirect('/admin/settings?error=Erro+ao+salvar+configurações+do+Hero#hero')
+    redirect('/admin/settings?error=Erro+ao+salvar+se%C3%A7%C3%A3o+Hero#hero')
   }
   revalidateAll()
-  redirect('/admin/settings?ok=Seção+Hero+atualizada+com+sucesso#hero')
+  redirect('/admin/settings?ok=Se%C3%A7%C3%A3o+Hero+atualizada+com+sucesso#hero')
 }
 
 async function saveBenefitsHeading(fd: FormData) {
@@ -84,10 +88,7 @@ async function saveBenefitsHeading(fd: FormData) {
   if (!heading) redirect('/admin/settings?error=T%C3%ADtulo+obrigat%C3%B3rio#benefits')
   try {
     await ensureTables()
-    await sql`
-      INSERT INTO site_settings (section, key, value) VALUES ('benefits', 'heading', ${heading})
-      ON CONFLICT (section, key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()
-    `
+    await upsertSetting('benefits', 'heading', heading)
   } catch (e) {
     console.error('settings.benefits.heading', e)
     redirect('/admin/settings?error=Erro+ao+salvar+t%C3%ADtulo#benefits')
@@ -102,14 +103,8 @@ async function saveTeamHeadings(fd: FormData) {
   if (!heading) redirect('/admin/settings?error=T%C3%ADtulo+obrigat%C3%B3rio#team')
   try {
     await ensureTables()
-    for (const key of ['heading', 'subheading'] as const) {
-      const val = sanitize(String(fd.get(key) || ''))
-      if (!val) continue
-      await sql`
-        INSERT INTO site_settings (section, key, value) VALUES ('team', ${key}, ${val})
-        ON CONFLICT (section, key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()
-      `
-    }
+    await upsertSetting('team', 'heading', heading)
+    await upsertSetting('team', 'subheading', sanitize(String(fd.get('subheading') || '')))
   } catch (e) {
     console.error('settings.team.headings', e)
     redirect('/admin/settings?error=Erro+ao+salvar#team')
@@ -124,14 +119,8 @@ async function saveServicesHeadings(fd: FormData) {
   if (!heading) redirect('/admin/settings?error=T%C3%ADtulo+obrigat%C3%B3rio#services')
   try {
     await ensureTables()
-    for (const key of ['heading', 'subheading'] as const) {
-      const val = sanitize(String(fd.get(key) || ''))
-      if (!val) continue
-      await sql`
-        INSERT INTO site_settings (section, key, value) VALUES ('services', ${key}, ${val})
-        ON CONFLICT (section, key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()
-      `
-    }
+    await upsertSetting('services', 'heading', heading)
+    await upsertSetting('services', 'subheading', sanitize(String(fd.get('subheading') || '')))
   } catch (e) {
     console.error('settings.services.headings', e)
     redirect('/admin/settings?error=Erro+ao+salvar#services')
@@ -146,14 +135,8 @@ async function saveTestimonialsHeadings(fd: FormData) {
   if (!heading) redirect('/admin/settings?error=T%C3%ADtulo+obrigat%C3%B3rio#testimonials')
   try {
     await ensureTables()
-    for (const key of ['heading', 'subheading'] as const) {
-      const val = sanitize(String(fd.get(key) || ''))
-      if (!val) continue
-      await sql`
-        INSERT INTO site_settings (section, key, value) VALUES ('testimonials', ${key}, ${val})
-        ON CONFLICT (section, key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()
-      `
-    }
+    await upsertSetting('testimonials', 'heading', heading)
+    await upsertSetting('testimonials', 'subheading', sanitize(String(fd.get('subheading') || '')))
   } catch (e) {
     console.error('settings.testimonials.headings', e)
     redirect('/admin/settings?error=Erro+ao+salvar#testimonials')
@@ -169,32 +152,21 @@ async function saveCtaSettings(fd: FormData) {
   try {
     await ensureTables()
     for (const key of ['title', 'subtitle', 'promo', 'button_label'] as const) {
-      const val = sanitize(String(fd.get(key) || ''))
-      if (!val) continue
-      await sql`
-        INSERT INTO site_settings (section, key, value) VALUES ('cta', ${key}, ${val})
-        ON CONFLICT (section, key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()
-      `
+      await upsertSetting('cta', key, sanitize(String(fd.get(key) || '')))
     }
   } catch (e) {
     console.error('settings.cta.save', e)
     redirect('/admin/settings?error=Erro+ao+salvar+CTA#cta')
   }
   revalidateAll()
-  redirect('/admin/settings?ok=Seção+CTA+atualizada#cta')
+  redirect('/admin/settings?ok=Se%C3%A7%C3%A3o+CTA+atualizada#cta')
 }
 
 async function addBlock(fd: FormData) {
   'use server'
   const section = sanitize(String(fd.get('section') || ''))
   const title = sanitize(String(fd.get('title') || ''))
-  if (!section || !title) redirect(`/admin/settings?error=Título+obrigatório#${section}`)
-  const subtitle = sanitize(String(fd.get('subtitle') || ''))
-  const description = sanitize(String(fd.get('description') || ''))
-  const image_url = sanitize(String(fd.get('image_url') || ''))
-  const image_alt = sanitize(String(fd.get('image_alt') || ''))
-  const order_index = parseInt(String(fd.get('order_index') || '0'), 10) || 0
-  // build extra from section-specific fields
+  if (!section || !title) redirect(`/admin/settings?error=T%C3%ADtulo+obrigat%C3%B3rio#${section}`)
   const extra: Record<string, string> = {}
   const icon_key = String(fd.get('icon_key') || '')
   const icon_url = sanitize(String(fd.get('icon_url') || ''))
@@ -206,8 +178,16 @@ async function addBlock(fd: FormData) {
     await ensureTables()
     await sql`
       INSERT INTO site_blocks (section, title, subtitle, description, image_url, image_alt, extra, order_index)
-      VALUES (${section}, ${title || null}, ${subtitle || null}, ${description || null},
-              ${image_url || null}, ${image_alt || null}, ${JSON.stringify(extra)}::jsonb, ${order_index})
+      VALUES (
+        ${section},
+        ${title},
+        ${sanitize(String(fd.get('subtitle') || '')) || null},
+        ${sanitize(String(fd.get('description') || '')) || null},
+        ${sanitize(String(fd.get('image_url') || '')) || null},
+        ${sanitize(String(fd.get('image_alt') || '')) || null},
+        ${JSON.stringify(extra)}::jsonb,
+        ${parseInt(String(fd.get('order_index') || '0'), 10) || 0}
+      )
     `
   } catch (e) {
     console.error('settings.block.add', e)
@@ -222,12 +202,7 @@ async function updateBlock(fd: FormData) {
   const id = sanitize(String(fd.get('id') || ''))
   const section = sanitize(String(fd.get('section') || ''))
   const title = sanitize(String(fd.get('title') || ''))
-  if (!id || !title) redirect(`/admin/settings?error=Dados+inválidos#${section}`)
-  const subtitle = sanitize(String(fd.get('subtitle') || ''))
-  const description = sanitize(String(fd.get('description') || ''))
-  const image_url = sanitize(String(fd.get('image_url') || ''))
-  const image_alt = sanitize(String(fd.get('image_alt') || ''))
-  const order_index = parseInt(String(fd.get('order_index') || '0'), 10) || 0
+  if (!id || !title) redirect(`/admin/settings?error=Dados+inv%C3%A1lidos#${section}`)
   const extra: Record<string, string> = {}
   const icon_key = String(fd.get('icon_key') || '')
   const icon_url = sanitize(String(fd.get('icon_url') || ''))
@@ -238,10 +213,14 @@ async function updateBlock(fd: FormData) {
   try {
     await sql`
       UPDATE site_blocks SET
-        title = ${title || null}, subtitle = ${subtitle || null},
-        description = ${description || null}, image_url = ${image_url || null},
-        image_alt = ${image_alt || null}, extra = ${JSON.stringify(extra)}::jsonb,
-        order_index = ${order_index}, updated_at = NOW()
+        title       = ${title},
+        subtitle    = ${sanitize(String(fd.get('subtitle') || '')) || null},
+        description = ${sanitize(String(fd.get('description') || '')) || null},
+        image_url   = ${sanitize(String(fd.get('image_url') || '')) || null},
+        image_alt   = ${sanitize(String(fd.get('image_alt') || '')) || null},
+        extra       = ${JSON.stringify(extra)}::jsonb,
+        order_index = ${parseInt(String(fd.get('order_index') || '0'), 10) || 0},
+        updated_at  = NOW()
       WHERE id = ${id}::uuid
     `
   } catch (e) {
@@ -256,7 +235,7 @@ async function deleteBlock(fd: FormData) {
   'use server'
   const id = sanitize(String(fd.get('id') || ''))
   const section = sanitize(String(fd.get('section') || ''))
-  if (!id) redirect('/admin/settings?error=ID+inválido')
+  if (!id) redirect('/admin/settings?error=ID+inv%C3%A1lido')
   try {
     await sql`DELETE FROM site_blocks WHERE id = ${id}::uuid`
   } catch (e) {
@@ -264,26 +243,13 @@ async function deleteBlock(fd: FormData) {
     redirect(`/admin/settings?error=Erro+ao+excluir+item#${section}`)
   }
   revalidateAll()
-  redirect(`/admin/settings?ok=Item+excluído#${section}`)
+  redirect(`/admin/settings?ok=Item+exclu%C3%ADdo#${section}`)
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+// ─── UI helpers ───────────────────────────────────────────────────────────────
 
 function SectionAnchor({ id }: { id: string }) {
   return <div id={id} className='-mt-6 pt-6' />
-}
-
-function ImagePreview({ url, alt }: { url?: string | null; alt?: string }) {
-  if (!url) return null
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={url}
-      alt={alt || 'Preview'}
-      className='mt-2 h-20 w-auto rounded-lg border border-[#e5e7eb] object-cover'
-      loading='lazy'
-    />
-  )
 }
 
 type BlockFormProps = {
@@ -298,9 +264,11 @@ type BlockFormProps = {
   submitLabel?: string
 }
 
-function BlockForm({ section, action, block, showIconKey, showIconUrl, showLink, showImage, showSubtitle, submitLabel = 'Salvar' }: BlockFormProps) {
+function BlockForm({
+  section, action, block, showIconKey, showIconUrl, showLink, showImage, showSubtitle, submitLabel = 'Salvar',
+}: BlockFormProps) {
   return (
-    <form action={action} className='grid md:grid-cols-2 gap-3'>
+    <form action={action} className='grid md:grid-cols-2 gap-4'>
       <input type='hidden' name='section' value={section} />
       {block && <input type='hidden' name='id' value={block.id} />}
 
@@ -323,10 +291,10 @@ function BlockForm({ section, action, block, showIconKey, showIconUrl, showLink,
 
       {showIconKey && (
         <div>
-          <label>Ícone</label>
-          <select name='icon_key'>
+          <label>Ícone do benefício</label>
+          <select name='icon_key' defaultValue={block?.extra?.icon_key || 'checkmark'}>
             {BENEFIT_ICON_KEYS.map(k => (
-              <option key={k} value={k} selected={block?.extra?.icon_key === k}>{BENEFIT_ICON_LABELS[k]}</option>
+              <option key={k} value={k}>{BENEFIT_ICON_LABELS[k]}</option>
             ))}
           </select>
         </div>
@@ -335,7 +303,13 @@ function BlockForm({ section, action, block, showIconKey, showIconUrl, showLink,
       {showIconUrl && (
         <div className='md:col-span-2'>
           <label>URL do ícone</label>
-          <input name='icon_url' type='url' maxLength={500} defaultValue={block?.extra?.icon_url ?? ''} placeholder='https://...' />
+          <input
+            name='icon_url'
+            type='url'
+            maxLength={500}
+            defaultValue={block?.extra?.icon_url ?? ''}
+            placeholder='https://www.svgrepo.com/show/...'
+          />
         </div>
       )}
 
@@ -347,18 +321,20 @@ function BlockForm({ section, action, block, showIconKey, showIconUrl, showLink,
       )}
 
       {showImage && (
-        <div className='md:col-span-2'>
-          <label>URL da imagem</label>
-          <input name='image_url' maxLength={500} defaultValue={block?.image_url ?? ''} placeholder='/doc1.webp ou https://...' />
-          <ImagePreview url={block?.image_url} alt={block?.image_alt ?? ''} />
-        </div>
-      )}
-
-      {showImage && (
-        <div>
-          <label>Texto alternativo da imagem</label>
-          <input name='image_alt' maxLength={200} defaultValue={block?.image_alt ?? ''} placeholder='Descrição para acessibilidade' />
-        </div>
+        <>
+          <div className='md:col-span-2'>
+            <ImageUploadField
+              name='image_url'
+              currentUrl={block?.image_url}
+              label='Imagem'
+              hint='Formatos aceitos: PNG, JPG, WEBP, GIF, SVG · Máximo 5 MB'
+            />
+          </div>
+          <div>
+            <label>Texto alternativo (acessibilidade)</label>
+            <input name='image_alt' maxLength={200} defaultValue={block?.image_alt ?? ''} placeholder='Descrição da imagem' />
+          </div>
+        </>
       )}
 
       <div>
@@ -386,8 +362,8 @@ function BlocksTable({
 }) {
   if (blocks.length === 0) {
     return (
-      <p className='text-center py-6 text-sm text-[#64748b]'>
-        Nenhum item cadastrado — exibindo conteúdo padrão.
+      <p className='text-center py-6 text-sm text-[#64748b] italic'>
+        Nenhum item cadastrado — página exibindo conteúdo padrão.
       </p>
     )
   }
@@ -399,7 +375,7 @@ function BlocksTable({
             {showImage && <th className='hidden sm:table-cell'>Imagem</th>}
             <th>Título</th>
             <th className='hidden md:table-cell'>Descrição</th>
-            <th>Ordem</th>
+            <th>Ord.</th>
             <th>Ações</th>
           </tr>
         </thead>
@@ -409,8 +385,9 @@ function BlocksTable({
               {showImage && (
                 <td className='hidden sm:table-cell'>
                   {b.image_url
+                    // eslint-disable-next-line @next/next/no-img-element
                     ? <img src={b.image_url} alt={b.image_alt || b.title || ''} className='h-10 w-10 rounded object-cover' loading='lazy' />
-                    : <span className='text-[#64748b]'>—</span>}
+                    : <span className='text-[#94a3b8]'>—</span>}
                 </td>
               )}
               <td className='font-medium text-[#0f172a]'>{b.title}</td>
@@ -453,16 +430,9 @@ export default async function Page({
   const editBlockId = params.editBlock ?? null
 
   const [
-    heroSettings,
-    ctaSettings,
-    benefitsSettings,
-    teamSettings,
-    servicesSettings,
-    testimonialsSettings,
-    benefitsBlocks,
-    teamBlocks,
-    servicesBlocks,
-    testimonialsBlocks,
+    heroSettings, ctaSettings,
+    benefitsSettings, teamSettings, servicesSettings, testimonialsSettings,
+    benefitsBlocks, teamBlocks, servicesBlocks, testimonialsBlocks,
   ] = await Promise.all([
     getSectionSettings('hero'),
     getSectionSettings('cta'),
@@ -476,17 +446,18 @@ export default async function Page({
     getSectionBlocks('testimonials'),
   ])
 
-  // find the block being edited, determine its section
   let editBlock: SiteBlock | null = null
   let editSection: string | null = null
   if (editBlockId) {
-    const allBlocks = [...benefitsBlocks, ...teamBlocks, ...servicesBlocks, ...testimonialsBlocks]
-    editBlock = allBlocks.find(b => b.id === editBlockId) ?? null
+    const all = [...benefitsBlocks, ...teamBlocks, ...servicesBlocks, ...testimonialsBlocks]
+    editBlock = all.find(b => b.id === editBlockId) ?? null
     editSection = editBlock?.section ?? null
   }
 
   const hero = { ...DEFAULT_HERO, ...heroSettings }
   const cta = { ...DEFAULT_CTA, ...ctaSettings }
+
+  const blobConfigured = !!process.env.BLOB_READ_WRITE_TOKEN
 
   return (
     <section className='space-y-8'>
@@ -497,17 +468,30 @@ export default async function Page({
 
       <FormFeedback ok={params.ok} error={params.error} />
 
+      {!blobConfigured && (
+        <div className='flex items-start gap-3 rounded-lg border border-[#fde68a] bg-[#fffbeb] px-4 py-3 text-sm text-[#92400e]'>
+          <svg className='w-4 h-4 mt-0.5 flex-shrink-0' fill='currentColor' viewBox='0 0 20 20'>
+            <path fillRule='evenodd' d='M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z' clipRule='evenodd' />
+          </svg>
+          <span>
+            <strong>Upload de imagens desativado</strong> — a variável <code className='bg-[#fde68a]/60 px-1 rounded'>BLOB_READ_WRITE_TOKEN</code> não está configurada.
+            Configure o Vercel Blob no painel do projeto para habilitar upload de arquivos.
+            Você ainda pode usar URLs de imagens diretamente.
+          </span>
+        </div>
+      )}
+
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <SectionAnchor id='hero' />
       <div className='section-card'>
         <div className='section-card-header'>
-          <h2 className='text-sm font-semibold text-[#0f172a]'>Seção Hero</h2>
-          <span className='text-xs text-[#64748b]'>Título, subtítulo e chamada principal</span>
+          <h2 className='text-sm font-semibold text-[#0f172a]'>Seção Hero — página principal</h2>
+          <span className='text-xs text-[#64748b]'>Título, subtítulo, badge e imagem de fundo</span>
         </div>
         <div className='section-card-body'>
-          <form action={saveHeroSettings} className='grid md:grid-cols-2 gap-3'>
+          <form action={saveHeroSettings} className='grid md:grid-cols-2 gap-4'>
             <div>
-              <label htmlFor='h_badge'>Badge</label>
+              <label htmlFor='h_badge'>Badge (etiqueta acima do título)</label>
               <input id='h_badge' name='badge' maxLength={100} defaultValue={hero.badge} placeholder='Ex: Deixe-nos ajudar você' />
             </div>
             <div className='md:col-span-2'>
@@ -519,20 +503,23 @@ export default async function Page({
               <input id='h_subtitle' name='subtitle' maxLength={300} defaultValue={hero.subtitle} />
             </div>
             <div className='md:col-span-2'>
-              <label htmlFor='h_desc'>Descrição</label>
+              <label htmlFor='h_desc'>Descrição complementar</label>
               <input id='h_desc' name='description' maxLength={300} defaultValue={hero.description} />
             </div>
             <div>
               <label htmlFor='h_cta'>Texto do botão CTA</label>
               <input id='h_cta' name='cta_label' maxLength={60} defaultValue={hero.cta_label} />
             </div>
-            <div>
-              <label htmlFor='h_bg'>URL da imagem de fundo</label>
-              <input id='h_bg' name='bg_image_url' maxLength={500} defaultValue={hero.bg_image_url} placeholder='/hero.webp ou https://...' />
-              <ImagePreview url={hero.bg_image_url} alt='Fundo hero' />
+            <div className='md:col-span-2'>
+              <ImageUploadField
+                name='bg_image_url'
+                currentUrl={hero.bg_image_url}
+                label='Imagem de fundo do Hero'
+                hint='Recomendado: imagem horizontal (landscape), mín. 1200×600 px'
+              />
             </div>
             <div className='md:col-span-2 flex justify-end'>
-              <SubmitButton label='Salvar Hero' />
+              <SubmitButton label='Salvar seção Hero' />
             </div>
           </form>
         </div>
@@ -542,11 +529,11 @@ export default async function Page({
       <SectionAnchor id='cta' />
       <div className='section-card'>
         <div className='section-card-header'>
-          <h2 className='text-sm font-semibold text-[#0f172a]'>Seção CTA (rodapé)</h2>
-          <span className='text-xs text-[#64748b]'>Chamada final de agendamento</span>
+          <h2 className='text-sm font-semibold text-[#0f172a]'>Seção CTA — chamada para agendamento</h2>
+          <span className='text-xs text-[#64748b]'>Banner de rodapé com botão de agendamento</span>
         </div>
         <div className='section-card-body'>
-          <form action={saveCtaSettings} className='grid md:grid-cols-2 gap-3'>
+          <form action={saveCtaSettings} className='grid md:grid-cols-2 gap-4'>
             <div className='md:col-span-2'>
               <label htmlFor='c_title'>Título *</label>
               <input id='c_title' name='title' required maxLength={200} defaultValue={cta.title} />
@@ -575,14 +562,13 @@ export default async function Page({
       <div className='section-card'>
         <div className='section-card-header'>
           <h2 className='text-sm font-semibold text-[#0f172a]'>Seção Benefícios</h2>
-          <span className='text-xs text-[#64748b]'>{benefitsBlocks.length} cadastrado(s) · fallback: 4 padrão</span>
+          <span className='text-xs text-[#64748b]'>{benefitsBlocks.length} cadastrado(s) · sem cadastros exibe 4 padrão</span>
         </div>
         <div className='section-card-body space-y-6'>
-          {/* heading form */}
           <form action={saveBenefitsHeading} className='flex gap-3 items-end'>
             <div className='flex-1'>
               <label htmlFor='b_heading'>Título da seção</label>
-              <input id='b_heading' name='heading' maxLength={200} required
+              <input id='b_heading' name='heading' required maxLength={200}
                 defaultValue={benefitsSettings.heading || DEFAULT_BENEFITS_HEADING} />
             </div>
             <SubmitButton label='Salvar título' />
@@ -590,15 +576,14 @@ export default async function Page({
 
           <BlocksTable blocks={benefitsBlocks} section='benefits' editId={editBlockId} />
 
-          <div>
-            <h3 className='text-sm font-semibold text-[#0f172a] mb-3'>
-              {editSection === 'benefits' && editBlock ? 'Editar item' : 'Adicionar benefício'}
+          <div className='border-t border-[#e5e7eb] pt-4'>
+            <h3 className='text-sm font-semibold text-[#0f172a] mb-4'>
+              {editSection === 'benefits' && editBlock ? '✏️ Editando benefício' : '+ Adicionar benefício'}
             </h3>
-            {editSection === 'benefits' && editBlock ? (
-              <BlockForm section='benefits' action={updateBlock} block={editBlock} showIconKey submitLabel='Atualizar' />
-            ) : (
-              <BlockForm section='benefits' action={addBlock} showIconKey submitLabel='Adicionar benefício' />
-            )}
+            {editSection === 'benefits' && editBlock
+              ? <BlockForm section='benefits' action={updateBlock} block={editBlock} showIconKey submitLabel='Atualizar benefício' />
+              : <BlockForm section='benefits' action={addBlock} showIconKey submitLabel='Adicionar benefício' />
+            }
           </div>
         </div>
       </div>
@@ -608,13 +593,13 @@ export default async function Page({
       <div className='section-card'>
         <div className='section-card-header'>
           <h2 className='text-sm font-semibold text-[#0f172a]'>Seção Equipe</h2>
-          <span className='text-xs text-[#64748b]'>{teamBlocks.length} cadastrado(s) · fallback: 4 padrão</span>
+          <span className='text-xs text-[#64748b]'>{teamBlocks.length} cadastrado(s) · sem cadastros exibe 4 padrão</span>
         </div>
         <div className='section-card-body space-y-6'>
-          <form action={saveTeamHeadings} className='grid md:grid-cols-2 gap-3 items-end'>
+          <form action={saveTeamHeadings} className='grid md:grid-cols-2 gap-4 items-end'>
             <div>
               <label htmlFor='t_heading'>Título da seção</label>
-              <input id='t_heading' name='heading' maxLength={200} required
+              <input id='t_heading' name='heading' required maxLength={200}
                 defaultValue={teamSettings.heading || DEFAULT_TEAM_HEADING} />
             </div>
             <div>
@@ -629,15 +614,14 @@ export default async function Page({
 
           <BlocksTable blocks={teamBlocks} section='team' editId={editBlockId} showImage />
 
-          <div>
-            <h3 className='text-sm font-semibold text-[#0f172a] mb-3'>
-              {editSection === 'team' && editBlock ? 'Editar membro' : 'Adicionar membro da equipe'}
+          <div className='border-t border-[#e5e7eb] pt-4'>
+            <h3 className='text-sm font-semibold text-[#0f172a] mb-4'>
+              {editSection === 'team' && editBlock ? '✏️ Editando membro' : '+ Adicionar membro da equipe'}
             </h3>
-            {editSection === 'team' && editBlock ? (
-              <BlockForm section='team' action={updateBlock} block={editBlock} showSubtitle showImage showLink submitLabel='Atualizar' />
-            ) : (
-              <BlockForm section='team' action={addBlock} showSubtitle showImage showLink submitLabel='Adicionar membro' />
-            )}
+            {editSection === 'team' && editBlock
+              ? <BlockForm section='team' action={updateBlock} block={editBlock} showSubtitle showImage showLink submitLabel='Atualizar membro' />
+              : <BlockForm section='team' action={addBlock} showSubtitle showImage showLink submitLabel='Adicionar membro' />
+            }
           </div>
         </div>
       </div>
@@ -647,17 +631,17 @@ export default async function Page({
       <div className='section-card'>
         <div className='section-card-header'>
           <h2 className='text-sm font-semibold text-[#0f172a]'>Seção Serviços</h2>
-          <span className='text-xs text-[#64748b]'>{servicesBlocks.length} cadastrado(s) · fallback: 6 padrão</span>
+          <span className='text-xs text-[#64748b]'>{servicesBlocks.length} cadastrado(s) · sem cadastros exibe 6 padrão</span>
         </div>
         <div className='section-card-body space-y-6'>
-          <form action={saveServicesHeadings} className='grid md:grid-cols-2 gap-3 items-end'>
+          <form action={saveServicesHeadings} className='grid md:grid-cols-2 gap-4 items-end'>
             <div>
               <label htmlFor='sv_heading'>Título da seção</label>
-              <input id='sv_heading' name='heading' maxLength={200} required
+              <input id='sv_heading' name='heading' required maxLength={200}
                 defaultValue={servicesSettings.heading || DEFAULT_SERVICES_HEADING} />
             </div>
             <div>
-              <label htmlFor='sv_sub'>Subtítulo da seção</label>
+              <label htmlFor='sv_sub'>Subtítulo</label>
               <input id='sv_sub' name='subheading' maxLength={400}
                 defaultValue={servicesSettings.subheading || DEFAULT_SERVICES_SUBHEADING} />
             </div>
@@ -668,15 +652,14 @@ export default async function Page({
 
           <BlocksTable blocks={servicesBlocks} section='services' editId={editBlockId} />
 
-          <div>
-            <h3 className='text-sm font-semibold text-[#0f172a] mb-3'>
-              {editSection === 'services' && editBlock ? 'Editar serviço' : 'Adicionar serviço'}
+          <div className='border-t border-[#e5e7eb] pt-4'>
+            <h3 className='text-sm font-semibold text-[#0f172a] mb-4'>
+              {editSection === 'services' && editBlock ? '✏️ Editando serviço' : '+ Adicionar serviço'}
             </h3>
-            {editSection === 'services' && editBlock ? (
-              <BlockForm section='services' action={updateBlock} block={editBlock} showIconUrl submitLabel='Atualizar' />
-            ) : (
-              <BlockForm section='services' action={addBlock} showIconUrl submitLabel='Adicionar serviço' />
-            )}
+            {editSection === 'services' && editBlock
+              ? <BlockForm section='services' action={updateBlock} block={editBlock} showIconUrl submitLabel='Atualizar serviço' />
+              : <BlockForm section='services' action={addBlock} showIconUrl submitLabel='Adicionar serviço' />
+            }
           </div>
         </div>
       </div>
@@ -686,17 +669,17 @@ export default async function Page({
       <div className='section-card'>
         <div className='section-card-header'>
           <h2 className='text-sm font-semibold text-[#0f172a]'>Seção Depoimentos</h2>
-          <span className='text-xs text-[#64748b]'>{testimonialsBlocks.length} cadastrado(s) · fallback: 3 padrão</span>
+          <span className='text-xs text-[#64748b]'>{testimonialsBlocks.length} cadastrado(s) · sem cadastros exibe 3 padrão</span>
         </div>
         <div className='section-card-body space-y-6'>
-          <form action={saveTestimonialsHeadings} className='grid md:grid-cols-2 gap-3 items-end'>
+          <form action={saveTestimonialsHeadings} className='grid md:grid-cols-2 gap-4 items-end'>
             <div>
               <label htmlFor='te_heading'>Título da seção</label>
-              <input id='te_heading' name='heading' maxLength={200} required
+              <input id='te_heading' name='heading' required maxLength={200}
                 defaultValue={testimonialsSettings.heading || DEFAULT_TESTIMONIALS_HEADING} />
             </div>
             <div>
-              <label htmlFor='te_sub'>Subtítulo da seção</label>
+              <label htmlFor='te_sub'>Subtítulo</label>
               <input id='te_sub' name='subheading' maxLength={300}
                 defaultValue={testimonialsSettings.subheading || DEFAULT_TESTIMONIALS_SUBHEADING} />
             </div>
@@ -707,15 +690,14 @@ export default async function Page({
 
           <BlocksTable blocks={testimonialsBlocks} section='testimonials' editId={editBlockId} showImage />
 
-          <div>
-            <h3 className='text-sm font-semibold text-[#0f172a] mb-3'>
-              {editSection === 'testimonials' && editBlock ? 'Editar depoimento' : 'Adicionar depoimento'}
+          <div className='border-t border-[#e5e7eb] pt-4'>
+            <h3 className='text-sm font-semibold text-[#0f172a] mb-4'>
+              {editSection === 'testimonials' && editBlock ? '✏️ Editando depoimento' : '+ Adicionar depoimento'}
             </h3>
-            {editSection === 'testimonials' && editBlock ? (
-              <BlockForm section='testimonials' action={updateBlock} block={editBlock} showImage submitLabel='Atualizar' />
-            ) : (
-              <BlockForm section='testimonials' action={addBlock} showImage submitLabel='Adicionar depoimento' />
-            )}
+            {editSection === 'testimonials' && editBlock
+              ? <BlockForm section='testimonials' action={updateBlock} block={editBlock} showImage submitLabel='Atualizar depoimento' />
+              : <BlockForm section='testimonials' action={addBlock} showImage submitLabel='Adicionar depoimento' />
+            }
           </div>
         </div>
       </div>
