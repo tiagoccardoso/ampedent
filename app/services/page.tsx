@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import HeroContainer from '../components/layout/HeroContainer'
 
 import services from '@/public/services.webp'

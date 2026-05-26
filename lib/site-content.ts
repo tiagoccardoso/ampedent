@@ -87,6 +87,31 @@ export const DEFAULT_CTA = {
   button_label: 'AGENDAR ONLINE',
 }
 
+// ─── About page ───────────────────────────────────────────────────────────────
+
+export const DEFAULT_ABOUT = {
+  heading: 'Conheça a DentalSys: onde os sorrisos brilham mais',
+  intro_text: 'Cansado da ansiedade de ir ao dentista? Pronto para viver um cuidado odontológico realmente agradável? Bem-vindo à DentalSys, seu refúgio odontológico acolhedor no bairro! Estamos aqui para mudar a forma como você pensa sobre ir ao dentista, com experiência gentil, tecnologia moderna e foco no seu conforto em cada etapa.',
+  mission_heading: 'Nossa missão',
+  mission_text: 'Na DentalSys, nossa missão é oferecer cuidado odontológico excepcional em um ambiente confortável e acolhedor. Temos o compromisso de orientar nossos pacientes por meio da educação em saúde bucal, oferecendo uma variedade de serviços completos, dos cuidados preventivos aos procedimentos restauradores.\nNossa equipe de profissionais dedicados acompanha os avanços mais recentes da tecnologia odontológica para garantir que nossos pacientes recebam o melhor atendimento possível. Acreditamos em construir relacionamentos de longo prazo com nossos pacientes, baseados em confiança e respeito mútuos.\nNosso objetivo é ajudar cada paciente a conquistar e manter um sorriso saudável e bonito por toda a vida. Esperamos receber você em nossa família odontológica e prometemos tornar sua experiência conosco positiva.',
+  image_url: '/about2.webp',
+}
+
+// ─── Services institutional page ─────────────────────────────────────────────
+
+export const DEFAULT_SERVICES_PAGE = {
+  heading: 'Apaixone-se pelo seu cuidado odontológico geral',
+  text: 'Estamos felizes em ser sua nova casa para uma odontologia excepcional. Visite-nos para uma limpeza, avaliação odontológica geral e um cuidado especial. Além disso, oferecemos tudo o que você precisa para se sentir e ficar bem.',
+  image_url: '/services2.webp',
+  page_heading: 'Nossos serviços odontológicos',
+}
+
+export const DEFAULT_SERVICES_PAGE_ITEMS: Omit<SiteBlock, 'id' | 'created_at' | 'updated_at'>[] = [
+  { section: 'services_page_items', title: 'Estética e eletivos', subtitle: null, description: 'Está insatisfeito com algum aspecto do seu sorriso? Tem dificuldade para mastigar ou percebe que seus dentes estão finos ou desgastados? A odontologia restauradora e estética pode ajudar você a conquistar o sorriso dos sonhos, aumentar sua autoestima e melhorar sua saúde geral e sua capacidade de voltar a comer com prazer.', image_url: null, image_alt: null, extra: { is_full_width: 'false' }, order_index: 0, is_active: true },
+  { section: 'services_page_items', title: 'Preventiva e geral', subtitle: null, description: 'Prevenir é melhor do que remediar. A odontologia preventiva ajuda a manter seu sorriso em excelente forma enquanto evita problemas odontológicos sérios. Consultas regulares facilitam a identificação de possíveis riscos à saúde bucal antes que se tornem preocupações maiores.', image_url: null, image_alt: null, extra: { is_full_width: 'false' }, order_index: 1, is_active: true },
+  { section: 'services_page_items', title: 'Transformação completa do sorriso', subtitle: null, description: 'A perda dentária é extremamente comum. Felizmente, avanços médicos importantes trouxeram diversas opções de tratamento odontológico para restaurar sua autoestima e sua capacidade de comer, falar e sorrir com confiança.', image_url: null, image_alt: null, extra: { is_full_width: 'true' }, order_index: 2, is_active: true },
+]
+
 // ─── DB helpers ───────────────────────────────────────────────────────────────
 
 export async function getSectionSettings(section: string): Promise<Record<string, string>> {

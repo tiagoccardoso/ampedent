@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import BookVisit from '../components/layout/BookVisit'
 import about from '@/public/about.webp'
 import OurTeamAbout from '../components/about/OurTeamAbout'
