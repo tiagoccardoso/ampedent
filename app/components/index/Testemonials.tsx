@@ -1,9 +1,6 @@
-import alk from '@/public/alankaizer.webp'
-import forsen2 from '@/public/forsen2.webp'
-import woodland from '@/public/woodland.webp'
-import Image from 'next/image'
+import { getSectionSettings, getSectionBlocks, DEFAULT_TESTIMONIALS, DEFAULT_TESTIMONIALS_HEADING, DEFAULT_TESTIMONIALS_SUBHEADING } from '@/lib/site-content'
 
-const stars = (
+const Stars = () => (
   <div className='flex gap-0.5' aria-label='5 estrelas'>
     {Array.from({ length: 5 }).map((_, i) => (
       <svg key={i} className='w-4 h-4 text-[#f59e0b]' fill='currentColor' viewBox='0 0 20 20'>
@@ -13,55 +10,43 @@ const stars = (
   </div>
 )
 
-const testimonials = [
-  {
-    text: 'O Dr. Lee transformou meu sorriso! Não tenho mais medo de mostrar meus dentes. Melhor dentista que já conheci!',
-    name: 'Alan Kaizer',
-    photo: alk,
-  },
-  {
-    text: 'A Dra. Green tornou a primeira visita odontológica do meu filho muito tranquila. Recomendo muito para atendimento infantil!',
-    name: 'Woodland Joseph',
-    photo: woodland,
-  },
-  {
-    text: 'O tratamento de canal de emergência foi indolor. O Dr. White salvou meu dia!',
-    name: 'Sebastian Fors',
-    photo: forsen2,
-  },
-]
+async function Testemonials() {
+  const [settings, blocks] = await Promise.all([
+    getSectionSettings('testimonials'),
+    getSectionBlocks('testimonials'),
+  ])
 
-function Testemonials() {
+  const heading = settings.heading || DEFAULT_TESTIMONIALS_HEADING
+  const subheading = settings.subheading || DEFAULT_TESTIMONIALS_SUBHEADING
+  const testimonials = blocks.length > 0 ? blocks : DEFAULT_TESTIMONIALS
+
   return (
     <section className='bg-[#f8f9ff]'>
       <div className='mx-auto w-full max-w-7xl px-5 py-16 md:px-10 md:py-24'>
         <div className='text-center mb-12'>
-          <h2 className='text-2xl font-bold md:text-4xl text-[#0f172a]'>
-            O que nossos pacientes dizem
-          </h2>
-          <p className='mt-3 text-[#64748b] text-sm md:text-base'>
-            Histórias reais de quem confia na DentalSys
-          </p>
+          <h2 className='text-2xl font-bold md:text-4xl text-[#0f172a]'>{heading}</h2>
+          <p className='mt-3 text-[#64748b] text-sm md:text-base'>{subheading}</p>
         </div>
 
         <ul className='grid gap-5 sm:grid-cols-2 md:grid-cols-3'>
-          {testimonials.map(t => (
+          {testimonials.map((t, i) => (
             <li
-              key={t.name}
+              key={i}
               className='bg-white rounded-xl border border-[#e5e7eb] p-6 shadow-card flex flex-col gap-4'>
-              {stars}
-              <p className='text-[#64748b] text-sm leading-relaxed flex-grow'>{t.text}</p>
+              <Stars />
+              <p className='text-[#64748b] text-sm leading-relaxed flex-grow'>{t.description}</p>
               <div className='flex items-center gap-3'>
-                <Image
-                  placeholder='blur'
-                  src={t.photo}
-                  alt={t.name}
-                  className='rounded-full object-cover flex-shrink-0'
-                  height={44}
-                  width={44}
-                />
+                {t.image_url && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={t.image_url}
+                    alt={t.image_alt || t.title || ''}
+                    className='rounded-full object-cover flex-shrink-0 h-11 w-11'
+                    loading='lazy'
+                  />
+                )}
                 <div>
-                  <p className='font-semibold text-[#0f172a] text-sm'>{t.name}</p>
+                  <p className='font-semibold text-[#0f172a] text-sm'>{t.title}</p>
                   <p className='text-xs text-[#64748b]'>Paciente verificado</p>
                 </div>
               </div>

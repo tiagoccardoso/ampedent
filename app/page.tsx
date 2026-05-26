@@ -5,6 +5,9 @@ import HeroBenefits from './components/index/HeroBenefits'
 import Services from './components/index/Services'
 import BookVisit from './components/layout/BookVisit'
 
+// Force SSR so CMS changes are reflected without a redeploy
+export const dynamic = 'force-dynamic'
+
 export default function Home() {
   return (
     <>
