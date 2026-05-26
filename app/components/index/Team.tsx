@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getSectionSettings, getSectionBlocks, DEFAULT_TEAM, DEFAULT_TEAM_HEADING, DEFAULT_TEAM_SUBHEADING } from '@/lib/site-content'
+import { getSectionSettings, getSectionBlocks, DEFAULT_TEAM_HEADING, DEFAULT_TEAM_SUBHEADING } from '@/lib/site-content'
 
 async function Team() {
   const [settings, blocks] = await Promise.all([
@@ -7,9 +7,10 @@ async function Team() {
     getSectionBlocks('team'),
   ])
 
+  if (blocks.length === 0) return null
+
   const heading = settings.heading || DEFAULT_TEAM_HEADING
   const subheading = settings.subheading || DEFAULT_TEAM_SUBHEADING
-  const members = blocks.length > 0 ? blocks : DEFAULT_TEAM
 
   return (
     <section className='bg-white'>
@@ -22,7 +23,7 @@ async function Team() {
         </div>
 
         <div className='grid gap-5 sm:grid-cols-2 md:grid-cols-4 max-w-5xl mx-auto'>
-          {members.map((m, i) => {
+          {blocks.map((m, i) => {
             const href = m.extra?.link || '/about'
             return (
               <Link

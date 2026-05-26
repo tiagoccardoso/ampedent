@@ -1,4 +1,4 @@
-import { getSectionSettings, getSectionBlocks, DEFAULT_TESTIMONIALS, DEFAULT_TESTIMONIALS_HEADING, DEFAULT_TESTIMONIALS_SUBHEADING } from '@/lib/site-content'
+import { getSectionSettings, getSectionBlocks, DEFAULT_TESTIMONIALS_HEADING, DEFAULT_TESTIMONIALS_SUBHEADING } from '@/lib/site-content'
 
 const Stars = () => (
   <div className='flex gap-0.5' aria-label='5 estrelas'>
@@ -16,9 +16,10 @@ async function Testemonials() {
     getSectionBlocks('testimonials'),
   ])
 
+  if (blocks.length === 0) return null
+
   const heading = settings.heading || DEFAULT_TESTIMONIALS_HEADING
   const subheading = settings.subheading || DEFAULT_TESTIMONIALS_SUBHEADING
-  const testimonials = blocks.length > 0 ? blocks : DEFAULT_TESTIMONIALS
 
   return (
     <section className='bg-[#f8f9ff]'>
@@ -29,7 +30,7 @@ async function Testemonials() {
         </div>
 
         <ul className='grid gap-5 sm:grid-cols-2 md:grid-cols-3'>
-          {testimonials.map((t, i) => (
+          {blocks.map((t, i) => (
             <li
               key={i}
               className='bg-white rounded-xl border border-[#e5e7eb] p-6 shadow-card flex flex-col gap-4'>
