@@ -12,15 +12,15 @@ type ApiPayload = { message?: string; professionals?: Professional[]; availableT
 
 const toISODate = (d: Date | null) => (d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : '')
 
-async function readJsonSafely<T extends Record<string, unknown>>(response: Response): Promise<T> {
+async function readJsonSafely(response: Response): Promise<ApiPayload> {
   const text = await response.text()
 
-  if (!text) return {} as T
+  if (!text) return {}
 
   try {
-    return JSON.parse(text) as T
+    return JSON.parse(text) as ApiPayload
   } catch {
-    return { message: text } as T
+    return { message: text }
   }
 }
 
@@ -55,7 +55,7 @@ function BookingForm() {
 
       try {
         const res = await fetch('/api/professionals', { cache: 'no-store' })
-        const data = await readJsonSafely<ApiPayload>(res)
+        const data = await readJsonSafely(res)
 
         if (!res.ok) {
           throw new Error(data.message || 'Erro ao buscar profissionais.')
@@ -97,7 +97,7 @@ function BookingForm() {
 
       try {
         const res = await fetch(`/api/availability?date=${toISODate(selectedDate)}&professionalId=${professionalId}`, { cache: 'no-store' })
-        const body = await readJsonSafely<ApiPayload>(res)
+        const body = await readJsonSafely(res)
 
         if (!res.ok) {
           throw new Error(body.message || 'Erro ao buscar horários.')
@@ -133,7 +133,7 @@ function BookingForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ firstName, lastName, email, phone, message, date: toISODate(selectedDate), time: selectedTime, professionalId }),
       })
-      const body = await readJsonSafely<ApiPayload>(res)
+      const body = await readJsonSafely(res)
 
       if (!res.ok) {
         setError(body.message || 'Não foi possível concluir o agendamento.')
