@@ -77,23 +77,15 @@ function TheHeader() {
             Serviços
           </Link>
           <Link
-            href='/agenda'
-            aria-label='Link para acessar a agenda'
+            href='/booking'
+            aria-label='Link para criar agendamento'
             className='p-2 rounded-full bg-blue-600 text-white hover:bg-blue-800 '>
             Agendar agora
           </Link>
-          {status !== 'authenticated' && (
-            <Link
-              href='/admin'
-              aria-label='Link para entrar no painel administrativo'
-              className='p-2 text-blue-600 border border-blue-600 rounded hover:text-blue-800 hover:border-blue-800'>
-              Entrar
-            </Link>
-          )}
           {status === 'authenticated' && (
             <>
               <Link
-                href='/admin/agenda'
+                href='/admin/bookings'
                 aria-label='Link para o painel administrativo de agendamentos'
                 className={
                   pathName.startsWith('/admin')
@@ -110,7 +102,7 @@ function TheHeader() {
             </>
           )}
         </nav>
-        <div className='flex md:hidden gap-3 items-center'>
+        <div className='flex md:hidden gap-8 items-center'>
           <button
             aria-label='botão para expandir o menu móvel'
             className={`hamburger ${isOpen ? 'open' : ''} focus:outline-none `}
@@ -119,15 +111,6 @@ function TheHeader() {
             <span className='hamburger-middle'></span>
             <span className='hamburger-bottom'></span>
           </button>
-          {status !== 'authenticated' && (
-            <Link
-              href='/admin'
-              aria-label='Link para entrar no painel administrativo'
-              className='rounded border border-blue-600 px-3 py-2 text-sm font-semibold text-blue-600 hover:border-blue-800 hover:text-blue-800'
-              onClick={() => setIsOpen(false)}>
-              Entrar
-            </Link>
-          )}
         </div>
       </div>
       {isOpen && (
@@ -147,15 +130,15 @@ function TheHeader() {
             Serviços
           </Link>
           <Link
-            href={'/agenda'}
-            aria-label='Link para acessar a agenda'
+            href={'/booking'}
+            aria-label='Link para criar agendamento'
             className=' rounded p-2 bg-blue-600 text-white animate-link font-bold'>
             Agendar agora
           </Link>
           {status === 'authenticated' && (
             <>
               <Link
-                href={'/admin/agenda'}
+                href={'/admin/bookings'}
                 aria-label='Link para o painel administrativo de agendamentos'
                 className='border rounded p-2 border-blue-400 animate-link'>
                 Admin

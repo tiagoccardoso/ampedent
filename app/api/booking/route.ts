@@ -41,13 +41,8 @@ export async function GET(req: Request) {
     const { data, count } = await dataApiRequest<BookingRow[]>('bookings', { searchParams, headers: { Prefer: 'count=exact' } })
 
     return Response.json({ message: 'Agendamentos encontrados', bookings: data.map(mapBooking), totalPages: Math.ceil((count ?? 0) / pageSize) })
-  } catch (error) {
-    console.error('booking.get', error)
-
-    return Response.json(
-      { message: 'Não foi possível carregar os agendamentos.', bookings: [], totalPages: 0 },
-      { status: 500 },
-    )
+  } catch {
+    throw new Error('Could not fetch bookings')
   }
 }
 
@@ -71,13 +66,8 @@ export async function POST(req: Request) {
     })
 
     return Response.json({ message: 'Agendamento criado', booking: data[0] ? mapBooking(data[0]) : null })
-  } catch (error) {
-    console.error('booking.create', error)
-
-    return Response.json(
-      { message: 'Não foi possível concluir o agendamento. Tente novamente ou contate a clínica.' },
-      { status: 500 },
-    )
+  } catch (error: any) {
+    throw new Error(error.message)
   }
 }
 
@@ -98,12 +88,7 @@ export async function PUT(req: Request) {
 
       return Response.json({ message: 'Agendamento atualizado', booking: data[0] ? mapBooking(data[0]) : null })
     }
-  } catch (error) {
-    console.error('booking.update', error)
-
-    return Response.json(
-      { message: 'Não foi possível atualizar o agendamento.' },
-      { status: 500 },
-    )
+  } catch {
+    throw new Error('Could not update bookings')
   }
 }
