@@ -1,13 +1,12 @@
 import { neon } from '@neondatabase/serverless'
 
 const databaseUrl = process.env.DATABASE_URL
-const missingDatabaseUrl = 'postgresql://missing:missing@localhost/missing'
 
-export const sql = neon(databaseUrl || missingDatabaseUrl)
-
-export function assertDatabaseUrl() {
-  if (!databaseUrl) throw new Error('Variável de ambiente DATABASE_URL ausente')
+if (!databaseUrl) {
+  throw new Error('Variável de ambiente DATABASE_URL ausente')
 }
+
+export const sql = neon(databaseUrl)
 
 export type NeonAuthUserPayload = {
   id: string

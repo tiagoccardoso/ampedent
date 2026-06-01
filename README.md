@@ -106,3 +106,7 @@ Depois da migração, execute `node createuser.js` (ou atualize `admin_users.pas
 Github [@atalek](https://github.com/atalek) <br> Linkedin:
 [@Aleksandar Atanasovski](https://www.linkedin.com/in/aleksandar-atanasovski-16b123263/)
 <br> Portfólio: [https://www.atalek.com/](https://www.atalek.com/)
+
+## Licença
+
+Este projeto está licenciado sob a [Apache License 2.0](./LICENSE).

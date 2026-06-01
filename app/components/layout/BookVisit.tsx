@@ -9,7 +9,7 @@ function BookVisit() {
           Veja os horários disponíveis e aproveite a odontologia bem feita. +Clareamento dental grátis para sempre.
         </p>
         <Link
-          href='/agenda'
+          href='/booking'
           className='mx-auto mt-16 inline-block rounded-md bg-blue-800 hover:bg-blue-600 px-8 py-4 text-center font-semibold text-white'>
           AGENDAR ONLINE
         </Link>

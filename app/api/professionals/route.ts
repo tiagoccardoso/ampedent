@@ -1,27 +1,13 @@
-import { sql } from '@/lib/neon'
-import { unstable_noStore as noStore } from 'next/cache'
+import { dataApiRequest } from '@/lib/dataApi'
 
 export async function GET() {
-  noStore()
+  const { data } = await dataApiRequest<{ id: string; full_name: string }[]>('professionals', {
+    searchParams: {
+      select: 'id,full_name',
+      is_active: 'eq.true',
+      order: 'full_name.asc',
+    },
+  })
 
-  try {
-    const professionals = await sql`
-      select id, full_name
-        from professionals
-       where is_active = true
-       order by full_name asc
-    `
-
-    return Response.json({ professionals })
-  } catch {
-    console.error('professionals.list')
-
-    return Response.json(
-      {
-        message: 'Não foi possível carregar os profissionais cadastrados.',
-        professionals: [],
-      },
-      { status: 500 },
-    )
-  }
+  return Response.json({ professionals: data })
 }
