@@ -93,7 +93,7 @@ function TheHeader() {
           {status === 'authenticated' && (
             <>
               <Link
-                href='/admin/bookings'
+                href='/admin/agenda'
                 aria-label='Link para o painel administrativo de agendamentos'
                 className={
                   pathName.startsWith('/admin')
@@ -155,7 +155,7 @@ function TheHeader() {
           {status === 'authenticated' && (
             <>
               <Link
-                href={'/admin/bookings'}
+                href={'/admin/agenda'}
                 aria-label='Link para o painel administrativo de agendamentos'
                 className='border rounded p-2 border-blue-400 animate-link'>
                 Admin
