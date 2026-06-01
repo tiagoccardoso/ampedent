@@ -1,3 +1,54 @@
-import { getCurrentAdminProfile } from '@/lib/auth'; import { redirect } from 'next/navigation'; import { revalidatePath } from 'next/cache'; import { sql } from '@/lib/neon'; import { SubmitButton } from '../_components/submit-button'; import { FormFeedback } from '../_components/form-feedback'
-async function save(fd: FormData){ 'use server'; try{ const patient_id=String(fd.get('patient_id')||''); const tooth_code=String(fd.get('tooth_code')||''); if(!patient_id||!tooth_code) redirect('/admin/odontogram?error=Verifique+os+campos+obrigat%C3%B3rios'); await sql`insert into odontogram_entries (patient_id,tooth_code,condition,planned_procedure,performed_procedure,notes) values (${patient_id}::uuid, ${tooth_code}, ${String(fd.get('condition')||'')||null}, ${String(fd.get('planned_procedure')||'')||null}, ${String(fd.get('performed_procedure')||'')||null}, ${String(fd.get('notes')||'')||null})`; revalidatePath('/admin/odontogram'); redirect('/admin/odontogram?ok=Odontograma+salvo+com+sucesso') } catch(e){ console.error('odontogram.save',e); redirect('/admin/odontogram?error=N%C3%A3o+foi+poss%C3%ADvel+salvar.+Verifique+os+dados+e+tente+novamente') } }
-export default async function Page({ searchParams }: { searchParams?: Promise<Record<string,string>> }){ const admin=await getCurrentAdminProfile(); if(!admin) redirect('/admin'); const [rows,pats]=await Promise.all([sql`select o.*, p.full_name patient_name from odontogram_entries o join patients p on p.id=o.patient_id order by o.created_at desc limit 100`, sql`select id, full_name from patients order by full_name`]); const params=(await searchParams)??{}; return <section className='space-y-4'><h1 className='text-2xl font-bold'>Odontograma</h1><FormFeedback ok={params.ok} error={params.error} /><form action={save} className='grid md:grid-cols-2 gap-3'><select name='patient_id' required><option value=''>Paciente *</option>{(pats as any[]).map(p=><option key={p.id} value={p.id}>{p.full_name}</option>)}</select><input name='tooth_code' required placeholder='Dente *' /><input name='condition' placeholder='Condição' /><input name='planned_procedure' placeholder='Procedimento planejado' /><input name='performed_procedure' placeholder='Procedimento realizado' /><textarea name='notes' placeholder='Observações' /><SubmitButton /></form><div className='overflow-auto'><table className='w-full text-sm'><thead><tr><th>Paciente</th><th>Dente</th><th>Condição</th></tr></thead><tbody>{(rows as any[]).map(r=><tr key={r.id}><td>{r.patient_name}</td><td>{r.tooth_code}</td><td>{r.condition}</td></tr>)}</tbody></table></div></section> }
+import { getCurrentAdminProfile } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
+import { sql } from '@/lib/neon'
+import { OdontogramClient } from './OdontogramClient'
+
+async function saveEntry(fd: FormData) {
+  'use server'
+  const patient_id = String(fd.get('patient_id') || '').trim()
+  const tooth_code = String(fd.get('tooth_code') || '').trim()
+  if (!patient_id || !tooth_code) throw new Error('Campos obrigatórios ausentes')
+  await sql`
+    insert into odontogram_entries
+      (patient_id, tooth_code, condition, planned_procedure, performed_procedure, notes)
+    values
+      (${patient_id}::uuid, ${tooth_code},
+       ${String(fd.get('condition') || '') || null},
+       ${String(fd.get('planned_procedure') || '') || null},
+       ${String(fd.get('performed_procedure') || '') || null},
+       ${String(fd.get('notes') || '') || null})`
+  revalidatePath('/admin/odontogram')
+}
+
+async function deleteEntry(fd: FormData) {
+  'use server'
+  const id = String(fd.get('id') || '').trim()
+  if (!id) throw new Error('ID ausente')
+  await sql`delete from odontogram_entries where id = ${id}::uuid`
+  revalidatePath('/admin/odontogram')
+}
+
+export default async function Page() {
+  const admin = await getCurrentAdminProfile()
+  if (!admin) redirect('/admin')
+
+  const [entries, patients] = await Promise.all([
+    sql`
+      select o.*, p.full_name as patient_name
+      from odontogram_entries o
+      join patients p on p.id = o.patient_id
+      order by o.created_at desc
+      limit 200`,
+    sql`select id, full_name from patients order by full_name`,
+  ])
+
+  return (
+    <OdontogramClient
+      patients={patients as any[]}
+      entries={entries as any[]}
+      saveAction={saveEntry}
+      deleteAction={deleteEntry}
+    />
+  )
+}
