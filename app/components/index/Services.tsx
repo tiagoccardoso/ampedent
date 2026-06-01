@@ -13,13 +13,6 @@ function Services() {
               centrada no paciente
             </Link>
           </h2>
-          <div className='mx-auto mb-8 mt-4 max-w-[528px] md:mb-12 lg:mb-16'>
-            <p className='text-[#636262]'>
-              Nossa equipe está sempre pronta para ajudar pacientes com suas
-              dúvidas odontológicas, garantindo que recebam o cuidado e a
-              atenção que merecem.
-            </p>
-          </div>
         </div>
         <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8 md:grid-cols-3 lg:gap-12 text-balance'>
           <div className='relative mb-8 flex flex-col rounded-2xl border border-solid border-black p-8 [box-shadow:rgb(0,_0,_0)_9px_9px] lg:mb-4'>

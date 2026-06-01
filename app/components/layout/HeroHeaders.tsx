@@ -9,7 +9,7 @@ function HeroHeaders() {
 
       <div className='flex items-stretch justify-center mt-8'>
         <Link
-          href='/booking'
+          href='/agenda'
           className='mx-auto inline-block rounded-md bg-blue-800 hover:bg-blue-600 px-8 py-4 text-center font-semibold text-white'>
           AGENDAR ONLINE
         </Link>

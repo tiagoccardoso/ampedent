@@ -14,8 +14,7 @@ async function Hero() {
         <h2 className='mx-auto max-w-lg text-slate-800 text-md sm:text-xl mb-4'>{home.subtitle}</h2>
         <h2 className='mx-auto mb-5 max-w-lg text-slate-800 text-md sm:text-xl'>{home.body}</h2>
         <div className='flex flex-col sm:flex-row gap-3 items-stretch justify-center mt-8 '>
-          <Link href='/booking' className='mx-auto inline-block rounded-md bg-blue-800 hover:bg-blue-600 px-8 py-4 text-center font-semibold text-white'>AGENDAR ONLINE</Link>
-          <Link href='/admin' className='mx-auto inline-block rounded-md border border-blue-700 text-blue-700 hover:bg-blue-50 px-8 py-4 text-center font-semibold'>ENTRAR</Link>
+          <Link href='/agenda' className='mx-auto inline-block rounded-md bg-blue-800 hover:bg-blue-600 px-8 py-4 text-center font-semibold text-white'>AGENDAR ONLINE</Link>
         </div>
       </div>
     </HeroContainer>
