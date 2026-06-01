@@ -16,11 +16,17 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className='flex min-h-screen flex-col md:flex-row md:overflow-hidden'>
-      <div className='w-full flex-none md:w-64'>
+    <div className='flex min-h-screen' style={{ background: '#f8fafb' }}>
+      {/* Sidebar */}
+      <div className='w-full flex-none md:w-64 shrink-0'>
         <SideNav />
       </div>
-      <div className='flex-grow p-6 md:overflow-y-auto md:p-12'>{children}</div>
+      {/* Main content */}
+      <div className='flex-1 overflow-auto'>
+        <div className='p-6 md:p-10 max-w-[1280px]'>
+          {children}
+        </div>
+      </div>
     </div>
   )
 }

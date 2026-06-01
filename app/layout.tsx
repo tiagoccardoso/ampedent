@@ -10,37 +10,62 @@ import AppProvider from './components/AppProvider'
 import { Suspense } from 'react'
 import Spinner from './components/Spinner'
 
+const siteUrl = 'https://ampedent.vercel.app'
+const siteName = 'Odonto Prime Studio'
+const siteDescription =
+  'Odonto Prime Studio oferece odontologia de alto padrão: implantes, estética dental, ortodontia e muito mais. Agende sua consulta online e sorria com confiança.'
+
 export const metadata: Metadata = {
   title: {
-    default: 'DentalSys | Sua parceira em cuidados odontológicos',
-    template: `%s | DentalSys`,
+    default: `${siteName} | Odontologia de Alto Padrão`,
+    template: `%s | ${siteName}`,
   },
-  description:
-    'A DentalSys oferece serviços odontológicos completos. Temos o compromisso de proporcionar um sorriso saudável a você.',
-  metadataBase: new URL('https://ampedent.vercel.app/'),
+  description: siteDescription,
+  keywords: [
+    'odontologia',
+    'clínica odontológica',
+    'implantes dentários',
+    'estética dental',
+    'ortodontia',
+    'clareamento dental',
+    'dentista',
+    'Odonto Prime Studio',
+    'saúde bucal',
+    'sorriso perfeito',
+  ],
+  metadataBase: new URL(siteUrl),
+  authors: [{ name: 'Odonto Prime Studio' }],
+  robots: { index: true, follow: true },
+
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
 
   openGraph: {
     type: 'website',
-    url: 'https://ampedent.vercel.app/',
-    title: 'DentalSys | Sua parceira em cuidados odontológicos',
-    description:
-      'A DentalSys oferece serviços odontológicos completos. Temos o compromisso de proporcionar um sorriso saudável a você.',
+    url: siteUrl,
+    siteName,
+    title: `${siteName} | Odontologia de Alto Padrão`,
+    description: siteDescription,
+    locale: 'pt_BR',
     images: [
       {
-        url: 'https://res.cloudinary.com/dkofkuquf/image/upload/v1707573685/nuxtshop/rlviwuatbxvwxex336eh.webp',
-        alt: 'DentalSys Logo',
+        url: `${siteUrl}/og-image.png`,
+        width: 1200,
+        height: 630,
+        alt: 'Odonto Prime Studio – Odontologia de Alto Padrão',
       },
     ],
   },
+
   twitter: {
     card: 'summary_large_image',
-    site: 'https://ampedent.vercel.app/',
-    title: 'DentalSys | Sua parceira em cuidados odontológicos',
-    description:
-      'A DentalSys oferece serviços odontológicos completos. Temos o compromisso de proporcionar um sorriso saudável a você.',
-    images: [
-      'https://res.cloudinary.com/dkofkuquf/image/upload/v1707573685/nuxtshop/rlviwuatbxvwxex336eh.webp',
-    ],
+    site: '@odontoprimestudio',
+    title: `${siteName} | Odontologia de Alto Padrão`,
+    description: siteDescription,
+    images: [`${siteUrl}/og-image.png`],
   },
 }
 
@@ -51,6 +76,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='pt-BR'>
+      <head>
+        <link rel='icon' type='image/svg+xml' href='/favicon.svg' />
+        <link rel='preconnect' href='https://fonts.googleapis.com' />
+        <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='anonymous' />
+      </head>
       <body>
         <AppProvider>
           <div className='flex min-h-screen flex-col'>
