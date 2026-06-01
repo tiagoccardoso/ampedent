@@ -19,6 +19,8 @@ function BookingForm() {
   const [message, setMessage] = useState('')
   const [professionals, setProfessionals] = useState<Professional[]>([])
   const [professionalId, setProfessionalId] = useState('')
+  const [professionalsStatus, setProfessionalsStatus] = useState<'loading' | 'success' | 'error'>('loading')
+  const [professionalsError, setProfessionalsError] = useState('')
   const [availableTimes, setAvailableTimes] = useState<string[]>([])
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
   const [selectedTime, setSelectedTime] = useState('')
@@ -27,13 +29,45 @@ function BookingForm() {
   const [created, setCreated] = useState(false)
   const successBoxRef = useRef<HTMLDivElement | null>(null)
 
-  const isDisabled = !firstName || !lastName || !email || !phone || !selectedTime || !professionalId
+  const isLoadingProfessionals = professionalsStatus === 'loading'
+  const hasProfessionals = professionals.length > 0
+  const isDisabled = !firstName || !lastName || !email || !phone || !selectedTime || !professionalId || isLoadingProfessionals || !hasProfessionals
 
   useEffect(() => {
-    fetch('/api/professionals').then(r => r.json()).then(data => {
-      setProfessionals(data.professionals || [])
-      if (data.professionals?.[0]) setProfessionalId(data.professionals[0].id)
-    }).catch(() => setError('Não foi possível carregar profissionais.'))
+    let ignore = false
+
+    async function loadProfessionals() {
+      setProfessionalsStatus('loading')
+      setProfessionalsError('')
+
+      try {
+        const res = await fetch('/api/professionals', { cache: 'no-store' })
+        const data = await res.json().catch(() => ({}))
+
+        if (!res.ok) {
+          throw new Error(data.message || 'Erro ao buscar profissionais.')
+        }
+
+        const nextProfessionals = Array.isArray(data.professionals) ? data.professionals : []
+
+        if (ignore) return
+        setProfessionals(nextProfessionals)
+        setProfessionalId(nextProfessionals[0]?.id || '')
+        setProfessionalsStatus('success')
+      } catch (err) {
+        if (ignore) return
+        setProfessionals([])
+        setProfessionalId('')
+        setProfessionalsStatus('error')
+        setProfessionalsError(err instanceof Error ? err.message : 'Não foi possível carregar profissionais.')
+      }
+    }
+
+    loadProfessionals()
+
+    return () => {
+      ignore = true
+    }
   }, [])
 
   useEffect(() => {
@@ -65,12 +99,16 @@ function BookingForm() {
   return <section className='max-w-3xl w-full min-h-lvh mx-auto flex items-center justify-center p-4'><div>
     {created ? <SuccessBox ref={successBoxRef}><div className='my-8'><h1 className='text-center mb-8 text-3xl font-bold md:text-5xl'>Consulta agendada</h1><p className='mx-auto text-lg mb-8 mt-4 text-slate-600 md:mb-16'>Obrigado! Sua consulta foi agendada para {formatDate(String(selectedDate))} às {formatTime(selectedTime)} - {incrementTimeByOneHour(selectedTime)}.</p></div></SuccessBox> : <>
       <BookingHeader />
+      {isLoadingProfessionals && <p className='text-center text-slate-600'>Carregando profissionais...</p>}
+      {professionalsStatus === 'error' && <p className='text-center text-red-600'>{professionalsError}</p>}
+      {professionalsStatus === 'success' && !hasProfessionals && <p className='text-center text-slate-600'>Nenhum profissional cadastrado para agendamento no momento.</p>}
+      {professionalsStatus === 'success' && hasProfessionals && <p className='text-center text-green-700'>Profissionais carregados com sucesso.</p>}
       {error && <p className='text-red-600 text-center'>{error}</p>}
       <form className='mx-auto' onSubmit={handleAppointment}>
         <div className='grid md:grid-cols-2 gap-4 items-center'><input disabled={isLoading} type='text' placeholder='Nome' value={firstName} onChange={e => setFirstName(e.target.value)} /><input disabled={isLoading} type='text' placeholder='Sobrenome' value={lastName} onChange={e => setLastName(e.target.value)} /></div>
         <div className='grid md:grid-cols-2 gap-4 items-center my-4'><input disabled={isLoading} type='email' placeholder='Email' value={email} onChange={e => setEmail(e.target.value)} /><input disabled={isLoading} type='text' placeholder='Telefone' value={phone} onChange={e => setPhone(e.target.value)} /></div>
         <div className='grid md:grid-cols-3 gap-4 items-center'>
-          <select value={professionalId} onChange={e => setProfessionalId(e.target.value)} disabled={isLoading}><option value=''>Profissional</option>{professionals.map(p => <option key={p.id} value={p.id}>{p.full_name}</option>)}</select>
+          <select value={professionalId} onChange={e => setProfessionalId(e.target.value)} disabled={isLoading || isLoadingProfessionals || !hasProfessionals}><option value=''>{isLoadingProfessionals ? 'Carregando profissionais...' : 'Profissional'}</option>{professionals.map(p => <option key={p.id} value={p.id}>{p.full_name}</option>)}</select>
           <DatePicker selected={selectedDate} onChange={(d: Date | null) => setSelectedDate(d)} dateFormat='dd/MM/yyyy' minDate={new Date()} />
           <select value={selectedTime} onChange={e => setSelectedTime(e.target.value)} disabled={isLoading || !availableTimes.length}>{availableTimes.length ? availableTimes.map(t => <option key={t} value={t}>{formatTime(t)} - {incrementTimeByOneHour(t)}</option>) : <option value=''>Sem horários disponíveis</option>}</select>
         </div>
