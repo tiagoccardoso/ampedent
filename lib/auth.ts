@@ -48,16 +48,26 @@ function signPayload(payload: SessionPayload) {
 }
 
 function verifyToken(token: string): SessionPayload | null {
-  const [body, sig] = token.split('.')
-  if (!body || !sig) return null
-  const expected = crypto
-    .createHmac('sha256', getAuthSecret())
-    .update(body)
-    .digest('base64url')
-  if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) return null
-  const payload = JSON.parse(Buffer.from(body, 'base64url').toString()) as SessionPayload
-  if (payload.exp < Math.floor(Date.now() / 1000)) return null
-  return payload
+  try {
+    const [body, sig] = token.split('.')
+    if (!body || !sig) return null
+
+    const expected = crypto
+      .createHmac('sha256', getAuthSecret())
+      .update(body)
+      .digest('base64url')
+
+    const signature = Buffer.from(sig)
+    const expectedSignature = Buffer.from(expected)
+    if (signature.length !== expectedSignature.length) return null
+    if (!crypto.timingSafeEqual(signature, expectedSignature)) return null
+
+    const payload = JSON.parse(Buffer.from(body, 'base64url').toString()) as SessionPayload
+    if (payload.exp < Math.floor(Date.now() / 1000)) return null
+    return payload
+  } catch {
+    return null
+  }
 }
 
 export async function createUser(email: string, name: string, password: string, role: AdminRole = 'admin') {

@@ -8,8 +8,21 @@ import SuccessBox from './SuccessBox'
 import BookingHeader from './BookingHeader'
 
 type Professional = { id: string; full_name: string }
+type ApiPayload = { message?: string; professionals?: Professional[]; availableTimes?: string[] }
 
 const toISODate = (d: Date | null) => (d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : '')
+
+async function readJsonSafely<T extends Record<string, unknown>>(response: Response): Promise<T> {
+  const text = await response.text()
+
+  if (!text) return {} as T
+
+  try {
+    return JSON.parse(text) as T
+  } catch {
+    return { message: text } as T
+  }
+}
 
 function BookingForm() {
   const [firstName, setFirstName] = useState('')
@@ -42,7 +55,7 @@ function BookingForm() {
 
       try {
         const res = await fetch('/api/professionals', { cache: 'no-store' })
-        const data = await res.json().catch(() => ({}))
+        const data = await readJsonSafely<ApiPayload>(res)
 
         if (!res.ok) {
           throw new Error(data.message || 'Erro ao buscar profissionais.')
@@ -71,30 +84,73 @@ function BookingForm() {
   }, [])
 
   useEffect(() => {
-    if (!selectedDate || !professionalId) return
-    setError('')
-    fetch(`/api/availability?date=${toISODate(selectedDate)}&professionalId=${professionalId}`)
-      .then(async r => ({ ok: r.ok, body: await r.json() }))
-      .then(({ ok, body }) => {
-        if (!ok) throw new Error(body.message || 'Erro ao buscar horários')
-        setAvailableTimes(body.availableTimes || [])
-        setSelectedTime((body.availableTimes || [])[0] || '')
-      })
-      .catch(err => setError(err.message || 'Erro ao buscar horários.'))
+    let ignore = false
+
+    async function loadAvailability() {
+      if (!selectedDate || !professionalId) {
+        setAvailableTimes([])
+        setSelectedTime('')
+        return
+      }
+
+      setError('')
+
+      try {
+        const res = await fetch(`/api/availability?date=${toISODate(selectedDate)}&professionalId=${professionalId}`, { cache: 'no-store' })
+        const body = await readJsonSafely<ApiPayload>(res)
+
+        if (!res.ok) {
+          throw new Error(body.message || 'Erro ao buscar horários.')
+        }
+
+        const nextTimes = Array.isArray(body.availableTimes) ? body.availableTimes : []
+        if (ignore) return
+        setAvailableTimes(nextTimes)
+        setSelectedTime(nextTimes[0] || '')
+      } catch (err) {
+        if (ignore) return
+        setAvailableTimes([])
+        setSelectedTime('')
+        setError(err instanceof Error ? err.message : 'Erro ao buscar horários.')
+      }
+    }
+
+    loadAvailability()
+
+    return () => {
+      ignore = true
+    }
   }, [selectedDate, professionalId])
 
   async function handleAppointment(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setIsLoading(true)
     setError('')
-    const res = await fetch('/api/booking', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ firstName, lastName, email, phone, message, date: toISODate(selectedDate), time: selectedTime, professionalId }) })
-    const body = await res.json()
-    setIsLoading(false)
-    if (!res.ok) return setError(body.message || 'Não foi possível concluir o agendamento.')
-    setCreated(true)
+
+    try {
+      const res = await fetch('/api/booking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstName, lastName, email, phone, message, date: toISODate(selectedDate), time: selectedTime, professionalId }),
+      })
+      const body = await readJsonSafely<ApiPayload>(res)
+
+      if (!res.ok) {
+        setError(body.message || 'Não foi possível concluir o agendamento.')
+        return
+      }
+
+      setCreated(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Não foi possível concluir o agendamento.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  useEffect(() => { if (created && successBoxRef.current) successBoxRef.current.scrollIntoView({ behavior: 'smooth' }) }, [created])
+  useEffect(() => {
+    if (created && successBoxRef.current) successBoxRef.current.scrollIntoView({ behavior: 'smooth' })
+  }, [created])
 
   return <section className='max-w-3xl w-full min-h-lvh mx-auto flex items-center justify-center p-4'><div>
     {created ? <SuccessBox ref={successBoxRef}><div className='my-8'><h1 className='text-center mb-8 text-3xl font-bold md:text-5xl'>Consulta agendada</h1><p className='mx-auto text-lg mb-8 mt-4 text-slate-600 md:mb-16'>Obrigado! Sua consulta foi agendada para {formatDate(String(selectedDate))} às {formatTime(selectedTime)} - {incrementTimeByOneHour(selectedTime)}.</p></div></SuccessBox> : <>

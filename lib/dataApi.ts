@@ -73,12 +73,20 @@ export async function dataApiRequest<T>(
   })
 
   const rawBody = await response.text()
-  const data = rawBody ? JSON.parse(rawBody) : null
+  let data: unknown = null
+
+  if (rawBody) {
+    try {
+      data = JSON.parse(rawBody)
+    } catch {
+      data = { rawBody }
+    }
+  }
 
   if (!response.ok) {
     const message =
-      typeof data?.message === 'string'
-        ? data.message
+      typeof (data as { message?: unknown } | null)?.message === 'string'
+        ? String((data as { message: string }).message)
         : `Requisição à API de dados falhou com status ${response.status}`
 
     throw new DataApiRequestError(message, response.status, data)

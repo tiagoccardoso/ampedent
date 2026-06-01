@@ -1,5 +1,1 @@
-import { redirect } from 'next/navigation'
-
-export default function Page() {
-  redirect('/admin/agenda')
-}
+export { default } from '../agenda/page'
