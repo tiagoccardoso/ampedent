@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import './globals.css'
 import { Analytics } from '@vercel/analytics/react'
 
@@ -10,8 +9,6 @@ import Loader from './components/Loader'
 import AppProvider from './components/AppProvider'
 import { Suspense } from 'react'
 import Spinner from './components/Spinner'
-
-const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: {
@@ -55,7 +52,7 @@ export default function RootLayout({
   return (
     <html lang='pt-BR'>
       <AppProvider>
-        <body className={inter.className}>
+        <body>
           <div className='flex flex-col min-h-screen'>
             <TheHeader />
             <Suspense fallback={<Spinner />}>

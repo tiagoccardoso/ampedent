@@ -41,6 +41,9 @@ input[type='password'],
 input[type='tel'],
 input[type='text'],
 input[type='number'],
+input[type='date'],
+input[type='time'],
+input[type='file'],
 input[type='search'],
 select {
   @apply block w-full mb-1 rounded-md;
