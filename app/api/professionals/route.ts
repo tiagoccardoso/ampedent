@@ -18,6 +18,7 @@ export async function GET() {
 
     return Response.json(
       {
+        success: false,
         message: 'Não foi possível carregar os profissionais cadastrados.',
         professionals: [],
       },

@@ -8,8 +8,21 @@ import SuccessBox from './SuccessBox'
 import BookingHeader from './BookingHeader'
 
 type Professional = { id: string; full_name: string }
+type ApiBody = { message?: string; professionals?: Professional[]; availableTimes?: string[] }
 
 const toISODate = (d: Date | null) => (d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : '')
+const fallbackApiError = 'A resposta do servidor não pôde ser processada. Tente novamente em instantes.'
+
+async function readJsonBody(response: Response): Promise<ApiBody> {
+  const text = await response.text()
+  if (!text.trim()) return {}
+
+  try {
+    return JSON.parse(text) as ApiBody
+  } catch {
+    return { message: fallbackApiError }
+  }
+}
 
 function BookingForm() {
   const [firstName, setFirstName] = useState('')
@@ -22,6 +35,7 @@ function BookingForm() {
   const [professionalsStatus, setProfessionalsStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [professionalsError, setProfessionalsError] = useState('')
   const [availableTimes, setAvailableTimes] = useState<string[]>([])
+  const [availabilityStatus, setAvailabilityStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
   const [selectedTime, setSelectedTime] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -30,8 +44,9 @@ function BookingForm() {
   const successBoxRef = useRef<HTMLDivElement | null>(null)
 
   const isLoadingProfessionals = professionalsStatus === 'loading'
+  const isLoadingAvailability = availabilityStatus === 'loading'
   const hasProfessionals = professionals.length > 0
-  const isDisabled = !firstName || !lastName || !email || !phone || !selectedTime || !professionalId || isLoadingProfessionals || !hasProfessionals
+  const isDisabled = !firstName || !lastName || !email || !phone || !selectedTime || !professionalId || isLoadingProfessionals || isLoadingAvailability || !hasProfessionals
 
   useEffect(() => {
     let ignore = false
@@ -42,7 +57,7 @@ function BookingForm() {
 
       try {
         const res = await fetch('/api/professionals', { cache: 'no-store' })
-        const data = await res.json().catch(() => ({}))
+        const data = await readJsonBody(res)
 
         if (!res.ok) {
           throw new Error(data.message || 'Erro ao buscar profissionais.')
@@ -58,6 +73,8 @@ function BookingForm() {
         if (ignore) return
         setProfessionals([])
         setProfessionalId('')
+        setAvailableTimes([])
+        setSelectedTime('')
         setProfessionalsStatus('error')
         setProfessionalsError(err instanceof Error ? err.message : 'Não foi possível carregar profissionais.')
       }
@@ -71,27 +88,72 @@ function BookingForm() {
   }, [])
 
   useEffect(() => {
-    if (!selectedDate || !professionalId) return
-    setError('')
-    fetch(`/api/availability?date=${toISODate(selectedDate)}&professionalId=${professionalId}`)
-      .then(async r => ({ ok: r.ok, body: await r.json() }))
-      .then(({ ok, body }) => {
-        if (!ok) throw new Error(body.message || 'Erro ao buscar horários')
-        setAvailableTimes(body.availableTimes || [])
-        setSelectedTime((body.availableTimes || [])[0] || '')
-      })
-      .catch(err => setError(err.message || 'Erro ao buscar horários.'))
+    let ignore = false
+
+    async function loadAvailability() {
+      if (!selectedDate || !professionalId) {
+        setAvailableTimes([])
+        setSelectedTime('')
+        setAvailabilityStatus('idle')
+        return
+      }
+
+      setAvailabilityStatus('loading')
+      setError('')
+      setAvailableTimes([])
+      setSelectedTime('')
+
+      try {
+        const res = await fetch(`/api/availability?date=${toISODate(selectedDate)}&professionalId=${professionalId}`, { cache: 'no-store' })
+        const body = await readJsonBody(res)
+
+        if (!res.ok) throw new Error(body.message || 'Erro ao buscar horários.')
+
+        const nextTimes = Array.isArray(body.availableTimes) ? body.availableTimes : []
+        if (ignore) return
+        setAvailableTimes(nextTimes)
+        setSelectedTime(nextTimes[0] || '')
+        setAvailabilityStatus('success')
+      } catch (err) {
+        if (ignore) return
+        setAvailableTimes([])
+        setSelectedTime('')
+        setAvailabilityStatus('error')
+        setError(err instanceof Error ? err.message : 'Erro ao buscar horários.')
+      }
+    }
+
+    loadAvailability()
+
+    return () => {
+      ignore = true
+    }
   }, [selectedDate, professionalId])
 
   async function handleAppointment(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setIsLoading(true)
     setError('')
-    const res = await fetch('/api/booking', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ firstName, lastName, email, phone, message, date: toISODate(selectedDate), time: selectedTime, professionalId }) })
-    const body = await res.json()
-    setIsLoading(false)
-    if (!res.ok) return setError(body.message || 'Não foi possível concluir o agendamento.')
-    setCreated(true)
+
+    try {
+      const res = await fetch('/api/booking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstName, lastName, email, phone, message, date: toISODate(selectedDate), time: selectedTime, professionalId }),
+      })
+      const body = await readJsonBody(res)
+
+      if (!res.ok) {
+        setError(body.message || 'Não foi possível concluir o agendamento.')
+        return
+      }
+
+      setCreated(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Não foi possível concluir o agendamento.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   useEffect(() => { if (created && successBoxRef.current) successBoxRef.current.scrollIntoView({ behavior: 'smooth' }) }, [created])
@@ -103,14 +165,16 @@ function BookingForm() {
       {professionalsStatus === 'error' && <p className='text-center text-red-600'>{professionalsError}</p>}
       {professionalsStatus === 'success' && !hasProfessionals && <p className='text-center text-slate-600'>Nenhum profissional cadastrado para agendamento no momento.</p>}
       {professionalsStatus === 'success' && hasProfessionals && <p className='text-center text-green-700'>Profissionais carregados com sucesso.</p>}
+      {isLoadingAvailability && <p className='text-center text-slate-600'>Carregando horários disponíveis...</p>}
+      {availabilityStatus === 'success' && hasProfessionals && !availableTimes.length && <p className='text-center text-slate-600'>Nenhum horário disponível para a data selecionada.</p>}
       {error && <p className='text-red-600 text-center'>{error}</p>}
       <form className='mx-auto' onSubmit={handleAppointment}>
         <div className='grid md:grid-cols-2 gap-4 items-center'><input disabled={isLoading} type='text' placeholder='Nome' value={firstName} onChange={e => setFirstName(e.target.value)} /><input disabled={isLoading} type='text' placeholder='Sobrenome' value={lastName} onChange={e => setLastName(e.target.value)} /></div>
         <div className='grid md:grid-cols-2 gap-4 items-center my-4'><input disabled={isLoading} type='email' placeholder='Email' value={email} onChange={e => setEmail(e.target.value)} /><input disabled={isLoading} type='text' placeholder='Telefone' value={phone} onChange={e => setPhone(e.target.value)} /></div>
         <div className='grid md:grid-cols-3 gap-4 items-center'>
           <select value={professionalId} onChange={e => setProfessionalId(e.target.value)} disabled={isLoading || isLoadingProfessionals || !hasProfessionals}><option value=''>{isLoadingProfessionals ? 'Carregando profissionais...' : 'Profissional'}</option>{professionals.map(p => <option key={p.id} value={p.id}>{p.full_name}</option>)}</select>
-          <DatePicker selected={selectedDate} onChange={(d: Date | null) => setSelectedDate(d)} dateFormat='dd/MM/yyyy' minDate={new Date()} />
-          <select value={selectedTime} onChange={e => setSelectedTime(e.target.value)} disabled={isLoading || !availableTimes.length}>{availableTimes.length ? availableTimes.map(t => <option key={t} value={t}>{formatTime(t)} - {incrementTimeByOneHour(t)}</option>) : <option value=''>Sem horários disponíveis</option>}</select>
+          <DatePicker selected={selectedDate} onChange={(d: Date | null) => setSelectedDate(d)} dateFormat='dd/MM/yyyy' minDate={new Date()} disabled={isLoading || isLoadingProfessionals || !hasProfessionals} />
+          <select value={selectedTime} onChange={e => setSelectedTime(e.target.value)} disabled={isLoading || isLoadingAvailability || !availableTimes.length}>{availableTimes.length ? availableTimes.map(t => <option key={t} value={t}>{formatTime(t)} - {incrementTimeByOneHour(t)}</option>) : <option value=''>{isLoadingAvailability ? 'Carregando horários...' : 'Sem horários disponíveis'}</option>}</select>
         </div>
         <textarea disabled={isLoading} value={message} onChange={e => setMessage(e.target.value)} className='w-full my-4' rows={5} placeholder='Mensagem (opcional)' />
         <button type='submit' className='rounded px-6 py-3 text-center font-semibold text-white bg-blue-600 hover:bg-blue-800 disabled:opacity-60' disabled={isDisabled || isLoading}>{isLoading ? 'Enviando...' : 'Agendar consulta'}</button>

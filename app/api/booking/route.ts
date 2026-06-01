@@ -4,7 +4,13 @@ import { dataApiRequest } from '@/lib/dataApi'
 import { BookingRow } from '@/lib/types'
 
 function normalizeBookingDate(date: string | Date) {
-  return new Date(date).toISOString().split('T')[0]
+  const normalized = new Date(date).toISOString().split('T')[0]
+  if (!normalized) throw new Error('Data do agendamento inválida')
+  return normalized
+}
+
+function bookingErrorResponse(message: string, status = 500) {
+  return Response.json({ success: false, message }, { status })
 }
 
 function buildSearchFilter(search: string) {
@@ -42,7 +48,7 @@ export async function GET(req: Request) {
 
     return Response.json({ message: 'Agendamentos encontrados', bookings: data.map(mapBooking), totalPages: Math.ceil((count ?? 0) / pageSize) })
   } catch {
-    throw new Error('Could not fetch bookings')
+    return bookingErrorResponse('Não foi possível carregar os agendamentos.')
   }
 }
 
@@ -50,13 +56,14 @@ export async function POST(req: Request) {
   try {
     const body = await req.json()
     const { firstName, lastName, email, phone, message, date, time, professionalId } = body
-    if (!professionalId) return Response.json({ message: 'Profissional é obrigatório' }, { status: 400 })
+    if (!professionalId) return bookingErrorResponse('Profissional é obrigatório', 400)
+    if (!date || !time) return bookingErrorResponse('Data e horário são obrigatórios', 400)
 
     const { data: conflicts } = await dataApiRequest<BookingRow[]>('bookings', {
       searchParams: { select: 'id', professional_id: `eq.${professionalId}`, date: `eq.${normalizeBookingDate(date)}`, time: `eq.${time}`, status: 'neq.canceled', limit: 1 },
     })
 
-    if (conflicts.length > 0) return Response.json({ message: 'Este horário não está mais disponível.' }, { status: 409 })
+    if (conflicts.length > 0) return bookingErrorResponse('Este horário não está mais disponível.', 409)
 
     const { data } = await dataApiRequest<BookingRow[]>('bookings', {
       method: 'POST',
@@ -66,8 +73,10 @@ export async function POST(req: Request) {
     })
 
     return Response.json({ message: 'Agendamento criado', booking: data[0] ? mapBooking(data[0]) : null })
-  } catch (error: any) {
-    throw new Error(error.message)
+  } catch (error) {
+    console.error('booking.create', error instanceof Error ? error.message : error)
+
+    return bookingErrorResponse('Não foi possível concluir o agendamento.')
   }
 }
 
@@ -78,17 +87,17 @@ export async function PUT(req: Request) {
     const role = await isSuperAdmin()
     if (role !== 'superadmin' && role !== 'admin') throw new Error('Não autorizado')
 
-    if (_id) {
-      const { data } = await dataApiRequest<BookingRow[]>('bookings', {
-        method: 'PATCH',
-        body: { status: 'completed' },
-        searchParams: { id: `eq.${_id}`, select: '*' },
-        headers: { Prefer: 'return=representation' },
-      })
+    if (!_id) return bookingErrorResponse('Identificador do agendamento é obrigatório', 400)
 
-      return Response.json({ message: 'Agendamento atualizado', booking: data[0] ? mapBooking(data[0]) : null })
-    }
+    const { data } = await dataApiRequest<BookingRow[]>('bookings', {
+      method: 'PATCH',
+      body: { status: 'completed' },
+      searchParams: { id: `eq.${_id}`, select: '*' },
+      headers: { Prefer: 'return=representation' },
+    })
+
+    return Response.json({ message: 'Agendamento atualizado', booking: data[0] ? mapBooking(data[0]) : null })
   } catch {
-    throw new Error('Could not update bookings')
+    return bookingErrorResponse('Não foi possível atualizar o agendamento.')
   }
 }

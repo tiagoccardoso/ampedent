@@ -30,63 +30,85 @@ function toTime(minutes: number) {
   return `${h}:${m}:00`
 }
 
+function isValidDateParam(date: string) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(date) && !Number.isNaN(toDateInSaoPaulo(date).getTime())
+}
+
 export async function GET(req: Request) {
   noStore()
-  const url = new URL(req.url)
-  const date = url.searchParams.get('date')
-  const professionalId = url.searchParams.get('professionalId')
 
-  if (!date || !professionalId) {
-    return Response.json({ message: 'Profissional e data são obrigatórios', availableTimes: [] }, { status: 400 })
+  try {
+    const url = new URL(req.url)
+    const date = url.searchParams.get('date')
+    const professionalId = url.searchParams.get('professionalId')
+
+    if (!date || !professionalId) {
+      return Response.json({ success: false, message: 'Profissional e data são obrigatórios', availableTimes: [] }, { status: 400 })
+    }
+
+    if (!isValidDateParam(date)) {
+      return Response.json({ success: false, message: 'Data inválida para consulta de horários', availableTimes: [] }, { status: 400 })
+    }
+
+    const selectedDate = toDateInSaoPaulo(date)
+    const weekday = selectedDate.getUTCDay()
+
+    const { data: schedules } = await dataApiRequest<ProfessionalScheduleRow[]>('professional_schedules', {
+      searchParams: {
+        professional_id: `eq.${professionalId}`,
+        weekday: `eq.${weekday}`,
+        is_active: 'eq.true',
+        select: '*',
+        limit: 1,
+      },
+    })
+
+    if (!schedules.length) {
+      return Response.json({ message: 'Nenhum horário configurado para este dia', availableTimes: [] })
+    }
+
+    const schedule = schedules[0]
+    const { data: bookings } = await dataApiRequest<Pick<BookingRow, 'time' | 'status'>[]>('bookings', {
+      searchParams: {
+        select: 'time,status',
+        date: `eq.${date}`,
+        professional_id: `eq.${professionalId}`,
+      },
+    })
+
+    const booked = new Set(bookings.filter(b => b.status !== 'canceled').map(b => b.time))
+
+    const start = toMinuteOfDay(schedule.start_time)
+    const end = toMinuteOfDay(schedule.end_time)
+    const breakStart = schedule.break_start ? toMinuteOfDay(schedule.break_start) : null
+    const breakEnd = schedule.break_end ? toMinuteOfDay(schedule.break_end) : null
+
+    const nowInBr = new Date(new Date().toLocaleString('en-US', { timeZone: TZ }))
+    const todayBr = nowInBr.toISOString().slice(0, 10)
+
+    const slots: string[] = []
+    for (let current = start; current + schedule.appointment_duration_minutes <= end; current += schedule.appointment_duration_minutes) {
+      const isInBreak = breakStart !== null && breakEnd !== null && current >= breakStart && current < breakEnd
+      if (isInBreak) continue
+
+      const time = toTime(current)
+      const isPastToday = date === todayBr && toMinuteOfDay(time) <= (nowInBr.getHours() * 60 + nowInBr.getMinutes())
+      if (isPastToday) continue
+      if (booked.has(time)) continue
+      slots.push(time)
+    }
+
+    return Response.json({ message: 'Horários disponíveis encontrados', availableTimes: slots })
+  } catch (error) {
+    console.error('availability.list', error instanceof Error ? error.message : error)
+
+    return Response.json(
+      {
+        success: false,
+        message: 'Não foi possível carregar os horários disponíveis.',
+        availableTimes: [],
+      },
+      { status: 500 },
+    )
   }
-
-  const selectedDate = toDateInSaoPaulo(date)
-  const weekday = selectedDate.getUTCDay()
-
-  const { data: schedules } = await dataApiRequest<ProfessionalScheduleRow[]>('professional_schedules', {
-    searchParams: {
-      professional_id: `eq.${professionalId}`,
-      weekday: `eq.${weekday}`,
-      is_active: 'eq.true',
-      select: '*',
-      limit: 1,
-    },
-  })
-
-  if (!schedules.length) {
-    return Response.json({ message: 'Nenhum horário configurado para este dia', availableTimes: [] })
-  }
-
-  const schedule = schedules[0]
-  const { data: bookings } = await dataApiRequest<Pick<BookingRow, 'time' | 'status'>[]>('bookings', {
-    searchParams: {
-      select: 'time,status',
-      date: `eq.${date}`,
-      professional_id: `eq.${professionalId}`,
-    },
-  })
-
-  const booked = new Set(bookings.filter(b => b.status !== 'canceled').map(b => b.time))
-
-  const start = toMinuteOfDay(schedule.start_time)
-  const end = toMinuteOfDay(schedule.end_time)
-  const breakStart = schedule.break_start ? toMinuteOfDay(schedule.break_start) : null
-  const breakEnd = schedule.break_end ? toMinuteOfDay(schedule.break_end) : null
-
-  const nowInBr = new Date(new Date().toLocaleString('en-US', { timeZone: TZ }))
-  const todayBr = nowInBr.toISOString().slice(0, 10)
-
-  const slots: string[] = []
-  for (let current = start; current + schedule.appointment_duration_minutes <= end; current += schedule.appointment_duration_minutes) {
-    const isInBreak = breakStart !== null && breakEnd !== null && current >= breakStart && current < breakEnd
-    if (isInBreak) continue
-
-    const time = toTime(current)
-    const isPastToday = date === todayBr && toMinuteOfDay(time) <= (nowInBr.getHours() * 60 + nowInBr.getMinutes())
-    if (isPastToday) continue
-    if (booked.has(time)) continue
-    slots.push(time)
-  }
-
-  return Response.json({ message: 'Horários disponíveis encontrados', availableTimes: slots })
 }
