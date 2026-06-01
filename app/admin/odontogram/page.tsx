@@ -3,7 +3,8 @@ import { getCurrentAdminProfile } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { sql } from '@/lib/neon'
-import { OdontogramClient, ODONTOGRAM_STATUS, TOOTH_CODES, type OdontogramEntry, type PatientOption, type ProcedureOption } from './odontogram-client'
+import { OdontogramClient } from './odontogram-client'
+import { ODONTOGRAM_STATUS, TOOTH_CODES, type OdontogramEntry, type PatientOption, type ProcedureOption } from './odontogram-data'
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const toothCodeSet = new Set<string>(TOOTH_CODES)
