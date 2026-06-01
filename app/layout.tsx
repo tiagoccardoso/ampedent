@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     template: `%s | DentalSys`,
   },
   description:
-    "A DentalSys oferece serviços odontológicos completos. Temos o compromisso de proporcionar um sorriso saudável a você.",
+    'A DentalSys oferece serviços odontológicos completos. Temos o compromisso de proporcionar um sorriso saudável a você.',
   metadataBase: new URL('https://ampedent.vercel.app/'),
 
   openGraph: {
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     url: 'https://ampedent.vercel.app/',
     title: 'DentalSys | Sua parceira em cuidados odontológicos',
     description:
-      "A DentalSys oferece serviços odontológicos completos. Temos o compromisso de proporcionar um sorriso saudável a você.",
+      'A DentalSys oferece serviços odontológicos completos. Temos o compromisso de proporcionar um sorriso saudável a você.',
     images: [
       {
         url: 'https://res.cloudinary.com/dkofkuquf/image/upload/v1707573685/nuxtshop/rlviwuatbxvwxex336eh.webp',
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     site: 'https://ampedent.vercel.app/',
     title: 'DentalSys | Sua parceira em cuidados odontológicos',
     description:
-      "A DentalSys oferece serviços odontológicos completos. Temos o compromisso de proporcionar um sorriso saudável a você.",
+      'A DentalSys oferece serviços odontológicos completos. Temos o compromisso de proporcionar um sorriso saudável a você.',
     images: [
       'https://res.cloudinary.com/dkofkuquf/image/upload/v1707573685/nuxtshop/rlviwuatbxvwxex336eh.webp',
     ],
@@ -51,9 +51,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='pt-BR'>
-      <AppProvider>
-        <body>
-          <div className='flex flex-col min-h-screen'>
+      <body>
+        <AppProvider>
+          <div className='flex min-h-screen flex-col'>
             <TheHeader />
             <Suspense fallback={<Spinner />}>
               <Loader />
@@ -62,8 +62,8 @@ export default function RootLayout({
             <Analytics />
           </div>
           <TheFooter />
-        </body>
-      </AppProvider>
+        </AppProvider>
+      </body>
     </html>
   )
 }
