@@ -17,7 +17,7 @@ function CreateUser() {
   const router = useRouter()
 
   useEffect(() => {
-    document.title = 'Criar usuário | Admin | DentalSys'
+    document.title = 'Criar usuário | Admin | Odonto Prime'
   }, [])
 
   async function handleLogin(e: FormEvent<HTMLFormElement>) {
@@ -63,7 +63,7 @@ function CreateUser() {
           className='mx-auto mb-4 max-w-md w-full pb-4'
           onSubmit={handleLogin}>
           <h1 className='text-center text-3xl my-8'>
-            Criar um novo usuário DentalSys
+            Criar um novo usuário Odonto Prime
           </h1>
           <div className='relative'>
             <input

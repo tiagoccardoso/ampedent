@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useAuth } from '@/app/components/AppProvider'
+import type { FooterConfig } from '@/lib/siteContent'
 
 function ToothLogo() {
   return (
@@ -14,9 +15,18 @@ function ToothLogo() {
   )
 }
 
-export default function TheFooter() {
+export default function TheFooter({ config }: { config?: FooterConfig }) {
   const year = new Date().getFullYear()
   const { status } = useAuth()
+
+  const clinicName = config?.clinic_name || 'Odonto Prime'
+  const tagline = config?.tagline || 'Studio'
+  const description = config?.description || ''
+  const address = config?.address || ''
+  const phone = config?.phone || ''
+  const email = config?.email || ''
+  const copyright = config?.copyright || ''
+  const cro = config?.cro || ''
 
   return (
     <footer className='relative bg-[#003441] text-white overflow-hidden'>
@@ -47,30 +57,42 @@ export default function TheFooter() {
               </div>
               <div>
                 <div className='font-extrabold text-xl text-white' style={{ fontFamily: 'Manrope, sans-serif' }}>
-                  Odonto Prime
+                  {clinicName}
                 </div>
                 <div className='text-[#cca730] font-bold text-[10px] tracking-[0.12em] uppercase' style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                  Studio
+                  {tagline}
                 </div>
               </div>
             </Link>
-            <p className='text-white/70 text-sm leading-relaxed max-w-sm'>
-              Odontologia de alto padrão com tecnologia de ponta, equipe especializada e atendimento humanizado. Seu sorriso é a nossa arte.
-            </p>
-            <div className='mt-6 flex flex-col gap-3 text-sm text-white/60'>
-              <div className='flex items-center gap-3'>
-                <span className='text-[#cca730]'>📍</span>
-                <span>Rua das Clínicas, 123 – São Paulo, SP</span>
+
+            {description && (
+              <p className='text-white/70 text-sm leading-relaxed max-w-sm mb-6'>
+                {description}
+              </p>
+            )}
+
+            {(address || email || phone) && (
+              <div className='flex flex-col gap-3 text-sm text-white/60'>
+                {address && (
+                  <div className='flex items-center gap-3'>
+                    <span className='text-[#cca730]'>📍</span>
+                    <span>{address}</span>
+                  </div>
+                )}
+                {email && (
+                  <div className='flex items-center gap-3'>
+                    <span className='text-[#cca730]'>✉️</span>
+                    <span>{email}</span>
+                  </div>
+                )}
+                {phone && (
+                  <div className='flex items-center gap-3'>
+                    <span className='text-[#cca730]'>📞</span>
+                    <span>{phone}</span>
+                  </div>
+                )}
               </div>
-              <div className='flex items-center gap-3'>
-                <span className='text-[#cca730]'>✉️</span>
-                <span>contato@odontoprimestudio.com.br</span>
-              </div>
-              <div className='flex items-center gap-3'>
-                <span className='text-[#cca730]'>📞</span>
-                <span>(11) 99999-0000</span>
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Navigation */}
@@ -107,38 +129,22 @@ export default function TheFooter() {
             </ul>
           </div>
 
-          {/* Services */}
-          <div>
-            <h4
-              className='mb-5 text-[#cca730] font-bold text-xs tracking-[0.12em] uppercase'
-              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-              Especialidades
-            </h4>
-            <ul className='space-y-3'>
-              {[
-                'Implantes Dentários',
-                'Estética Dental',
-                'Ortodontia',
-                'Clareamento',
-                'Periodontia',
-                'Urgência 24h',
-              ].map(item => (
-                <li key={item} style={{ listStyle: 'none' }}>
-                  <span className='text-white/70 text-sm'>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Placeholder to keep 4-col grid balanced when no specialty list */}
+          <div />
         </div>
 
         {/* Divider */}
         <div className='border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-white/50'>
-          <span>© {year} Odonto Prime Studio. Todos os direitos reservados.</span>
-          <div className='flex items-center gap-4'>
-            <span>CRO-SP 00000</span>
-            <span>·</span>
-            <span>Política de privacidade</span>
-          </div>
+          <span>
+            {copyright
+              ? copyright
+              : `© ${year} ${clinicName}${tagline ? ' ' + tagline : ''}. Todos os direitos reservados.`}
+          </span>
+          {cro && (
+            <div className='flex items-center gap-4'>
+              <span>{cro}</span>
+            </div>
+          )}
         </div>
       </div>
     </footer>

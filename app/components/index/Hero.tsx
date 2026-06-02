@@ -1,11 +1,12 @@
 import Link from 'next/link'
-import { getSiteContent } from '@/lib/siteContent'
+import { getSiteContent, getHomeStats } from '@/lib/siteContent'
 import HeroContainer from '../layout/HeroContainer'
 import heroImg from '@/public/hero.webp'
 
 async function Hero() {
   const content = await getSiteContent()
   const home = content.home
+  const stats = getHomeStats(content)
 
   const title = home.title || 'Seu sorriso merece excelência'
   const subtitle = home.subtitle || 'Tecnologia de ponta, cuidado humanizado'
@@ -68,25 +69,28 @@ async function Hero() {
           </Link>
         </div>
 
-        {/* Stats strip */}
-        <div
-          className='mt-20 grid grid-cols-3 gap-px rounded-2xl overflow-hidden max-w-lg w-full mx-auto'
-          style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.15)' }}>
-          {[
-            { value: '15+', label: 'Anos de experiência' },
-            { value: '8k+', label: 'Pacientes atendidos' },
-            { value: '98%', label: 'Satisfação' },
-          ].map(({ value, label }) => (
-            <div key={label} className='flex flex-col items-center justify-center py-5 px-3'>
-              <span className='text-2xl sm:text-3xl font-extrabold text-white mb-1'>{value}</span>
-              <span
-                className='text-[10px] text-white/60 font-semibold tracking-[0.08em] uppercase text-center'
-                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                {label}
-              </span>
-            </div>
-          ))}
-        </div>
+        {/* Stats strip — only rendered when stats are configured */}
+        {stats.length > 0 && (
+          <div
+            className='mt-20 grid gap-px rounded-2xl overflow-hidden max-w-lg w-full mx-auto'
+            style={{
+              gridTemplateColumns: `repeat(${stats.length}, 1fr)`,
+              background: 'rgba(255,255,255,0.08)',
+              backdropFilter: 'blur(16px)',
+              border: '1px solid rgba(255,255,255,0.15)',
+            }}>
+            {stats.map(({ value, label }) => (
+              <div key={label} className='flex flex-col items-center justify-center py-5 px-3'>
+                <span className='text-2xl sm:text-3xl font-extrabold text-white mb-1'>{value}</span>
+                <span
+                  className='text-[10px] text-white/60 font-semibold tracking-[0.08em] uppercase text-center'
+                  style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                  {label}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Scroll hint */}
         <div className='absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce'>

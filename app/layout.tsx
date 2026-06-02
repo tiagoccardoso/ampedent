@@ -9,6 +9,7 @@ import Loader from './components/Loader'
 import AppProvider from './components/AppProvider'
 import { Suspense } from 'react'
 import Spinner from './components/Spinner'
+import { getSiteContent, getHeaderConfig, getFooterConfig } from '@/lib/siteContent'
 
 const siteUrl = 'https://ampedent.vercel.app'
 const siteName = 'Odonto Prime Studio'
@@ -69,11 +70,15 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const content = await getSiteContent().catch(() => null)
+  const headerConfig = content ? getHeaderConfig(content) : undefined
+  const footerConfig = content ? getFooterConfig(content) : undefined
+
   return (
     <html lang='pt-BR'>
       <head>
@@ -84,14 +89,14 @@ export default function RootLayout({
       <body>
         <AppProvider>
           <div className='flex min-h-screen flex-col'>
-            <TheHeader />
+            <TheHeader config={headerConfig} />
             <Suspense fallback={<Spinner />}>
               <Loader />
             </Suspense>
             {children}
             <Analytics />
           </div>
-          <TheFooter />
+          <TheFooter config={footerConfig} />
         </AppProvider>
       </body>
     </html>

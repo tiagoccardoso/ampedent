@@ -1,9 +1,11 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/app/components/AppProvider'
+import type { HeaderConfig } from '@/lib/siteContent'
 
 function ToothIcon() {
   return (
@@ -24,12 +26,16 @@ function UpArrowIcon() {
   )
 }
 
-export default function TheHeader() {
+export default function TheHeader({ config }: { config?: HeaderConfig }) {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [y, setY] = useState(0)
   const pathName = usePathname()
   const { status, logout } = useAuth()
+
+  const clinicName = config?.clinic_name || 'Odonto Prime'
+  const tagline = config?.tagline || 'Studio'
+  const iconUrl = config?.icon_url || null
 
   useEffect(() => {
     const onScroll = () => {
@@ -56,15 +62,19 @@ export default function TheHeader() {
           href='/'
           onClick={() => setIsOpen(false)}
           className='flex items-center gap-2.5 group'>
-          <div className='flex items-center justify-center w-9 h-9 rounded-lg bg-[#003441] text-white transition-transform group-hover:scale-105'>
-            <ToothIcon />
+          <div className='flex items-center justify-center w-9 h-9 rounded-lg bg-[#003441] text-white transition-transform group-hover:scale-105 overflow-hidden'>
+            {iconUrl ? (
+              <Image src={iconUrl} alt={clinicName} width={36} height={36} className='object-cover w-full h-full' />
+            ) : (
+              <ToothIcon />
+            )}
           </div>
           <div className='flex flex-col leading-none'>
             <span className='text-[#003441] font-extrabold text-base tracking-tight' style={{ fontFamily: 'Manrope, sans-serif' }}>
-              Odonto Prime
+              {clinicName}
             </span>
             <span className='text-[#cca730] font-semibold text-[10px] tracking-[0.12em] uppercase' style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-              Studio
+              {tagline}
             </span>
           </div>
         </Link>

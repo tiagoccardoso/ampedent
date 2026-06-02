@@ -53,7 +53,7 @@ function Bookings() {
   }, [filter, debouncedSearchTerm, page])
 
   useEffect(() => {
-    document.title = 'Agendamentos | Admin | DentalSys'
+    document.title = 'Agendamentos | Admin | Odonto Prime'
   }, [])
 
   if (status === 'unauthenticated') {
