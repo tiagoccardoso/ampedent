@@ -45,3 +45,14 @@ export type AdminUserRow = {
   created_at?: string
   updated_at?: string
 }
+
+export type SubscriptionPlan = 'monthly' | 'annual'
+export type SubscriptionStatus = 'active' | 'canceled' | 'expired'
+
+export type UserSubscription = {
+  trial_started_at: string | null
+  subscription_plan: SubscriptionPlan | null
+  subscription_status: SubscriptionStatus | null
+  subscription_starts_at: string | null
+  subscription_ends_at: string | null
+}

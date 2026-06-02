@@ -29,6 +29,22 @@ export async function getAdminById(id: string) {
 
 export async function deleteAdminById(id: string) { await sql`DELETE FROM "user" WHERE id = ${id}` }
 
+export async function getUserSubscription(userId: string) {
+  const rows = await sql`
+    SELECT trial_started_at, subscription_plan, subscription_status, subscription_starts_at, subscription_ends_at
+    FROM "user" WHERE id = ${userId} LIMIT 1
+  `
+  return rows[0] as import('@/lib/types').UserSubscription ?? null
+}
+
+export async function activateTrial(userId: string) {
+  await sql`
+    UPDATE "user"
+    SET trial_started_at = COALESCE(trial_started_at, NOW()), updated_at = NOW()
+    WHERE id = ${userId}
+  `
+}
+
 export async function listBookings() {
   const rows = await sql`SELECT * FROM bookings ORDER BY status DESC, date ASC, time ASC`
   return rows as BookingRow[]

@@ -18,6 +18,7 @@ type AdminSession = {
 type AuthContextValue = {
   session: AdminSession | null
   status: 'loading' | 'authenticated' | 'unauthenticated'
+  hasAccess: boolean
   refreshSession: () => Promise<void>
   logout: () => Promise<void>
 }
@@ -27,6 +28,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 function AppProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<AdminSession | null>(null)
   const [status, setStatus] = useState<AuthContextValue['status']>('loading')
+  const [hasAccess, setHasAccess] = useState(false)
 
   const refreshSession = useCallback(async () => {
     setStatus('loading')
@@ -35,17 +37,20 @@ function AppProvider({ children }: { children: React.ReactNode }) {
     if (res.ok) {
       const data = await res.json()
       setSession({ user: data.user, email: data.email, role: data.role })
+      setHasAccess(data.hasAccess ?? false)
       setStatus('authenticated')
       return
     }
 
     setSession(null)
+    setHasAccess(false)
     setStatus('unauthenticated')
   }, [])
 
   const logout = useCallback(async () => {
     await fetch('/api/auth/logout', { method: 'POST' })
     setSession(null)
+    setHasAccess(false)
     setStatus('unauthenticated')
   }, [])
 
@@ -54,8 +59,8 @@ function AppProvider({ children }: { children: React.ReactNode }) {
   }, [refreshSession])
 
   const value = useMemo(
-    () => ({ session, status, refreshSession, logout }),
-    [logout, refreshSession, session, status],
+    () => ({ session, status, hasAccess, refreshSession, logout }),
+    [logout, refreshSession, session, status, hasAccess],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
