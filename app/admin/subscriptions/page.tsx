@@ -1,5 +1,6 @@
 import { getCurrentAdminProfile } from '@/lib/auth'
 import { getUserSubscription } from '@/lib/db'
+import { getSiteContent, getFooterConfig } from '@/lib/siteContent'
 import { redirect } from 'next/navigation'
 import SubscriptionsClient from './_components/SubscriptionsClient'
 
@@ -7,7 +8,14 @@ export default async function SubscriptionsPage() {
   const admin = await getCurrentAdminProfile()
   if (!admin) redirect('/admin')
 
-  const sub = await getUserSubscription(admin.profile.id)
+  const [sub, siteContent] = await Promise.all([
+    getUserSubscription(admin.profile.id),
+    getSiteContent().catch(() => null),
+  ])
+
+  const footer = siteContent ? getFooterConfig(siteContent) : null
+  const contactWhatsapp = footer?.whatsapp || ''
+  const contactEmail = footer?.email || ''
 
   function computeHasAccess(): boolean {
     if (!sub) return false
@@ -42,6 +50,8 @@ export default async function SubscriptionsPage() {
         subscription={sub}
         hasAccess={computeHasAccess()}
         trialDaysRemaining={trialDaysRemaining()}
+        contactWhatsapp={contactWhatsapp}
+        contactEmail={contactEmail}
       />
     </section>
   )

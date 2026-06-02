@@ -8,9 +8,11 @@ type Props = {
   subscription: UserSubscription | null
   hasAccess: boolean
   trialDaysRemaining: number
+  contactWhatsapp?: string
+  contactEmail?: string
 }
 
-export default function SubscriptionsClient({ subscription, hasAccess, trialDaysRemaining }: Props) {
+export default function SubscriptionsClient({ subscription, hasAccess, trialDaysRemaining, contactWhatsapp, contactEmail }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
@@ -93,7 +95,7 @@ export default function SubscriptionsClient({ subscription, hasAccess, trialDays
 
       <div>
         <h2 className='mb-4 text-lg font-bold'>Planos disponíveis</h2>
-        <div className='grid gap-6 sm:grid-cols-3'>
+        <div className='grid gap-6 sm:grid-cols-2 xl:grid-cols-4'>
 
           {/* Trial */}
           <div className='rounded-xl border bg-white p-6 shadow-sm flex flex-col'>
@@ -167,6 +169,45 @@ export default function SubscriptionsClient({ subscription, hasAccess, trialDays
               >
                 Em breve
               </button>
+            </div>
+          </div>
+
+          {/* Personalizado */}
+          <div className='rounded-xl border bg-white p-6 shadow-sm flex flex-col'>
+            <p className='text-xs font-semibold uppercase tracking-wide text-gray-500'>Personalizado</p>
+            <p className='mt-2 text-xl font-bold text-gray-900'>Plano Personalizado</p>
+            <p className='mt-1 text-2xl font-bold text-gray-700'>Valor sob consulta</p>
+            <p className='text-sm text-gray-400'>&nbsp;</p>
+            <ul className='mt-4 space-y-2 text-sm text-gray-600 flex-1'>
+              <li>✓ Website</li>
+              <li>✓ Página pública de agendamentos</li>
+              <li>✓ Domínio próprio</li>
+            </ul>
+            <div className='mt-6'>
+              {contactWhatsapp ? (
+                <a
+                  href={`https://wa.me/${contactWhatsapp.replace(/\D/g, '')}`}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='block w-full rounded-md bg-green-600 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-green-700'
+                >
+                  Entrar em contato
+                </a>
+              ) : contactEmail ? (
+                <a
+                  href={`mailto:${contactEmail}?subject=Interesse no Plano Personalizado`}
+                  className='block w-full rounded-md bg-gray-700 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-gray-800'
+                >
+                  Entrar em contato
+                </a>
+              ) : (
+                <a
+                  href='/admin/settings'
+                  className='block w-full rounded-md bg-gray-700 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-gray-800'
+                >
+                  Entrar em contato
+                </a>
+              )}
             </div>
           </div>
 
