@@ -77,6 +77,8 @@ async function deleteProcedure(formData: FormData) {
   redirect(target)
 }
 
+const currency = (n: number) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+
 export default async function Page({ searchParams }: { searchParams?: Promise<Record<string, string>> }) {
   const admin = await getCurrentAdminProfile()
   if (!admin) redirect('/admin')
@@ -86,42 +88,83 @@ export default async function Page({ searchParams }: { searchParams?: Promise<Re
   const rows = await sql`select * from procedures order by created_at desc limit 100`
 
   return (
-    <section className='space-y-6'>
-      <div><h1 className='text-2xl font-bold'>Procedimentos</h1><p className='text-sm text-gray-600'>Gerencie serviços/procedimentos usados nos agendamentos e orçamentos.</p></div>
+    <section className='space-y-8'>
+      <div>
+        <p className='text-xs font-bold tracking-[0.1em] uppercase mb-1 text-[#30628a]' style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Clínica</p>
+        <h1 className='text-2xl font-extrabold text-[#003441]' style={{ fontFamily: 'Manrope, sans-serif' }}>Procedimentos</h1>
+        <p className='text-sm text-[#70787c] mt-1'>Gerencie os serviços e procedimentos usados em agendamentos e orçamentos.</p>
+      </div>
+
       <FormFeedback ok={params.ok} error={params.error} />
-      <form action={saveProcedure} className='grid gap-3 rounded border bg-white p-4 md:grid-cols-2'>
-        <input name='name' required placeholder='Nome *' />
-        <input name='amount' required placeholder='Valor ex: 120,50' />
-        <input name='estimated_minutes' type='number' min={1} placeholder='Duração estimada (min)' />
-        <input name='category' placeholder='Categoria' />
-        <textarea name='description' className='md:col-span-2' placeholder='Descrição' />
-        <label className='flex items-center gap-2'><input type='checkbox' name='is_active' defaultChecked />Ativo</label>
-        <SubmitButton label='Cadastrar procedimento' />
-      </form>
-      <div className='overflow-auto rounded border'>
-        <table className='w-full min-w-[900px] text-sm'>
-          <thead className='bg-gray-50'><tr><th className='p-2 text-left'>Nome</th><th className='p-2 text-left'>Valor</th><th className='p-2 text-left'>Categoria</th><th className='p-2 text-left'>Ativo</th><th className='p-2 text-left'>Ações</th></tr></thead>
-          <tbody>{(rows as any[]).map(row => (
-            <tr key={row.id} className='border-t align-top'>
-              <td className='p-2 font-medium'>{row.name}</td><td className='p-2'>{Number(row.amount).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td><td className='p-2'>{row.category || '-'}</td><td className='p-2'>{row.is_active ? 'Sim' : 'Não'}</td>
-              <td className='space-y-2 p-2'>
-                <details className='rounded border p-2'><summary className='cursor-pointer font-semibold text-blue-700'>Editar</summary>
-                  <form action={saveProcedure} className='mt-3 grid gap-2 md:grid-cols-2'>
-                    <input type='hidden' name='id' value={row.id} />
-                    <input name='name' defaultValue={row.name} required />
-                    <input name='amount' defaultValue={String(row.amount).replace('.', ',')} required />
-                    <input name='estimated_minutes' type='number' min={1} defaultValue={row.estimated_minutes || ''} placeholder='Duração' />
-                    <input name='category' defaultValue={row.category || ''} placeholder='Categoria' />
-                    <textarea name='description' className='md:col-span-2' defaultValue={row.description || ''} />
-                    <label className='flex items-center gap-2'><input type='checkbox' name='is_active' defaultChecked={row.is_active} />Ativo</label>
-                    <SubmitButton label='Atualizar' />
-                  </form>
-                </details>
-                <form action={deleteProcedure}><input type='hidden' name='id' value={row.id} /><DeleteConfirmButton message={`Excluir o procedimento ${row.name}?`} /></form>
-              </td>
-            </tr>
-          ))}</tbody>
-        </table>
+
+      <div className='bg-white rounded-2xl border border-[#e6e8e9] shadow-sm overflow-hidden'>
+        <div className='px-6 py-4 border-b border-[#f2f4f5] flex items-center gap-3'>
+          <span className='text-xl'>➕</span>
+          <h2 className='font-bold text-[#003441]' style={{ fontFamily: 'Manrope, sans-serif' }}>Cadastrar procedimento</h2>
+        </div>
+        <form action={saveProcedure} className='px-6 py-6 grid gap-x-5 gap-y-4 md:grid-cols-2'>
+          <div><label htmlFor='proc_name'>Nome *</label><input id='proc_name' name='name' required placeholder='Ex.: Restauração em resina' /></div>
+          <div><label htmlFor='proc_amount'>Valor (R$) *</label><input id='proc_amount' name='amount' required placeholder='Ex.: 120,50' /></div>
+          <div><label htmlFor='proc_duration'>Duração estimada (min)</label><input id='proc_duration' name='estimated_minutes' type='number' min={1} placeholder='60' /></div>
+          <div><label htmlFor='proc_category'>Categoria</label><input id='proc_category' name='category' placeholder='Ex.: Restauração, Endodontia' /></div>
+          <div className='md:col-span-2'><label htmlFor='proc_desc'>Descrição</label><textarea id='proc_desc' name='description' rows={2} placeholder='Detalhes opcionais do procedimento' /></div>
+          <div className='flex items-center gap-2'>
+            <input type='checkbox' id='proc_active' name='is_active' defaultChecked className='w-4 h-4 accent-[#003441]' />
+            <label htmlFor='proc_active' className='mb-0 normal-case text-sm text-[#40484b]'>Procedimento ativo</label>
+          </div>
+          <div className='flex justify-end'><SubmitButton label='✓ Cadastrar procedimento' /></div>
+        </form>
+      </div>
+
+      <div className='bg-white rounded-2xl border border-[#e6e8e9] shadow-sm overflow-hidden'>
+        <div className='px-6 py-4 border-b border-[#f2f4f5]'>
+          <h2 className='font-bold text-[#003441]' style={{ fontFamily: 'Manrope, sans-serif' }}>
+            Procedimentos cadastrados <span className='ml-2 text-sm font-normal text-[#70787c]'>({(rows as any[]).length})</span>
+          </h2>
+        </div>
+        {(rows as any[]).length === 0 ? (
+          <div className='px-6 py-16 text-center'><div className='text-4xl mb-3'>⚙️</div><p className='text-[#70787c] text-sm'>Nenhum procedimento cadastrado.</p></div>
+        ) : (
+          <div className='admin-table-wrap rounded-none border-0'>
+            <table className='admin-table' style={{ minWidth: 720 }}>
+              <thead><tr>{['Nome', 'Valor', 'Duração', 'Categoria', 'Ativo', 'Ações'].map(h => <th key={h}>{h}</th>)}</tr></thead>
+              <tbody>
+                {(rows as any[]).map(row => (
+                  <tr key={row.id}>
+                    <td className='font-semibold text-[#003441]'>{row.name}</td>
+                    <td>{currency(Number(row.amount))}</td>
+                    <td>{row.estimated_minutes ? `${row.estimated_minutes} min` : '—'}</td>
+                    <td>{row.category || '—'}</td>
+                    <td>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${row.is_active ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-gray-50 text-gray-500 border-gray-200'}`} style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                        {row.is_active ? 'Ativo' : 'Inativo'}
+                      </span>
+                    </td>
+                    <td className='space-y-2'>
+                      <details className='rounded-lg border border-[#e6e8e9]'>
+                        <summary className='cursor-pointer px-3 py-1.5 text-xs font-semibold text-[#30628a] hover:text-[#003441]'>✏️ Editar</summary>
+                        <form action={saveProcedure} className='p-3 grid gap-3 md:grid-cols-2 border-t border-[#f2f4f5]'>
+                          <input type='hidden' name='id' value={row.id} />
+                          <div><label>Nome *</label><input name='name' defaultValue={row.name} required /></div>
+                          <div><label>Valor</label><input name='amount' defaultValue={String(row.amount).replace('.', ',')} /></div>
+                          <div><label>Duração (min)</label><input name='estimated_minutes' type='number' min={1} defaultValue={row.estimated_minutes || ''} /></div>
+                          <div><label>Categoria</label><input name='category' defaultValue={row.category || ''} /></div>
+                          <div className='md:col-span-2'><label>Descrição</label><textarea name='description' defaultValue={row.description || ''} rows={2} /></div>
+                          <div className='flex items-center gap-2'>
+                            <input type='checkbox' name='is_active' defaultChecked={row.is_active} className='w-4 h-4 accent-[#003441]' />
+                            <span className='text-xs text-[#40484b]'>Ativo</span>
+                          </div>
+                          <div className='flex justify-end'><SubmitButton label='Atualizar' variant='secondary' /></div>
+                        </form>
+                      </details>
+                      <form action={deleteProcedure}><input type='hidden' name='id' value={row.id} /><DeleteConfirmButton message={`Excluir o procedimento "${row.name}"?`} /></form>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </section>
   )

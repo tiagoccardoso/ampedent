@@ -5,19 +5,23 @@ import OurMission from '../components/about/OurMission'
 import HeroContainer from '../components/layout/HeroContainer'
 import { Metadata } from 'next'
 import HeroHeaders from '../components/layout/HeroHeaders'
+import { getSiteContent, getTeamMembers } from '@/lib/siteContent'
 
 export const metadata: Metadata = {
   title: 'Sobre',
 }
 
-function About() {
+async function About() {
+  const content = await getSiteContent()
+  const members = getTeamMembers(content)
+
   return (
     <>
       <HeroContainer backgroundImage={about.src}>
         <HeroHeaders />
       </HeroContainer>
       <OurMission />
-      <OurTeamAbout />
+      <OurTeamAbout members={members} />
       <BookVisit />
     </>
   )

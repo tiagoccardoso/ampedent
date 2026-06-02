@@ -11,13 +11,14 @@ function HeroContainer({
     <section className='hero-container'>
       <Image
         priority
-        className='object-cover opacity-70'
+        className='object-cover'
         src={backgroundImage}
-        alt={backgroundImage}
+        alt='Odonto Prime Studio – Clínica Odontológica'
         loading='eager'
         fill
       />
-      <div className='z-40'>{children}</div>
+      {/* children includes hero-gradient div + content */}
+      {children}
     </section>
   )
 }

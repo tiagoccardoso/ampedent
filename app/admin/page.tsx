@@ -4,7 +4,18 @@ import { useAuth } from '@/app/components/AppProvider'
 import { useRouter } from 'next/navigation'
 import { FormEvent, useEffect, useState } from 'react'
 
-function Admin() {
+function ToothIcon() {
+  return (
+    <svg width='32' height='32' viewBox='0 0 28 28' fill='none' xmlns='http://www.w3.org/2000/svg'>
+      <path
+        d='M14 3C10 3 6 6 6 10C6 13 8 15 8 17.5C8 21 10 25 12.5 25C13.8 25 14.5 22 14 22C13.5 22 14.2 25 15.5 25C18 25 20 21 20 17.5C20 15 22 13 22 10C22 6 18 3 14 3Z'
+        fill='currentColor'
+      />
+    </svg>
+  )
+}
+
+export default function Admin() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -15,6 +26,14 @@ function Admin() {
   const [success, setSuccess] = useState('')
   const { status, refreshSession } = useAuth()
   const router = useRouter()
+
+  useEffect(() => {
+    document.title = 'Acesso administrativo | Odonto Prime Studio'
+  }, [])
+
+  useEffect(() => {
+    if (status === 'authenticated') router.push('/admin/dashboard')
+  }, [router, status])
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -30,20 +49,13 @@ function Admin() {
       setError('')
       setSuccess('')
 
-      const res = await fetch(
-        isRegistering ? '/api/auth/register' : '/api/auth/login',
-        {
-          method: 'POST',
-          body: JSON.stringify({ name, email, password, confirmPassword }),
-          headers: { 'Content-Type': 'application/json' },
-        },
-      )
-
+      const res = await fetch(isRegistering ? '/api/auth/register' : '/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ name, email, password, confirmPassword }),
+        headers: { 'Content-Type': 'application/json' },
+      })
       const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(data.message ?? 'Não foi possível autenticar')
-      }
+      if (!res.ok) throw new Error(data.message ?? 'Não foi possível autenticar')
 
       if (isRegistering && data.authenticated === false) {
         setSuccess(data.message)
@@ -59,139 +71,149 @@ function Admin() {
     }
   }
 
-  useEffect(() => {
-    document.title = 'Entrar administrativo | DentalSys'
-  }, [])
-
-  useEffect(() => {
-    if (status === 'authenticated') {
-      router.push('/admin/dashboard')
-    }
-  }, [router, status])
-
   return (
-    <section className='flex min-h-[100dvh] w-full items-center justify-center bg-slate-50 px-4 py-8 sm:px-6'>
-      <div className='w-full max-w-[28rem] rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8'>
-        <form className='flex w-full flex-col gap-4' onSubmit={handleSubmit} aria-busy={isLoading}>
-          <h1 className='text-center text-2xl font-semibold text-slate-900 sm:text-3xl'>
-            {isRegistering ? 'Criar conta DentalSys' : 'Entrar na DentalSys'}
+    <section
+      className='flex min-h-[100dvh] w-full items-center justify-center px-5 py-10'
+      style={{ background: 'linear-gradient(135deg, #003441 0%, #0f4c5c 55%, #30628a 100%)' }}>
+
+      {/* Decorative orbs */}
+      <div
+        className='fixed top-0 right-0 w-96 h-96 rounded-full pointer-events-none opacity-20'
+        style={{ background: 'radial-gradient(circle, #9acee1, transparent 70%)', transform: 'translate(40%, -40%)' }}
+      />
+      <div
+        className='fixed bottom-0 left-0 w-72 h-72 rounded-full pointer-events-none opacity-15'
+        style={{ background: 'radial-gradient(circle, #cca730, transparent 70%)', transform: 'translate(-40%, 40%)' }}
+      />
+
+      <div
+        className='relative w-full max-w-[26rem] rounded-2xl overflow-hidden'
+        style={{
+          background: 'rgba(255,255,255,0.97)',
+          boxShadow: '0 24px 64px rgba(0,52,65,0.3)',
+        }}>
+
+        {/* Top bar */}
+        <div
+          className='px-8 pt-8 pb-6 border-b border-[#f2f4f5] text-center'
+          style={{ background: '#f8fafb' }}>
+          <div
+            className='w-14 h-14 rounded-2xl flex items-center justify-center text-white mx-auto mb-4'
+            style={{ background: '#003441' }}>
+            <ToothIcon />
+          </div>
+          <h1
+            className='text-xl font-extrabold text-[#003441]'
+            style={{ fontFamily: 'Manrope, sans-serif' }}>
+            {isRegistering ? 'Criar conta' : 'Acesso administrativo'}
           </h1>
+          <p
+            className='mt-1 text-xs text-[#70787c]'
+            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            Odonto Prime Studio
+          </p>
+        </div>
+
+        {/* Form */}
+        <form className='px-8 py-7 flex flex-col gap-5' onSubmit={handleSubmit} aria-busy={isLoading}>
 
           {isRegistering && (
-            <div className='flex flex-col gap-2'>
-              <label htmlFor='name' className='text-sm font-medium text-slate-700'>
-                Nome
-              </label>
+            <div>
+              <label htmlFor='name'>Nome de usuário</label>
               <input
+                id='name'
+                type='text'
                 disabled={isLoading}
                 autoFocus
                 value={name}
                 onChange={e => setName(e.target.value)}
-                type='text'
-                id='name'
-                name='name'
-                placeholder='Nome de usuário'
-                className='min-h-11 w-full rounded-md border border-slate-300 px-3 py-2 text-base outline-none transition focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-100'
+                placeholder='Seu nome'
                 required
               />
             </div>
           )}
 
-          <div className='flex flex-col gap-2'>
-            <label htmlFor='email' className='text-sm font-medium text-slate-700'>
-              E-mail
-            </label>
+          <div>
+            <label htmlFor='email'>E-mail</label>
             <input
+              id='email'
+              type='email'
               disabled={isLoading}
               autoFocus={!isRegistering}
               value={email}
               onChange={e => setEmail(e.target.value)}
-              type='email'
-              id='email'
-              name='email'
-              placeholder='voce@empresa.com'
-              className='min-h-11 w-full rounded-md border border-slate-300 px-3 py-2 text-base outline-none transition focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-100'
+              placeholder='voce@clinica.com.br'
               required
             />
           </div>
 
-          <div className='flex flex-col gap-2'>
-            <label htmlFor='password' className='text-sm font-medium text-slate-700'>
-              Senha
-            </label>
+          <div>
+            <label htmlFor='password'>Senha</label>
             <input
+              id='password'
+              type='password'
               disabled={isLoading}
               value={password}
               onChange={e => setPassword(e.target.value)}
-              type='password'
-              id='password'
-              name='password'
-              placeholder='Digite sua senha'
-              className='min-h-11 w-full rounded-md border border-slate-300 px-3 py-2 text-base outline-none transition focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-100'
+              placeholder='••••••••'
               required
             />
           </div>
 
-
           {isRegistering && (
-            <div className='flex flex-col gap-2'>
-              <label htmlFor='confirm-password' className='text-sm font-medium text-slate-700'>
-                Confirmar senha
-              </label>
+            <div>
+              <label htmlFor='confirm-password'>Confirmar senha</label>
               <input
+                id='confirm-password'
+                type='password'
                 disabled={isLoading}
                 value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
-                type='password'
-                id='confirm-password'
-                name='confirmPassword'
-                placeholder='Confirme a senha'
-                className='min-h-11 w-full rounded-md border border-slate-300 px-3 py-2 text-base outline-none transition focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-100'
+                placeholder='••••••••'
                 required
               />
             </div>
           )}
 
           {error && (
-            <p className='rounded-md border border-red-200 bg-red-50 px-3 py-2 text-center text-sm text-red-700'>
-              {error}
-            </p>
+            <div
+              role='alert'
+              className='flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700'>
+              <span>❌</span>
+              <span>{error}</span>
+            </div>
           )}
           {success && (
-            <p className='rounded-md border border-green-200 bg-green-50 px-3 py-2 text-center text-sm text-green-700'>
-              {success}
-            </p>
+            <div
+              role='status'
+              className='flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700'>
+              <span>✅</span>
+              <span>{success}</span>
+            </div>
           )}
 
           <button
-            disabled={isLoading}
             type='submit'
-            className='mt-2 min-h-11 w-full rounded-md bg-blue-600 px-6 py-3 text-center font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-blue-400'>
+            disabled={isLoading}
+            className='btn-primary w-full justify-center py-3.5 mt-1'>
             {isLoading
-              ? isRegistering
-                ? 'Cadastrando...'
-                : 'Entrando...'
-              : isRegistering
-                ? 'Cadastrar'
-                : 'Entrar'}
+              ? isRegistering ? 'Cadastrando…' : 'Entrando…'
+              : isRegistering ? 'Criar conta' : 'Entrar'}
           </button>
 
           <button
-            disabled={isLoading}
             type='button'
-            className='mx-auto mt-2 text-sm font-medium text-blue-700 underline-offset-2 transition hover:text-blue-800 hover:underline disabled:cursor-not-allowed disabled:text-slate-500'
+            disabled={isLoading}
+            className='text-sm font-semibold text-center text-[#30628a] hover:text-[#003441] transition-colors disabled:opacity-50'
             onClick={() => {
-              setIsRegistering(prev => !prev)
+              setIsRegistering(p => !p)
               setError('')
               setSuccess('')
             }}>
-            {isRegistering
-              ? 'Já tenho uma conta administrativa'
-              : 'Cadastrar novo usuário'}
+            {isRegistering ? '← Já tenho uma conta' : 'Cadastrar novo acesso'}
           </button>
         </form>
       </div>
     </section>
   )
 }
-export default Admin

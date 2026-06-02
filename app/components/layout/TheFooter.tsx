@@ -1,111 +1,152 @@
 'use client'
 
 import Link from 'next/link'
-import Github from '../Icons/Github'
 import { useAuth } from '@/app/components/AppProvider'
+import type { FooterConfig } from '@/lib/siteContent'
 
-function TheFooter() {
-  const currentYear = new Date().getFullYear()
+function ToothLogo() {
+  return (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M16 3C11.5 3 7 6.5 7 11.5C7 15 9 17.5 9 20.5C9 25 11.5 29 14.5 29C16 29 16.8 26 16 26C15.2 26 16 29 17.5 29C20.5 29 23 25 23 20.5C23 17.5 25 15 25 11.5C25 6.5 20.5 3 16 3Z"
+        fill="#9acee1"
+      />
+    </svg>
+  )
+}
+
+export default function TheFooter({ config }: { config?: FooterConfig }) {
+  const year = new Date().getFullYear()
   const { status } = useAuth()
 
+  const clinicName = config?.clinic_name || 'Odonto Prime'
+  const tagline = config?.tagline || 'Studio'
+  const description = config?.description || ''
+  const address = config?.address || ''
+  const phone = config?.phone || ''
+  const email = config?.email || ''
+  const copyright = config?.copyright || ''
+  const cro = config?.cro || ''
+
   return (
-    <footer className='block relative'>
+    <footer className='relative bg-[#003441] text-white overflow-hidden'>
+      {/* Top wave */}
       <div className='wave'>
-        <svg
-          data-name='Layer 1'
-          xmlns='http://www.w3.org/2000/svg'
-          viewBox='0 0 1200 120'
-          preserveAspectRatio='none'>
+        <svg data-name='Layer 1' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'>
           <path
             d='M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z'
-            className='shape-fill'></path>
+            className='shape-fill'
+          />
         </svg>
       </div>
-      <div className='py-16 md:py-24 lg:py-32 mx-auto w-full max-w-7xl px-5 md:px-10'>
-        <div className='flex-row flex justify-between max-[767px]:flex-col max-[767px]:items-start'>
-          <div className='w-full max-w-[560px] max-[991px]:mr-4 max-[991px]:flex-initial max-[767px]:'>
-            <h2 className='font-bold text-3xl md:text-5xl'>
-              Cuidado personalizado, resultados excepcionais
-            </h2>
-          </div>
-          <div className='max-[991px]:ml-4 max-[991px]:flex-none max-[767px]: max-[767px]:mt-8'>
-            <div className='mb-4 flex max-w-[272px] items-start justify-start'>
-              <img
-                src='https://assets.website-files.com/6458c625291a94a195e6cf3a/6458c625291a94bb99e6cf78_MapPin.svg'
-                alt=''
-                className='inline-block mr-3'
-                width={24}
-                height={24}
-              />
-              <p className='text-slate-600 max-[479px]:text-sm'>
-                123 Main St, Anytown, CA 90210, USA
+
+      {/* Decorative gradient orb */}
+      <div
+        className='absolute top-0 right-0 w-96 h-96 rounded-full opacity-10 pointer-events-none'
+        style={{ background: 'radial-gradient(circle, #9acee1 0%, transparent 70%)', transform: 'translate(30%, -30%)' }}
+      />
+
+      <div className='relative z-10 mx-auto max-w-[1280px] px-5 pt-28 pb-12'>
+        {/* Main grid */}
+        <div className='grid gap-12 sm:grid-cols-2 lg:grid-cols-4 mb-16'>
+          {/* Brand */}
+          <div className='lg:col-span-2'>
+            <Link href='/' className='inline-flex items-center gap-3 mb-5 group'>
+              <div className='flex items-center justify-center w-10 h-10 rounded-xl bg-white/10 group-hover:bg-white/20 transition-colors'>
+                <ToothLogo />
+              </div>
+              <div>
+                <div className='font-extrabold text-xl text-white' style={{ fontFamily: 'Manrope, sans-serif' }}>
+                  {clinicName}
+                </div>
+                <div className='text-[#cca730] font-bold text-[10px] tracking-[0.12em] uppercase' style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                  {tagline}
+                </div>
+              </div>
+            </Link>
+
+            {description && (
+              <p className='text-white/70 text-sm leading-relaxed max-w-sm mb-6'>
+                {description}
               </p>
-            </div>
-            <div className='mb-4 flex max-w-[272px] items-start justify-start'>
-              <img
-                src='https://assets.website-files.com/6458c625291a94a195e6cf3a/6458c625291a944119e6cf76_EnvelopeSimple-2.svg'
-                alt='ícone de e-mail'
-                className='inline-block mr-3'
-                width={24}
-                height={24}
-              />
-              <p className='text-slate-600 max-[479px]:text-sm'>
-                contato@dentalsys.com
-              </p>
-            </div>
-            <div className='mb-4 flex max-w-[272px] items-start justify-start'>
-              <img
-                src='https://www.svgrepo.com/show/79112/telephone.svg'
-                alt='ícone de telefone'
-                className='inline-block mr-3 '
-                width={24}
-                height={24}
-              />
-              <p className='text-slate-600 max-[479px]:text-sm'>+1234567890</p>
-            </div>
-          </div>
-        </div>
-        <div className='mb-14 w-full [border-bottom:1.7px_solid_rgb(0,_0,_0)] mt-16'></div>
-        <div className='flex-row flex justify-between max-[991px]:items-center max-[767px]:flex-col max-[767px]:items-start'>
-          <div className='font-semibold max-[991px]: max-[479px]:mb-4 max-[991px]:py-1 text-center sm:text-center'>
-            <Link
-              href='/about'
-              aria-label='Link para a página sobre nós'
-              className='inline-block font-normal text-slate-600 transition hover:text-blue-600 sm:pr-6 lg:pr-12 py-1.5 sm:py-2 pr-6'>
-              Sobre nós
-            </Link>
-            <Link
-              href='/services'
-              aria-label='Link para a página de serviços'
-              className='inline-block font-normal text-slate-600 transition hover:text-blue-600 sm:pr-6 lg:pr-12 py-1.5 sm:py-2 pr-6'>
-              Serviços
-            </Link>
-            <Link
-              href='/agenda'
-              aria-label='Link para criar agendamento'
-              className='inline-block font-normal text-slate-600 transition hover:text-blue-600 sm:pr-6 lg:pr-12 py-1.5 sm:py-2 pr-6'>
-              Agendar online
-            </Link>
-            {status === 'authenticated' && (
-              <Link
-                href='/admin/agenda'
-                aria-label='Link para o painel administrativo de agendamentos'
-                className='inline-block font-normal text-slate-600 transition hover:text-blue-600 sm:pr-6 lg:pr-12 py-1.5 sm:py-2 pr-6'>
-                Admin
-              </Link>
+            )}
+
+            {(address || email || phone) && (
+              <div className='flex flex-col gap-3 text-sm text-white/60'>
+                {address && (
+                  <div className='flex items-center gap-3'>
+                    <span className='text-[#cca730]'>📍</span>
+                    <span>{address}</span>
+                  </div>
+                )}
+                {email && (
+                  <div className='flex items-center gap-3'>
+                    <span className='text-[#cca730]'>✉️</span>
+                    <span>{email}</span>
+                  </div>
+                )}
+                {phone && (
+                  <div className='flex items-center gap-3'>
+                    <span className='text-[#cca730]'>📞</span>
+                    <span>{phone}</span>
+                  </div>
+                )}
+              </div>
             )}
           </div>
-          <div className='max-[991px]:flex-none '>
-            <Link
-              href='https://github.com/atalek/ampedent'
-              target='_blank'
-              className='text-slate-600   flex flex-row items-center gap-1 '>
-              © {currentYear} DentalSys - Criado por atalek <Github />
-            </Link>
+
+          {/* Navigation */}
+          <div>
+            <h4
+              className='mb-5 text-[#cca730] font-bold text-xs tracking-[0.12em] uppercase'
+              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              Navegação
+            </h4>
+            <ul className='space-y-3'>
+              {[
+                { href: '/', label: 'Início' },
+                { href: '/about', label: 'Sobre nós' },
+                { href: '/services', label: 'Serviços' },
+                { href: '/agenda', label: 'Agendar online' },
+              ].map(({ href, label }) => (
+                <li key={href} style={{ listStyle: 'none' }}>
+                  <Link
+                    href={href}
+                    className='text-white/70 text-sm hover:text-white hover:translate-x-1 inline-block transition-all duration-150'>
+                    {label}
+                  </Link>
+                </li>
+              ))}
+              {status === 'authenticated' && (
+                <li style={{ listStyle: 'none' }}>
+                  <Link
+                    href='/admin/dashboard'
+                    className='text-white/70 text-sm hover:text-white hover:translate-x-1 inline-block transition-all duration-150'>
+                    Painel Admin
+                  </Link>
+                </li>
+              )}
+            </ul>
           </div>
+
+          {/* Placeholder to keep 4-col grid balanced when no specialty list */}
+          <div />
+        </div>
+
+        {/* Divider */}
+        <div className='border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-white/50'>
+          <span>
+            {copyright
+              ? copyright
+              : `© ${year} ${clinicName}${tagline ? ' ' + tagline : ''}. Todos os direitos reservados.`}
+          </span>
+          {cro && (
+            <div className='flex items-center gap-4'>
+              <span>{cro}</span>
+            </div>
+          )}
         </div>
       </div>
     </footer>
   )
 }
-export default TheFooter

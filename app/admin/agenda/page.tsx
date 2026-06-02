@@ -82,7 +82,23 @@ async function deleteAppointment(formData: FormData) {
   redirect(target)
 }
 
-type AgendaPageData = {
+const statusLabel: Record<string, string> = {
+  scheduled: 'Agendado',
+  in_progress: 'Em andamento',
+  completed: 'Concluído',
+  canceled: 'Cancelado',
+  no_show: 'Não compareceu',
+}
+
+const statusBadge: Record<string, string> = {
+  scheduled: 'bg-blue-50 text-blue-700 border-blue-200',
+  in_progress: 'bg-amber-50 text-amber-700 border-amber-200',
+  completed: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  canceled: 'bg-red-50 text-red-600 border-red-200',
+  no_show: 'bg-gray-50 text-gray-600 border-gray-200',
+}
+
+type AgendaData = {
   rows: any[]
   patientOptions: any[]
   professionalOptions: any[]
@@ -90,7 +106,7 @@ type AgendaPageData = {
   loadError?: string
 }
 
-async function loadAgendaData(): Promise<AgendaPageData> {
+async function loadAgendaData(): Promise<AgendaData> {
   try {
     const [rows, patients, professionals, procedures] = await Promise.all([
       sql`
@@ -106,7 +122,6 @@ async function loadAgendaData(): Promise<AgendaPageData> {
       sql`select id, full_name from professionals where is_active = true order by full_name`,
       sql`select id, name from procedures where is_active = true order by name`,
     ])
-
     return {
       rows: rows as any[],
       patientOptions: patients as any[],
@@ -115,82 +130,223 @@ async function loadAgendaData(): Promise<AgendaPageData> {
     }
   } catch (error) {
     console.error('agenda.load', error)
-
     return {
       rows: [],
       patientOptions: [],
       professionalOptions: [],
       procedureOptions: [],
-      loadError:
-        'A rota /admin/agenda existe, mas não conseguiu carregar os dados. Verifique se a variável DATABASE_URL está configurada e se as migrations das tabelas patients, professionals, procedures e appointments foram aplicadas no Neon.',
+      loadError: 'Não foi possível carregar os dados. Verifique se DATABASE_URL está configurado e as migrations foram aplicadas.',
     }
   }
 }
 
-function getParam(params: Record<string, string | string[] | undefined>, key: string) {
-  const value = params[key]
-  return Array.isArray(value) ? value[0] : value
+function AppointmentFormFields({
+  appointment,
+  patientOptions,
+  professionalOptions,
+  procedureOptions,
+  disabled,
+}: {
+  appointment?: any
+  patientOptions: any[]
+  professionalOptions: any[]
+  procedureOptions: any[]
+  disabled?: boolean
+}) {
+  const suffix = appointment?.id ?? 'new'
+  return (
+    <div className='grid gap-x-5 gap-y-4 md:grid-cols-2'>
+      {appointment && <input type='hidden' name='id' value={appointment.id} />}
+
+      <div>
+        <label htmlFor={`patient_id_${suffix}`}>Paciente *</label>
+        <select id={`patient_id_${suffix}`} name='patient_id' required disabled={disabled} defaultValue={appointment?.patient_id ?? ''}>
+          <option value=''>Selecione o paciente</option>
+          {patientOptions.map(p => <option key={p.id} value={p.id}>{p.full_name}</option>)}
+        </select>
+      </div>
+
+      <div>
+        <label htmlFor={`professional_id_${suffix}`}>Profissional</label>
+        <select id={`professional_id_${suffix}`} name='professional_id' disabled={disabled} defaultValue={appointment?.professional_id ?? ''}>
+          <option value=''>Selecione o profissional</option>
+          {professionalOptions.map(p => <option key={p.id} value={p.id}>{p.full_name}</option>)}
+        </select>
+      </div>
+
+      <div>
+        <label htmlFor={`procedure_id_${suffix}`}>Procedimento</label>
+        <select id={`procedure_id_${suffix}`} name='procedure_id' disabled={disabled} defaultValue={appointment?.procedure_id ?? ''}>
+          <option value=''>Selecione o procedimento</option>
+          {procedureOptions.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+        </select>
+      </div>
+
+      <div>
+        <label htmlFor={`status_${suffix}`}>Status</label>
+        <select id={`status_${suffix}`} name='status' disabled={disabled} defaultValue={appointment?.status ?? 'scheduled'}>
+          {appointmentStatus.map(s => <option key={s} value={s}>{statusLabel[s] ?? s}</option>)}
+        </select>
+      </div>
+
+      <div>
+        <label htmlFor={`appointment_date_${suffix}`}>Data *</label>
+        <input id={`appointment_date_${suffix}`} name='appointment_date' type='date' required disabled={disabled} defaultValue={appointment?.appointment_date ?? ''} />
+      </div>
+
+      <div>
+        <label htmlFor={`start_time_${suffix}`}>Início *</label>
+        <input id={`start_time_${suffix}`} name='start_time' type='time' required disabled={disabled} defaultValue={appointment ? String(appointment.start_time).slice(0, 5) : ''} />
+      </div>
+
+      <div>
+        <label htmlFor={`end_time_${suffix}`}>Fim *</label>
+        <input id={`end_time_${suffix}`} name='end_time' type='time' required disabled={disabled} defaultValue={appointment ? String(appointment.end_time).slice(0, 5) : ''} />
+      </div>
+
+      <div className='md:col-span-2'>
+        <label htmlFor={`notes_${suffix}`}>Observações</label>
+        <textarea id={`notes_${suffix}`} name='notes' rows={2} placeholder='Observações sobre a consulta…' disabled={disabled} defaultValue={appointment?.notes ?? ''} className='resize-y' />
+      </div>
+    </div>
+  )
 }
 
-export default async function Page({ searchParams }: { searchParams?: Promise<Record<string, string | string[] | undefined>> }) {
+export default async function Page({ searchParams }: { searchParams?: Promise<Record<string, string>> }) {
   const admin = await getCurrentAdminProfile()
   if (!admin) redirect('/admin')
   if (!['superadmin', 'admin', 'dentist', 'reception'].includes(admin.role)) redirect('/admin/dashboard')
 
   const params = (await searchParams) ?? {}
   const { rows, patientOptions, professionalOptions, procedureOptions, loadError } = await loadAgendaData()
-  const canCreateAppointment = !loadError && patientOptions.length > 0
 
   return (
-    <section className='space-y-6'>
-      <div><h1 className='text-2xl font-bold'>Agenda</h1><p className='text-sm text-gray-600'>Rota administrativa /admin/agenda ativa para criar, editar, atualizar e excluir agendamentos.</p></div>
-      <FormFeedback ok={getParam(params, 'ok')} error={getParam(params, 'error')} />
+    <section className='space-y-8'>
+      {/* Page header */}
+      <div>
+        <p
+          className='text-xs font-bold tracking-[0.1em] uppercase mb-1 text-[#30628a]'
+          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          Clínica
+        </p>
+        <h1 className='text-2xl font-extrabold text-[#003441]' style={{ fontFamily: 'Manrope, sans-serif' }}>
+          Agenda
+        </h1>
+        <p className='text-sm text-[#70787c] mt-1'>Cadastre e gerencie consultas agendadas.</p>
+      </div>
+
+      <FormFeedback ok={params.ok} error={params.error} />
+
       {loadError && (
-        <div className='rounded border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900'>
-          <p className='font-semibold'>Agenda encontrada, mas os dados não foram carregados.</p>
+        <div className='rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900'>
+          <p className='font-semibold'>Não foi possível carregar os dados da agenda.</p>
           <p className='mt-1'>{loadError}</p>
         </div>
       )}
+
       {!loadError && patientOptions.length === 0 && (
-        <p className='rounded border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900'>Cadastre pelo menos um paciente para criar agendamentos.</p>
+        <div className='rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900'>
+          Cadastre pelo menos um paciente para criar agendamentos.
+        </div>
       )}
-      <form action={saveAppointment} className='grid gap-3 rounded border bg-white p-4 md:grid-cols-2'>
-        <select name='patient_id' required disabled={!canCreateAppointment}><option value=''>Paciente *</option>{patientOptions.map(patient => <option key={patient.id} value={patient.id}>{patient.full_name}</option>)}</select>
-        <select name='professional_id' disabled={!!loadError}><option value=''>Profissional</option>{professionalOptions.map(professional => <option key={professional.id} value={professional.id}>{professional.full_name}</option>)}</select>
-        <select name='procedure_id' disabled={!!loadError}><option value=''>Procedimento</option>{procedureOptions.map(procedure => <option key={procedure.id} value={procedure.id}>{procedure.name}</option>)}</select>
-        <select name='status' disabled={!!loadError}>{appointmentStatus.map(status => <option key={status} value={status}>{status}</option>)}</select>
-        <input name='appointment_date' type='date' required disabled={!canCreateAppointment} />
-        <input name='start_time' type='time' required disabled={!canCreateAppointment} />
-        <input name='end_time' type='time' required disabled={!canCreateAppointment} />
-        <textarea name='notes' className='md:col-span-2' placeholder='Observações' disabled={!!loadError} />
-        {canCreateAppointment ? <SubmitButton label='Criar agendamento' /> : <button className='btn opacity-60' type='button' disabled>Criar agendamento</button>}
-      </form>
-      <div className='overflow-auto rounded border'>
-        <table className='w-full min-w-[1000px] text-sm'>
-          <thead className='bg-gray-50'><tr><th className='p-2 text-left'>Paciente</th><th className='p-2 text-left'>Profissional</th><th className='p-2 text-left'>Procedimento</th><th className='p-2 text-left'>Data/Hora</th><th className='p-2 text-left'>Status</th><th className='p-2 text-left'>Ações</th></tr></thead>
-          <tbody>{(rows as any[]).map(row => (
-            <tr key={row.id} className='border-t align-top'>
-              <td className='p-2 font-medium'>{row.patient_name}</td><td className='p-2'>{row.professional_name || '-'}</td><td className='p-2'>{row.procedure_name || '-'}</td><td className='p-2'>{row.appointment_date} {String(row.start_time).slice(0, 5)}-{String(row.end_time).slice(0, 5)}</td><td className='p-2'>{row.status}</td>
-              <td className='space-y-2 p-2'>
-                <details className='rounded border p-2'><summary className='cursor-pointer font-semibold text-blue-700'>Editar</summary>
-                  <form action={saveAppointment} className='mt-3 grid gap-2 md:grid-cols-2'>
-                    <input type='hidden' name='id' value={row.id} />
-                    <select name='patient_id' defaultValue={row.patient_id} required>{patientOptions.map(patient => <option key={patient.id} value={patient.id}>{patient.full_name}</option>)}</select>
-                    <select name='professional_id' defaultValue={row.professional_id || ''}><option value=''>Profissional</option>{professionalOptions.map(professional => <option key={professional.id} value={professional.id}>{professional.full_name}</option>)}</select>
-                    <select name='procedure_id' defaultValue={row.procedure_id || ''}><option value=''>Procedimento</option>{procedureOptions.map(procedure => <option key={procedure.id} value={procedure.id}>{procedure.name}</option>)}</select>
-                    <select name='status' defaultValue={row.status}>{appointmentStatus.map(status => <option key={status} value={status}>{status}</option>)}</select>
-                    <input name='appointment_date' type='date' defaultValue={row.appointment_date} required />
-                    <input name='start_time' type='time' defaultValue={String(row.start_time).slice(0, 5)} required />
-                    <input name='end_time' type='time' defaultValue={String(row.end_time).slice(0, 5)} required />
-                    <textarea name='notes' className='md:col-span-2' defaultValue={row.notes || ''} placeholder='Observações' />
-                    <SubmitButton label='Atualizar' />
-                  </form>
-                </details>
-                <form action={deleteAppointment}><input type='hidden' name='id' value={row.id} /><DeleteConfirmButton message={`Excluir o agendamento de ${row.patient_name}?`} /></form>
-              </td>
-            </tr>
-          ))}</tbody>
-        </table>
+
+      {/* New appointment form */}
+      <div className='bg-white rounded-2xl border border-[#e6e8e9] shadow-sm overflow-hidden'>
+        <div className='px-6 py-4 border-b border-[#f2f4f5] flex items-center gap-3'>
+          <span className='text-xl'>📅</span>
+          <h2 className='font-bold text-[#003441]' style={{ fontFamily: 'Manrope, sans-serif' }}>
+            Nova consulta
+          </h2>
+        </div>
+        <form action={saveAppointment} className='px-6 py-6'>
+          <AppointmentFormFields
+            patientOptions={patientOptions}
+            professionalOptions={professionalOptions}
+            procedureOptions={procedureOptions}
+            disabled={!!loadError || patientOptions.length === 0}
+          />
+          <div className='mt-6 flex justify-end'>
+            <SubmitButton label='✓ Criar consulta' />
+          </div>
+        </form>
+      </div>
+
+      {/* Appointment list */}
+      <div className='bg-white rounded-2xl border border-[#e6e8e9] shadow-sm overflow-hidden'>
+        <div className='px-6 py-4 border-b border-[#f2f4f5] flex items-center justify-between'>
+          <h2 className='font-bold text-[#003441]' style={{ fontFamily: 'Manrope, sans-serif' }}>
+            Consultas agendadas{' '}
+            <span className='ml-2 text-sm font-normal text-[#70787c]'>({rows.length})</span>
+          </h2>
+        </div>
+
+        {rows.length === 0 ? (
+          <div className='px-6 py-16 text-center'>
+            <div className='text-4xl mb-3'>📅</div>
+            <p className='text-[#70787c] text-sm'>Nenhuma consulta cadastrada.</p>
+          </div>
+        ) : (
+          <div className='overflow-x-auto'>
+            <table className='w-full min-w-[900px] text-sm'>
+              <thead>
+                <tr style={{ background: '#f8fafb', borderBottom: '1px solid #e6e8e9' }}>
+                  {['Paciente', 'Profissional', 'Procedimento', 'Data', 'Horário', 'Status', 'Ações'].map(h => (
+                    <th
+                      key={h}
+                      className='px-5 py-3 text-left text-[10px] font-bold tracking-[0.08em] uppercase text-[#70787c]'
+                      style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className='divide-y divide-[#f2f4f5]'>
+                {rows.map(row => (
+                  <tr key={row.id} className='hover:bg-[#f8fafb] transition-colors align-top'>
+                    <td className='px-5 py-4 font-medium text-[#003441]'>{row.patient_name}</td>
+                    <td className='px-5 py-4 text-[#40484b]'>{row.professional_name ?? '—'}</td>
+                    <td className='px-5 py-4 text-[#40484b]'>{row.procedure_name ?? '—'}</td>
+                    <td className='px-5 py-4 text-[#40484b]'>
+                      {new Date(row.appointment_date + 'T00:00:00').toLocaleDateString('pt-BR')}
+                    </td>
+                    <td className='px-5 py-4 text-[#40484b]'>
+                      {String(row.start_time).slice(0, 5)} – {String(row.end_time).slice(0, 5)}
+                    </td>
+                    <td className='px-5 py-4'>
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${statusBadge[row.status] ?? 'bg-gray-50 text-gray-600 border-gray-200'}`}
+                        style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                        {statusLabel[row.status] ?? row.status}
+                      </span>
+                    </td>
+                    <td className='px-5 py-4 space-y-2'>
+                      <details className='rounded-lg border border-[#e6e8e9] p-2'>
+                        <summary className='cursor-pointer text-xs font-semibold text-[#30628a] hover:text-[#003441]'>
+                          ✏️ Editar
+                        </summary>
+                        <form action={saveAppointment} className='mt-3'>
+                          <AppointmentFormFields
+                            appointment={row}
+                            patientOptions={patientOptions}
+                            professionalOptions={professionalOptions}
+                            procedureOptions={procedureOptions}
+                          />
+                          <div className='mt-4 flex justify-end'>
+                            <SubmitButton label='Atualizar' variant='secondary' />
+                          </div>
+                        </form>
+                      </details>
+                      <form action={deleteAppointment}>
+                        <input type='hidden' name='id' value={row.id} />
+                        <DeleteConfirmButton message={`Excluir o agendamento de ${row.patient_name}?`} />
+                      </form>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </section>
   )
